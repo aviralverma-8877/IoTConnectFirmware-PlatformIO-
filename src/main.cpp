@@ -28,14 +28,11 @@
 #define DHTTYPE DHT11                     //Type of DHT sensor.
 
 //Configuring Device
-#define FIRMWARE_V "0.0.9"                //Current firmware version. (Displayed on Device Portal)
-#define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
+#define FIRMWARE_V "0.1.0"                //Current firmware version. (Displayed on Device Portal)
+#define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
 bool debugging = false;                   //Turn On or Off the serial output.
-
-DynamicJsonBuffer jsonBuffer;             //JSON Buffer variable 1.
-DynamicJsonBuffer jsonBuffert;            //JSON Buffer variable 2.
 
 AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
 WiFiManager wifiManager;                  //Variable to initiate WiFi Manager
@@ -200,13 +197,12 @@ void serialDisplay(String head,String body)
 {
   if(debugging)
   {
-    jsonBuffer.clear();
-    JsonObject& root = jsonBuffer.createObject();
-    root["action"] = "display";
-    root["head"] = head;
-    root["body"] = body;
+    StaticJsonDocument<400> doc;
+    doc["action"] = "display";
+    doc["head"] = head;
+    doc["body"] = body;
     String c;
-    root.printTo(c);
+    serializeJson(doc, c);
     Serial.println(c);
     sendToMQTT(debugtopic, c);
   }
@@ -252,22 +248,21 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   {
     p += payload[i];
   }
-  jsonBuffert.clear();
+  StaticJsonDocument<200> root;
   serialDisplay("MQTT",p);
-  JsonObject& root = jsonBuffert.parseObject(p);
-  if (root.success()) 
+  DeserializationError error = deserializeJson(root, p);
+  if (!error) 
   {
     const char *action;
     action = root["action"];
 /*-------Action command for reconfigring WiFi---------------*/
     if(comp(action,"RESET_DEVICE"))
     {
-      jsonBuffer.clear();
-      JsonObject& sJsont = jsonBuffer.createObject();
-      sJsont["action"] = "ResetDevice";
-      sJsont["stat"] = "Reset Success.";
+      StaticJsonDocument<400> doc;
+      doc["action"] = "ResetDevice";
+      doc["stat"] = "Reset Success.";
       String r;
-      sJsont.printTo(r);
+      serializeJson(doc, r);
       sendToMQTT(outtopic, r);
       reset();
     }
@@ -275,11 +270,10 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-------Action command for fetching WiFi SSID--------------*/
     if(comp(action,"SSID"))
     {
-      jsonBuffer.clear();
-      JsonObject& sJson = jsonBuffer.createObject();
-      sJson["SSID"] = Wifi_ssid;
+      StaticJsonDocument<400> doc;
+      doc["SSID"] = Wifi_ssid;
       String r;
-      sJson.printTo(r);
+      serializeJson(doc, r);
       sendToMQTT(outtopic, r);
     }
 /*-------Action command for fetching WiFi SSID--------------*/
@@ -297,22 +291,20 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-------Action command for getting Sensor Frequency--------------*/
     if(comp(action,"GETFREQ"))
     {
-      jsonBuffer.clear();
-      JsonObject& sJson = jsonBuffer.createObject();
-      sJson["FREQ"] = delayMS;
+      StaticJsonDocument<400> doc;
+      doc["FREQ"] = delayMS;
       String r;
-      sJson.printTo(r);
+      serializeJson(doc, r);
       sendToMQTT(outtopic, r);
     }
 /*-------Action command for getting Sensor Frequency--------*/
 /*-------Action command for fetching ESP Chip ID------------*/
     if(comp(action,"ESPID"))
     {
-      jsonBuffer.clear();
-      JsonObject& sJson = jsonBuffer.createObject();
-      sJson["CHIPID"] = chipid;
+      StaticJsonDocument<400> doc;
+      doc["CHIPID"] = chipid;
       String r;
-      sJson.printTo(r);
+      serializeJson(doc, r);
       sendToMQTT(outtopic, r);
     }
 /*-------Action command for fetching ESP Chip ID------------*/
@@ -320,12 +312,11 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-------Action command for resetting ESP-------------------*/
     if(comp(action,"RESET"))
     {
-      jsonBuffer.clear();
-      JsonObject& sJsont = jsonBuffer.createObject();
-      sJsont["action"] = "ResetStatus";
-      sJsont["stat"] = "Resetting Device...";
+      StaticJsonDocument<400> doc;
+      doc["action"] = "ResetStatus";
+      doc["stat"] = "Resetting Device...";
       String r;
-      sJsont.printTo(r);
+      serializeJson(doc, r);
       sendToMQTT(outtopic, r);
       ESP.reset();
     }
@@ -340,17 +331,16 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       delay(100);
       
 //sending nortification
-      jsonBuffer.clear();
-      JsonObject& sJson = jsonBuffer.createObject();
+      StaticJsonDocument<400> doc;
       if(root.containsKey("by"))
       {
-        sJson["by"] = root["by"];
-        sJson["no"] = root["no"];
-        sJson["CHIPID"] = chipid;
-        sJson["input"] = root["value"];
+        doc["by"] = root["by"];
+        doc["no"] = root["no"];
+        doc["CHIPID"] = chipid;
+        doc["input"] = root["value"];
       }
       String r = "";
-      sJson.printTo(r);
+      serializeJson(doc, r);
       sendToMQTT(norttopic, r);
 
 //saving to eeprom
@@ -371,24 +361,22 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-------Action command for getting getting device version--*/
     else if(comp(action,"GET_DEVICE_VERSION"))
     {
-      jsonBuffer.clear();
-      JsonObject& sJsont = jsonBuffer.createObject();
-      sJsont["action"] = "Device Version";
-      sJsont["value"] = DEVICE_V;
+      StaticJsonDocument<400> doc;
+      doc["action"] = "Device Version";
+      doc["value"] = DEVICE_V;
       String r;
-      sJsont.printTo(r);
+      serializeJson(doc, r);
       sendToMQTT(outtopic, r);
     }
 /*-------Action command for getting getting device version--*/
 /*-----Action command for getting getting firmware version--*/
     else if(comp(action,"GET_VERSION"))
     {
-      jsonBuffer.clear();
-      JsonObject& sJsont = jsonBuffer.createObject();
-      sJsont["action"] = "Firmware Version";
-      sJsont["value"] = FIRMWARE_V;
+      StaticJsonDocument<400> doc;
+      doc["action"] = "Firmware Version";
+      doc["value"] = FIRMWARE_V;
       String r;
-      sJsont.printTo(r);
+      serializeJson(doc, r);
       sendToMQTT(outtopic, r);
     }
 /*-----Action command for getting getting firmware version--*/
@@ -405,12 +393,11 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-------Meathod to update ESP------------------------------*/
 void updateESP()
 {
-  jsonBuffer.clear();
-  JsonObject& sJson = jsonBuffer.createObject();
-  sJson["action"] = "UpdateStatus";
-  sJson["stat"] = "Updating Device...";
+  StaticJsonDocument<400> doc;
+  doc["action"] = "UpdateStatus";
+  doc["stat"] = "Updating Device...";
   String r;
-  sJson.printTo(r);
+  serializeJson(doc, r);
   sendToMQTT(outtopic, r);
   delay(100);
   t_httpUpdate_return ret = ESPhttpUpdate.update(updateAddress);
@@ -427,12 +414,11 @@ void updateESP()
         stat = "Update Successfull...";
         break;
   }
-  jsonBuffer.clear();
-  JsonObject& sJsont = jsonBuffer.createObject();
-  sJsont["action"] = "UpdateStatus";
-  sJsont["stat"] = stat;
+  StaticJsonDocument<400> doc_1;
+  doc_1["action"] = "UpdateStatus";
+  doc_1["stat"] = stat;
   r = "";
-  sJsont.printTo(r);
+  serializeJson(doc_1, r);
   sendToMQTT(outtopic, r);
   delay(100);
   serialDisplay("Update",stat);
@@ -458,17 +444,16 @@ void reset()
 /*----Meathod for sending relay status----------------------*/
 void send_status()
 {
-  jsonBuffer.clear();
-  JsonObject& sJson = jsonBuffer.createObject();
-  sJson["d"] = chipid;
-  sJson["action"] = "s";
-  JsonArray& data = sJson.createNestedArray("v");
+  StaticJsonDocument<400> doc;
+  doc["d"] = chipid;
+  doc["action"] = "s";
+  JsonArray data = doc.createNestedArray("v");
   for(int t=0; t<8; t++)
   {
     data.add(sr.get(t));
   }
   String r;
-  sJson.printTo(r);
+  serializeJson(doc, r);
   sendToMQTT(outtopic, r);
   sendToMQTT(espstatus, r);
 }
@@ -482,30 +467,28 @@ void sendToMQTT(String topic, String msg)
 /*---Meathod for pinging MQTT Server for active connection--*/
 void pinging()
 {
-  jsonBuffer.clear();
-  JsonObject& sJson = jsonBuffer.createObject();
-  sJson["d"] = chipid;
+  StaticJsonDocument<400> doc;
+  doc["d"] = chipid;
   if(strcmp(DEVICE_V, "v2") == 0)
-    sJson["s"] = true;
+    doc["s"] = true;
   else
-    sJson["s"] = false;
-  sJson["i"] = IpAddress;
+    doc["s"] = false;
+  doc["i"] = IpAddress;
   String r;
-  sJson.printTo(r);
+  serializeJson(doc, r);
   sendToMQTT(espraw, r);
 }
 /*---Meathod for pinging MQTT Server for active connection--*/
 /*-----Meathod for sending sensor data----------------------*/
 void sendSensorData()
 {
-  jsonBuffer.clear();
-  JsonObject& sJson = jsonBuffer.createObject();
-  sJson["d"] = chipid;
-  sJson["t"] = temp;
-  sJson["h"] = humid;
-  sJson["l"] = light;
+  StaticJsonDocument<400> doc;
+  doc["d"] = chipid;
+  doc["t"] = temp;
+  doc["h"] = humid;
+  doc["l"] = light;
   String s;
-  sJson.printTo(s);
+  serializeJson(doc, s);
   sendToMQTT(sensortopic, s);
 }
 /*-----Meathod for sending sensor data----------------------*/
@@ -544,14 +527,14 @@ void fetchIP()
   if(strcmp(IpAddress.c_str(),"") == 0)
   {
     http.begin("http://api.ipify.org/?format=json");
-    int httpCode = http.GET();
+    http.GET();
     String payload = http.getString();
     http.end();
-    jsonBuffer.clear();
-    JsonObject& root = jsonBuffer.parseObject(payload);
+    StaticJsonDocument<400> doc;
+    deserializeJson(doc, payload);
     IpAddress = "";
-    root["ip"].printTo(IpAddress);
-    jsonBuffer.clear();
+    const char* s = doc["ip"];
+    IpAddress = s;
     Wifi_ssid = WiFi.SSID();
     serialDisplay("SSID",Wifi_ssid);
     serialDisplay("IP Address",IpAddress);
