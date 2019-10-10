@@ -28,7 +28,7 @@
 #define DHTTYPE DHT11                     //Type of DHT sensor.
 
 //Configuring Device
-#define FIRMWARE_V "0.1.0"                //Current firmware version. (Displayed on Device Portal)
+#define FIRMWARE_V "0.1.1"                //Current firmware version. (Displayed on Device Portal)
 #define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
@@ -156,7 +156,7 @@ void setup() {
     Serial.print(".");
     checkReset();
   }
-  fetchIP();    
+  fetchIP();  
 /*-------Fetch IP Address-----------------------------------*/
 /*-------Setting up MQTT------------------------------------*/
   mqtt.onConnect(onMqttConnect);
@@ -172,7 +172,7 @@ void setup() {
   TickerForcheckReset.attach_ms(10, checkReset);
   TickerForconnectToMqtt.attach_ms(10000, connectToMqtt);
   TickerForFeedbackLED.attach(0.6, feedbackLED);
-  TickerForfetchIP.attach(5, fetchIP);
+//  TickerForfetchIP.attach(5, fetchIP);
 /*-------Setting up the trikers-----------------------------*/    
 }
 /*-------feedbackLED----------------------------------------*/
@@ -461,7 +461,7 @@ void send_status()
 /*----Meathod for sending MQTT Data-------------------------*/
 void sendToMQTT(String topic, String msg)
 {
-  mqtt.publish(topic.c_str(), 0, false, msg.c_str(), msg.length());
+  mqtt.publish(topic.c_str(), 2, false, msg.c_str(), msg.length());
 }
 /*----Meathod for sending MQTT Data-------------------------*/
 /*---Meathod for pinging MQTT Server for active connection--*/
@@ -524,8 +524,6 @@ bool comp(const char *val1,const char *val2)
 /*-----Meathod for feyching IP Address----------------------*/
 void fetchIP()
 {
-  if(strcmp(IpAddress.c_str(),"") == 0)
-  {
     http.begin("http://api.ipify.org/?format=json");
     http.GET();
     String payload = http.getString();
@@ -538,7 +536,6 @@ void fetchIP()
     Wifi_ssid = WiFi.SSID();
     serialDisplay("SSID",Wifi_ssid);
     serialDisplay("IP Address",IpAddress);
-  }
 }
 /*-----Meathod for fetching IP Address----------------------*/
 /*-----Blank function-----------------------------------------*/
@@ -560,7 +557,7 @@ void loop()
       dht.humidity().getEvent(&event);
       if (!isnan(event.relative_humidity))
         humid = event.relative_humidity;
-      light = map(analogRead(LDR_PIN), 0, 1023, 0, 100);
+      light = map(analogRead(LDR_PIN), 300, 1023, 0, 100);
     }
   }
 }
