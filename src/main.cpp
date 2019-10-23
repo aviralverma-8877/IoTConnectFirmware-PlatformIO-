@@ -28,8 +28,8 @@
 #define DHTTYPE DHT11                     //Type of DHT sensor.
 
 //Configuring Device
-#define FIRMWARE_V "0.1.1"                //Current firmware version. (Displayed on Device Portal)
-#define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
+#define FIRMWARE_V "0.1.2"                //Current firmware version. (Displayed on Device Portal)
+#define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
 bool debugging = false;                   //Turn On or Off the serial output.
@@ -172,7 +172,7 @@ void setup() {
   TickerForcheckReset.attach_ms(10, checkReset);
   TickerForconnectToMqtt.attach_ms(10000, connectToMqtt);
   TickerForFeedbackLED.attach(0.6, feedbackLED);
-//  TickerForfetchIP.attach(5, fetchIP);
+  TickerForfetchIP.attach(30, fetchIP);
 /*-------Setting up the trikers-----------------------------*/    
 }
 /*-------feedbackLED----------------------------------------*/
@@ -524,18 +524,25 @@ bool comp(const char *val1,const char *val2)
 /*-----Meathod for feyching IP Address----------------------*/
 void fetchIP()
 {
-    http.begin("http://api.ipify.org/?format=json");
-    http.GET();
-    String payload = http.getString();
-    http.end();
-    StaticJsonDocument<400> doc;
-    deserializeJson(doc, payload);
-    IpAddress = "";
-    const char* s = doc["ip"];
-    IpAddress = s;
-    Wifi_ssid = WiFi.SSID();
-    serialDisplay("SSID",Wifi_ssid);
-    serialDisplay("IP Address",IpAddress);
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    HTTPClient httpAPI;
+    httpAPI.begin("http://api.ipify.org/?format=json");
+    int HttpCode = httpAPI.GET();
+    if(HttpCode > 0)
+    {  
+      String payload = httpAPI.getString();
+      httpAPI.end();
+      StaticJsonDocument<400> doc;
+      deserializeJson(doc, payload);
+      IpAddress = "";
+      const char* s = doc["ip"];
+      IpAddress = s;
+      Wifi_ssid = WiFi.SSID();
+      serialDisplay("SSID",Wifi_ssid);
+      serialDisplay("IP Address",IpAddress);
+    }
+  }
 }
 /*-----Meathod for fetching IP Address----------------------*/
 /*-----Blank function-----------------------------------------*/
