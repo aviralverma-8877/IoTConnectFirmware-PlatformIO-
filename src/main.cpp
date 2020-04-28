@@ -23,16 +23,16 @@
 
 #define LDR_PIN A0                        //LDR Pin address
 #define reset_btn 4                       //Reset Button pin
-#define indicator_led 13                  //LED Pin
+#define indicator_led 12                  //LED Pin
 #define DHTPIN 2                          //DHT single wire interface pin
 #define DHTTYPE DHT11                     //Type of DHT sensor.
 
 //Configuring Device
-#define FIRMWARE_V "0.1.2"                //Current firmware version. (Displayed on Device Portal)
+#define FIRMWARE_V "0.1.3"                //Current firmware version. (Displayed on Device Portal)
 #define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
-bool debugging = true;                   //Turn On or Off the serial output.
+bool debugging = false;                   //Turn On or Off the serial output.
 
 AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
 WiFiManager wifiManager;                  //Variable to initiate WiFi Manager
@@ -56,7 +56,7 @@ uint8_t i;                                //Global variables
 HTTPClient http;                          //Global variables
 int temp, humid, light;                   //Global variables
 uint32_t delayMS;                         //Global variables
-const char *updateAddress; //Update address
+String updateAddress; //Update address
 /*----------------------------------------------------------*/
 
 /*--------------MQTT Configration---------------------------*/
@@ -106,7 +106,11 @@ void fetchIP();
 void updateESP();
 void blank();
 void (*callback)(void);                                 //Callback function meathod
-
+void configModeCallback(WiFiManager *myWiFiManager)
+{
+  TickerForFeedbackLED.attach(0.1, feedbackLED);
+  serialDisplay("EEPROM","Callback meathod");
+}
 void setup() {
   Serial.begin(115200);
 /*--------Reading Configs from EEPROM------------------------*/
@@ -125,8 +129,15 @@ void setup() {
   pinMode(indicator_led,OUTPUT);
   pinMode(LDR_PIN,INPUT);
 /*--------Setting up the GPIOs-------------------------------*/  
-  wifiManager.setDebugOutput(false); //Set WiFi manager debug output.
-  WiFi.mode(WIFI_STA);
+ if(debugging)
+ {
+  wifiManager.setDebugOutput(true); //Set WiFi manager debug output.
+ }
+ else
+ {
+   wifiManager.setDebugOutput(false); //Set WiFi manager debug output.
+ }
+ 
 /*-------Start WiFi Manager---------------------------------*/
   if(conf.setupFlag)
   {
@@ -134,6 +145,8 @@ void setup() {
     EEPROM.put(0, conf);
     EEPROM.commit();
     TickerForFeedbackLED.attach(0.2, feedbackLED);
+    wifiManager.setAPCallback(configModeCallback);
+    wifiManager.setBreakAfterConfig(true);
     wifiManager.startConfigPortal("IOT Connect");
   }
 /*-------Start WiFi Manager---------------------------------*/
@@ -153,7 +166,8 @@ void setup() {
 /*-------Fetch IP Address-----------------------------------*/
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
+    if(debugging)
+      Serial.print(".");
     checkReset();
   }
   fetchIP();  
@@ -164,7 +178,7 @@ void setup() {
   mqtt.onSubscribe(onMqttSubscribe);
   mqtt.onUnsubscribe(onMqttUnsubscribe);
   mqtt.onMessage(onMqttMessage);
-  mqtt.onPublish(onMqttPublish);
+//  mqtt.onPublish(onMqttPublish);
   mqtt.setCredentials(MQTT_UNAME, MQTT_PASS);
   mqtt.setServer(MQTT_HOST, MQTT_PORT);
 /*-------Setting up MQTT------------------------------------*/
@@ -383,7 +397,8 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-------Action command for updating firmware---------------*/
     else if(comp(action,"UPDATE"))
     {
-      updateAddress = root["url"];
+      const char * c = root["url"];
+      updateAddress = c;
       callback = &updateESP;
     }
 /*-------Action command for updating firmware---------------*/
@@ -400,7 +415,8 @@ void updateESP()
   serializeJson(doc, r);
   sendToMQTT(outtopic, r);
   delay(100);
-  t_httpUpdate_return ret = ESPhttpUpdate.update(updateAddress);
+  t_httpUpdate_return ret = ESPhttpUpdate.update(updateAddress.c_str());
+  serialDisplay("Update Address",updateAddress);
   String stat = "";
   switch(ret) 
   {
@@ -422,6 +438,7 @@ void updateESP()
   sendToMQTT(outtopic, r);
   delay(100);
   serialDisplay("Update",stat);
+  callback = &blank;
 }
 /*-------Meathod to update ESP------------------------------*/
 /*----Meathod called on sending/publishing message on MQTT--*/
@@ -435,6 +452,7 @@ void reset()
 {
   digitalWrite(indicator_led,HIGH);
   WiFi.disconnect();
+  EEPROM.wipe();
   conf.setupFlag = true;
   EEPROM.put(0, conf);
   EEPROM.commit();
@@ -497,13 +515,7 @@ void checkReset()
 {
   if(digitalRead(reset_btn) == HIGH)
   {
-    digitalWrite(indicator_led,HIGH);
-    WiFi.disconnect();
-    conf.setupFlag = true;
-    EEPROM.put(0, conf);
-    EEPROM.commit();
-    ESP.reset();
-//    wifiManager.startConfigPortal("IOT Connect");
+    reset();
   }
 }
 /*-----Meathod for checking reset button--------------------*/
