@@ -32,14 +32,14 @@
 #define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
-bool debugging = false;                   //Turn On or Off the serial output.
+bool debugging = true;                   //Turn On or Off the serial output.
 
 AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
 WiFiManager wifiManager;                  //Variable to initiate WiFi Manager
 
 DHT_Unified dht(DHTPIN, DHTTYPE);         //Initializing DHT sensor. 
 
-ShiftRegister74HC595 sr (1, 16, 14, 12);  //Setting up shift register.
+ShiftRegister74HC595<1> sr (16, 14, 12);  //Setting up shift register.
 String chipid = String(ESP.getChipId());  //Fetching ESP device ID.
 sensor_t sensor;                          //DTH sensor
 sensors_event_t event;                    //Creating event variable for DHT sensor.
