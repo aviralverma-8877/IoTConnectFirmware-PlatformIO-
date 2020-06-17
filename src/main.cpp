@@ -28,11 +28,11 @@
 #define DHTTYPE DHT11                     //Type of DHT sensor.
 
 //Configuring Device
-#define FIRMWARE_V "0.1.2"                //Current firmware version. (Displayed on Device Portal)
+#define FIRMWARE_V "0.1.4"                //Current firmware version. (Displayed on Device Portal)
 #define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
-bool debugging = true;                   //Turn On or Off the serial output.
+bool debugging = false;                   //Turn On or Off the serial output.
 
 AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
 WiFiManager wifiManager;                  //Variable to initiate WiFi Manager
@@ -212,7 +212,7 @@ void serialDisplay(String head,String body)
 void onMqttConnect(bool sessionPresent) {
   serialDisplay("MQTT","MQTT is Connected");
   mqtt.subscribe(intopic.c_str(), 2);
-  TickerForPinging.attach_ms(500, pinging);
+  TickerForPinging.attach_ms(10000, pinging);
   if(strcmp(DEVICE_V, "v2") == 0)
     TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
 }
