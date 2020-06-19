@@ -29,7 +29,7 @@
 
 //Configuring Device
 #define FIRMWARE_V "0.1.4"                //Current firmware version. (Displayed on Device Portal)
-#define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
+#define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
 bool debugging = false;                   //Turn On or Off the serial output.
@@ -286,6 +286,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     {
       StaticJsonDocument<400> doc;
       doc["SSID"] = Wifi_ssid;
+      doc["RSSI"] = String(WiFi.RSSI());
       String r;
       serializeJson(doc, r);
       sendToMQTT(outtopic, r);
