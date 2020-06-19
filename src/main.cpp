@@ -28,11 +28,7 @@
 #define DHTTYPE DHT11                     //Type of DHT sensor.
 
 //Configuring Device
-<<<<<<< HEAD
 #define FIRMWARE_V "0.1.4"                //Current firmware version. (Displayed on Device Portal)
-=======
-#define FIRMWARE_V "0.1.3"                //Current firmware version. (Displayed on Device Portal)
->>>>>>> 8c28abd05f6c1ddbe6aefb320e6eef2d9acefd3b
 #define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
