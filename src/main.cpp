@@ -28,7 +28,7 @@
 #define DHTTYPE DHT11                     //Type of DHT sensor.
 
 //Configuring Device
-#define FIRMWARE_V "0.1.4"                //Current firmware version. (Displayed on Device Portal)
+#define FIRMWARE_V "0.1.5"                //Current firmware version. (Displayed on Device Portal)
 #define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
@@ -47,6 +47,7 @@ sensors_event_t event;                    //Creating event variable for DHT sens
 /*----------------------------------------------------------*/
 String payload;                           //Global variables
 String IpAddress = "";                    //Global variables
+String LocalIP = "";                      //Global variables
 String data;                              //Global variables
 String Wifi_ssid;                         //Global variables
 bool mqtt_setup = false;                  //Global variables
@@ -104,6 +105,7 @@ void checkReset();
 bool comp(const char *val1,const char *val2);
 void fetchIP();
 void updateESP();
+String IpAddress2String(const IPAddress& ipAddress);
 void blank();
 void (*callback)(void);                                 //Callback function meathod
 void configModeCallback(WiFiManager *myWiFiManager)
@@ -493,6 +495,7 @@ void pinging()
   else
     doc["s"] = false;
   doc["i"] = IpAddress;
+  doc["l"] = LocalIP;
   String r;
   serializeJson(doc, r);
   sendToMQTT(espraw, r);
@@ -552,12 +555,22 @@ void fetchIP()
       const char* s = doc["ip"];
       IpAddress = s;
       Wifi_ssid = WiFi.SSID();
+      LocalIP = IpAddress2String(WiFi.localIP());
       serialDisplay("SSID",Wifi_ssid);
       serialDisplay("IP Address",IpAddress);
     }
   }
 }
 /*-----Meathod for fetching IP Address----------------------*/
+/*-----Meathod to convert IP Address to String -------------*/
+String IpAddress2String(const IPAddress& ipAddress)
+{
+  return String(ipAddress[0]) + String(".") +\
+  String(ipAddress[1]) + String(".") +\
+  String(ipAddress[2]) + String(".") +\
+  String(ipAddress[3])  ;
+}
+/*-----Meathod to convert IP Address to String -------------*/
 /*-----Blank function-----------------------------------------*/
 void blank()
 {
