@@ -63,21 +63,163 @@ ESP8266WebServer webServer(80);           //Global variables
 /*----------------------------------------------------------*/
 /*-------------Webpage Data---------------------------------*/
 String responseHTML = "<!DOCTYPE html>\
-                      <html>\
                           <head>\
+                            <meta name=\"viewport\" content=\"width=device-width,user-scalable=no,initial-scale=1\">\
                             <title>\
                               IoT Connect\
                             </title>\
                           </head>\
                           <style>\
+                          .style_btn{\
+                              background-color: #4CAF50;\
+                              border: none;\
+                              color: white;\
+                              padding: 15px 32px;\
+                              text-align: center;\
+                              text-decoration: none;\
+                              display: inline-block;\
+                              font-size: 16px;\
+                              margin: 4px 2px;\
+                              cursor: pointer;\
+                          }\
                           </style>\
+                          <script>\
+                          function httpGet(relay, value)\
+                          {\
+                              theUrl = 'http://192.168.0.104/control?command={\"relay\":'+relay+',\"action\":'+value+'}';\
+                              console.log(theUrl);\
+                              var xmlHttp = new XMLHttpRequest();\
+                              xmlHttp.open( \"GET\", theUrl, false );\
+                              xmlHttp.send( null );\
+                              return xmlHttp.responseText;\
+                          }\
+                          </script>\
                         <body>\
-                          <h1>\
-                            IoT Connect\
-                          </h1>\
-                          <p>\
-                            This is a captive portal example. All requests will be redirected here.\
-                          </p>\
+                            <h1>IoT Connect</h1>\
+                            <hr /><center>\
+                            <table>\
+                              <tr>\
+                                <th>\
+                                  Relay 1\
+                                </th>\
+                              </tr>\
+                              <tr>\
+                                <td>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(0,1)\">\
+                                    ON\
+                                  </button>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(0,0)\">\
+                                    OFF\
+                                  </button>\
+                                </td>\
+                              </tr>\
+                              <tr>\
+                                <th>\
+                                  Relay 2\
+                                </th>\
+                              </tr>\
+                              <tr>\
+                                <td>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(1,1)\">\
+                                    ON\
+                                  </button>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(1,0)\">\
+                                    OFF\
+                                  </button>\
+                                </td>\
+                              </tr>\
+                              <tr>\
+                                <th>\
+                                  Relay 3\
+                                </th>\
+                              </tr>\
+                              <tr>\
+                                <td>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(2,1)\">\
+                                    ON\
+                                  </button>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(2,0)\">\
+                                    OFF\
+                                  </button>\
+                                </td>\
+                              </tr>\
+                              <tr>\
+                                <th>\
+                                  Relay 4\
+                                </th>\
+                              </tr>\
+                              <tr>\
+                                <td>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(3,1)\">\
+                                    ON\
+                                  </button>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(3,0)\">\
+                                    OFF\
+                                  </button>\
+                                </td>\
+                              </tr>\
+                              <tr>\
+                                <th>\
+                                  Relay 5\
+                                </th>\
+                              </tr>\
+                              <tr>\
+                                <td>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(4,1)\">\
+                                    ON\
+                                  </button>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(4,0)\">\
+                                    OFF\
+                                  </button>\
+                                </td>\
+                              </tr>\
+                              <tr>\
+                                <th>\
+                                  Relay 6\
+                                </th>\
+                              </tr>\
+                              <tr>\
+                                <td>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(5,1)\">\
+                                    ON\
+                                  </button>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(5,0)\">\
+                                    OFF\
+                                  </button>\
+                                </td>\
+                              </tr>\
+                              <tr>\
+                                <th>\
+                                  Relay 7\
+                                </th>\
+                              </tr>\
+                              <tr>\
+                                <td>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(6,1)\">\
+                                    ON\
+                                  </button>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(6,0)\">\
+                                    OFF\
+                                  </button>\
+                                </td>\
+                              </tr>\
+                              <tr>\
+                                <th>\
+                                  Relay 8\
+                                </th>\
+                              </tr>\
+                              <tr>\
+                                <td>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(7,1)\">\
+                                    ON\
+                                  </button>\
+                                  <button class=\"style_btn\" onclick=\"httpGet(7,0)\">\
+                                    OFF\
+                                  </button>\
+                                </td>\
+                              </tr>\
+                            </table>\
+                            </center>\
                         </body>\
                       </html>";
 /*-------------Webpage Data---------------------------------*/
@@ -108,7 +250,7 @@ Ticker TickerForfetchIP;
 Ticker TickerForconnectToMqtt;
 Ticker TickerForFeedbackLED;
 /*--------------Tickers for Async Meathods------------------*/
-void relay_action(int no, int value, String by);
+void relay_action(int no, bool value, String by);
 void handleWebControl();
 void feedbackLED();
 void connectToMqtt();
@@ -214,10 +356,10 @@ void setup() {
   TickerForfetchIP.attach(30, fetchIP);
 /*-------Setting up the trikers-----------------------------*/    
 /*-------Web Server Setup-----------------------------------*/
+  webServer.on("/control", handleWebControl);
   webServer.onNotFound([]() {
     webServer.send(200, "text/html", responseHTML);
   });
-  webServer.on("/control", handleWebControl);
   webServer.begin();
 /*-------Web Server Setup-----------------------------------*/
 }
@@ -225,7 +367,7 @@ void setup() {
 void handleWebControl()
 {
   String message;
-  StaticJsonDocument<400> doc;
+  StaticJsonDocument<200> doc;
   for (int i = 0; i < webServer.args(); i++) 
   {
     if(webServer.argName(i) == "command")
@@ -235,20 +377,21 @@ void handleWebControl()
       if (error) 
       {
         String return_msg = "";
-        StaticJsonDocument<400> return_doc;
+        StaticJsonDocument<200> return_doc;
         return_doc["done"] = 0;
         return_doc["error"] = error;
         serializeJson(return_doc, return_msg);
-        webServer.send(200, "text/plain", return_msg); 
+        webServer.send(200, "application/json", return_msg); 
         return;
       }
       int relay = doc["relay"];
       bool action = doc["action"];
+      relay_action(relay, action, "");
       doc["done"] = 1;
       serializeJson(doc, message);
     }
   }
-  webServer.send(200, "text/plain", message);       //Response to the HTTP request
+  webServer.send(200, "application/json", message);       //Response to the HTTP request
 }
 /*-------Web Server Controller------------------------------*/
 
@@ -404,7 +547,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     else if(comp(action,"RELAY"))
     {
       int no = root["no"];
-      int value = root["value"];
+      bool value = root["value"];
       String by = root["by"];
       relay_action(no, value, by);
     }
@@ -448,7 +591,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   }
 }
 /*-------Meathod called on reciving message from MQTT-------*/
-void relay_action(int no, int value, String by)
+void relay_action(int no, bool value, String by)
 {
   sr.set(no, value);
 //sending status
