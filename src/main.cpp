@@ -66,7 +66,7 @@ String responseHTML = "<!DOCTYPE html>\
                           <head>\
                             <meta name=\"viewport\" content=\"width=device-width,user-scalable=no,initial-scale=1\">\
                             <title>\
-                              IoT Connect\
+                              IoT Connect : Solutions for smart homes.\
                             </title>\
                           </head>\
                           <style>\
@@ -95,7 +95,7 @@ String responseHTML = "<!DOCTYPE html>\
                           }\
                           </script>\
                         <body>\
-                            <h1>IoT Connect</h1>\
+                            <h1>IOT Connect : Solutions for smart homes.</h1>\
                             <hr /><center>\
                             <table>\
                               <tr>\
