@@ -29,7 +29,7 @@
 
 //Configuring Device
 #define FIRMWARE_V "0.1.5"                //Current firmware version. (Displayed on Device Portal)
-#define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
+#define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
 bool debugging = false;                   //Turn On or Off the serial output.
@@ -57,9 +57,30 @@ uint8_t i;                                //Global variables
 HTTPClient http;                          //Global variables
 int temp, humid, light;                   //Global variables
 uint32_t delayMS;                         //Global variables
-String updateAddress; //Update address
+String updateAddress;                     //Update address
+DNSServer dnsServer;                      //Global variables
+ESP8266WebServer webServer(80);           //Global variables
 /*----------------------------------------------------------*/
-
+/*-------------Webpage Data---------------------------------*/
+String responseHTML = "<!DOCTYPE html>\
+                      <html>\
+                          <head>\
+                            <title>\
+                              IoT Connect\
+                            </title>\
+                          </head>\
+                          <style>\
+                          </style>\
+                        <body>\
+                          <h1>\
+                            IoT Connect\
+                          </h1>\
+                          <p>\
+                            This is a captive portal example. All requests will be redirected here.\
+                          </p>\
+                        </body>\
+                      </html>";
+/*-------------Webpage Data---------------------------------*/
 /*--------------MQTT Configration---------------------------*/
 String outtopic = chipid+"-out";          //MQTT Topic for sending data from ESP.
 String intopic = chipid+"-in";            //MQTT Topic for reciving data to ESP.
@@ -87,6 +108,7 @@ Ticker TickerForfetchIP;
 Ticker TickerForconnectToMqtt;
 Ticker TickerForFeedbackLED;
 /*--------------Tickers for Async Meathods------------------*/
+void handleWebControl();
 void feedbackLED();
 void connectToMqtt();
 void serialDisplay(String head,String body);
@@ -190,7 +212,30 @@ void setup() {
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   TickerForfetchIP.attach(30, fetchIP);
 /*-------Setting up the trikers-----------------------------*/    
+/*-------Web Server Setup-----------------------------------*/
+  webServer.onNotFound([]() {
+    webServer.send(200, "text/html", responseHTML);
+  });
+  webServer.on("/control", handleWebControl);
+  webServer.begin();
+/*-------Web Server Setup-----------------------------------*/
 }
+/*-------Web Server Controller------------------------------*/
+void handleWebControl()
+{
+  String message = "Number of args received:";
+  message += webServer.args();
+  message += "\n";
+  for (int i = 0; i < webServer.args(); i++) 
+  {
+    message += "Arg nº" + (String)i + " –> ";
+    message += webServer.argName(i) + ": ";
+    message += webServer.arg(i) + "\n";
+  }
+  webServer.send(200, "text/plain", message);       //Response to the HTTP request
+}
+/*-------Web Server Controller------------------------------*/
+
 /*-------feedbackLED----------------------------------------*/
 void feedbackLED()
 {
@@ -590,7 +635,8 @@ void loop()
       dht.humidity().getEvent(&event);
       if (!isnan(event.relative_humidity))
         humid = event.relative_humidity;
-      light = map(analogRead(LDR_PIN), 300, 1023, 0, 100);
+      light = map(analogRead(LDR_PIN), 0, 255, 0, 100);
     }
   }
+  webServer.handleClient();
 }
