@@ -108,6 +108,7 @@ Ticker TickerForfetchIP;
 Ticker TickerForconnectToMqtt;
 Ticker TickerForFeedbackLED;
 /*--------------Tickers for Async Meathods------------------*/
+void relay_action(int no, int value, String by);
 void handleWebControl();
 void feedbackLED();
 void connectToMqtt();
@@ -223,14 +224,29 @@ void setup() {
 /*-------Web Server Controller------------------------------*/
 void handleWebControl()
 {
-  String message = "Number of args received:";
-  message += webServer.args();
-  message += "\n";
+  String message;
+  StaticJsonDocument<400> doc;
   for (int i = 0; i < webServer.args(); i++) 
   {
-    message += "Arg nº" + (String)i + " –> ";
-    message += webServer.argName(i) + ": ";
-    message += webServer.arg(i) + "\n";
+    if(webServer.argName(i) == "command")
+    {
+      String command = webServer.arg(i);
+      DeserializationError error = deserializeJson(doc, command);
+      if (error) 
+      {
+        String return_msg = "";
+        StaticJsonDocument<400> return_doc;
+        return_doc["done"] = 0;
+        return_doc["error"] = error;
+        serializeJson(return_doc, return_msg);
+        webServer.send(200, "text/plain", return_msg); 
+        return;
+      }
+      int relay = doc["relay"];
+      bool action = doc["action"];
+      doc["done"] = 1;
+      serializeJson(doc, message);
+    }
   }
   webServer.send(200, "text/plain", message);       //Response to the HTTP request
 }
@@ -387,31 +403,10 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-------Action command for controlling Relays--------------*/
     else if(comp(action,"RELAY"))
     {
-      sr.set(root["no"], root["value"]);
-//sending status
-      send_status();
-      delay(100);
-      
-//sending nortification
-      StaticJsonDocument<400> doc;
-      if(root.containsKey("by"))
-      {
-        doc["by"] = root["by"];
-        doc["no"] = root["no"];
-        doc["CHIPID"] = chipid;
-        doc["input"] = root["value"];
-      }
-      String r = "";
-      serializeJson(doc, r);
-      sendToMQTT(norttopic, r);
-
-//saving to eeprom
-      for(int t=0; t<8; t++)
-      {
-        conf.pinValues[t] = sr.get(t);
-      }
-      EEPROM.put(0, conf);
-      EEPROM.commit();
+      int no = root["no"];
+      int value = root["value"];
+      String by = root["by"];
+      relay_action(no, value, by);
     }
 /*-------Action command for controlling Relays--------------*/
 /*-------Action command for getting Relays status-----------*/
@@ -453,6 +448,34 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   }
 }
 /*-------Meathod called on reciving message from MQTT-------*/
+void relay_action(int no, int value, String by)
+{
+  sr.set(no, value);
+//sending status
+  send_status();
+  delay(100);
+  
+//sending nortification
+  StaticJsonDocument<400> doc;
+  if(by != "")
+  {
+    doc["by"] = by;
+    doc["no"] = no;
+    doc["CHIPID"] = chipid;
+    doc["input"] = value;
+  }
+  String r = "";
+  serializeJson(doc, r);
+  sendToMQTT(norttopic, r);
+
+//saving to eeprom
+  for(int t=0; t<8; t++)
+  {
+    conf.pinValues[t] = sr.get(t);
+  }
+  EEPROM.put(0, conf);
+  EEPROM.commit();
+}
 /*-------Meathod to update ESP------------------------------*/
 void updateESP()
 {
