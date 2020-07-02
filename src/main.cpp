@@ -70,7 +70,8 @@ String responseHTML = "<!DOCTYPE html>\
                             </title>\
                           </head>\
                           <style>\
-                          .style_btn{\
+                          .style_btn\
+                          {\
                               background-color: #4CAF50;\
                               border: none;\
                               color: white;\
@@ -82,6 +83,7 @@ String responseHTML = "<!DOCTYPE html>\
                               margin: 4px 2px;\
                               cursor: pointer;\
                           }\
+                          tr:nth-child(even) {background-color: #f2f2f2;}\
                           </style>\
                           <script>\
                           function httpGet(relay, value, action)\
@@ -97,8 +99,11 @@ String responseHTML = "<!DOCTYPE html>\
                               if(action == \"reboot_device\")\
                               {\
                                 theUrl = '/control?device={\"action\":\"reboot\"}';\
-                              }\                              
-                              console.log(theUrl);\
+                              }\
+                              if(action == \"get_status\")\
+                              {\
+                                theUrl = '/get_status';\
+                              }\
                               var xmlHttp = new XMLHttpRequest();\
                               xmlHttp.open( \"GET\", theUrl, false );\
                               xmlHttp.send( null );\
@@ -111,32 +116,64 @@ String responseHTML = "<!DOCTYPE html>\
                             {\
                               content = content + \"<tr>\
                                 <th>\
-                                  Relay \"+i+\"\
+                                  Relay \"+i+\" : <span id='status-\"+i+\"'></span>\
                                 </th>\
-                              </tr>\
-                              <tr>\
-                                <td>\
+                                <th>\
                                   <button class='style_btn' onclick='httpGet(\"+i+\",1,\\\"toggle_relay\\\")'>\
                                     ON\
                                   </button>\
                                   <button class='style_btn' onclick='httpGet(\"+i+\",0,\\\"toggle_relay\\\")'>\
                                     OFF\
                                   </button>\
-                                </td>\
+                                </th>\
                               </tr>\
                               \";\
                             }\
                             table.innerHTML = content;\
+                            setInterval(function()\
+                            {\
+                              data = httpGet(0, 0, 'get_status');\
+                              json = JSON.parse(data);\
+                              if(json != null)\
+                              {\
+                                for(var i=0; i<json['relay_status'].length; i++)\
+                                {\
+                                  var element = document.getElementById('status-'+i);\
+                                  if(json['relay_status'][i] == 0)\
+                                  {\
+                                    element.innerHTML = 'OFF';\
+                                  }\
+                                  if(json['relay_status'][i] == 1)\
+                                  {\
+                                    element.innerHTML = 'ON';\
+                                  }\
+                                }\
+                                var cont = \"\";\
+                                wifi_ssid = json['wifi_ssid'];\
+                                cont = \"Connected to <b>\"+wifi_ssid;\
+                                if(json['temp'] != undefined)\
+                                {\
+                                  temp = json['temp'];\
+                                  humid = json['humid'];\
+                                  lumin = json['lumin'];\
+                                  cont = cont + \" | Temperature : \"+temp+\" C | Humidity : \"+humid+\" % | Lumin : \"+lumin+\" % \"\
+                                }\
+                                element = document.getElementById('WiFi_Status');\
+                                element.innerHTML = cont;\
+                              }\
+                            },1000);\
                           }\
                           </script>\
                         <body onload=\"print_table()\">\
                             <h1>IOT Connect : Solutions for smart homes.</h1>\
                             <hr /><center>\
                             <div align=\"right\">\
-                              <button onclick=\"httpGet(0,0,'reset_device')\">Reset</button>\
+                              <button onclick=\"if(confirm('Are you sure you want to reset this device?')){httpGet(0,0,'reset_device')}\">Reset</button>\
                               <button onclick=\"httpGet(0,0,'reboot_device')\">Reboot</button>\
                             </div>\
-                            <table id=\"relay_table\">\
+                            <div id='WiFi_Status' align=\"left\">\
+                            </div>\
+                            <table id=\"relay_table\" cellspacing=\"15\">\
                             </table>\
                             </center>\
                         </body>\
@@ -171,6 +208,7 @@ Ticker TickerForFeedbackLED;
 /*--------------Tickers for Async Meathods------------------*/
 void relay_action(int no, bool value, String by);
 void handleWebControl();
+void handleWebStatus();
 void feedbackLED();
 void connectToMqtt();
 void serialDisplay(String head,String body);
@@ -215,6 +253,7 @@ void setup() {
   pinMode(indicator_led,OUTPUT);
   pinMode(LDR_PIN,INPUT);
 /*--------Setting up the GPIOs-------------------------------*/  
+
  if(debugging)
  {
   wifiManager.setDebugOutput(true); //Set WiFi manager debug output.
@@ -256,6 +295,7 @@ void setup() {
       Serial.print(".");
     checkReset();
   }
+
   fetchIP();  
 /*-------Fetch IP Address-----------------------------------*/
 /*-------Setting up MQTT------------------------------------*/
@@ -276,6 +316,7 @@ void setup() {
 /*-------Setting up the trikers-----------------------------*/    
 /*-------Web Server Setup-----------------------------------*/
   webServer.on("/control", handleWebControl);
+  webServer.on("/get_status", handleWebStatus);
   webServer.onNotFound([]() {
     webServer.send(200, "text/html", responseHTML);
   });
@@ -334,6 +375,22 @@ void handleWebControl()
   }
   webServer.send(200, "application/json", message);       //Response to the HTTP request
 }
+void handleWebStatus()
+{
+  String return_msg = "";
+  StaticJsonDocument<200> return_doc;
+  JsonArray relay_status = return_doc.createNestedArray("relay_status");
+  for(int t=0; t<8; t++)
+  {
+    relay_status.add(sr.get(t));
+  }
+  return_doc["type"] = DEVICE_V;
+  return_doc["wifi_ssid"] = Wifi_ssid;
+  return_doc["wifi_rssi"] = String(WiFi.RSSI());
+  serializeJson(return_doc, return_msg);
+  webServer.send(200, "application/json", return_msg); 
+}
+
 /*-------Web Server Controller------------------------------*/
 
 /*-------feedbackLED----------------------------------------*/
