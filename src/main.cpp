@@ -84,140 +84,59 @@ String responseHTML = "<!DOCTYPE html>\
                           }\
                           </style>\
                           <script>\
-                          function httpGet(relay, value)\
+                          function httpGet(relay, value, action)\
                           {\
-                              theUrl = 'http://192.168.0.104/control?command={\"relay\":'+relay+',\"action\":'+value+'}';\
+                              if(action == \"toggle_relay\")\
+                              {\
+                                theUrl = '/control?command={\"relay\":'+relay+',\"action\":'+value+'}';\
+                              }\
+                              if(action == \"reset_device\")\
+                              {\
+                                theUrl = '/control?device={\"action\":\"reset\"}';\
+                              }\
+                              if(action == \"reboot_device\")\
+                              {\
+                                theUrl = '/control?device={\"action\":\"reboot\"}';\
+                              }\                              
                               console.log(theUrl);\
                               var xmlHttp = new XMLHttpRequest();\
                               xmlHttp.open( \"GET\", theUrl, false );\
                               xmlHttp.send( null );\
                               return xmlHttp.responseText;\
                           }\
+                          function print_table(){\
+                            var table = document.getElementById(\"relay_table\");\
+                            var content = \"\";\
+                            for(var i = 0; i<8; i++)\
+                            {\
+                              content = content + \"<tr>\
+                                <th>\
+                                  Relay \"+i+\"\
+                                </th>\
+                              </tr>\
+                              <tr>\
+                                <td>\
+                                  <button class='style_btn' onclick='httpGet(\"+i+\",1,\\\"toggle_relay\\\")'>\
+                                    ON\
+                                  </button>\
+                                  <button class='style_btn' onclick='httpGet(\"+i+\",0,\\\"toggle_relay\\\")'>\
+                                    OFF\
+                                  </button>\
+                                </td>\
+                              </tr>\
+                              \";\
+                            }\
+                            table.innerHTML = content;\
+                          }\
                           </script>\
-                        <body>\
+                        <body onload=\"print_table()\">\
                             <h1>IOT Connect : Solutions for smart homes.</h1>\
                             <hr /><center>\
-                            <table>\
-                              <tr>\
-                                <th>\
-                                  Relay 1\
-                                </th>\
-                              </tr>\
-                              <tr>\
-                                <td>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(0,1)\">\
-                                    ON\
-                                  </button>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(0,0)\">\
-                                    OFF\
-                                  </button>\
-                                </td>\
-                              </tr>\
-                              <tr>\
-                                <th>\
-                                  Relay 2\
-                                </th>\
-                              </tr>\
-                              <tr>\
-                                <td>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(1,1)\">\
-                                    ON\
-                                  </button>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(1,0)\">\
-                                    OFF\
-                                  </button>\
-                                </td>\
-                              </tr>\
-                              <tr>\
-                                <th>\
-                                  Relay 3\
-                                </th>\
-                              </tr>\
-                              <tr>\
-                                <td>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(2,1)\">\
-                                    ON\
-                                  </button>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(2,0)\">\
-                                    OFF\
-                                  </button>\
-                                </td>\
-                              </tr>\
-                              <tr>\
-                                <th>\
-                                  Relay 4\
-                                </th>\
-                              </tr>\
-                              <tr>\
-                                <td>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(3,1)\">\
-                                    ON\
-                                  </button>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(3,0)\">\
-                                    OFF\
-                                  </button>\
-                                </td>\
-                              </tr>\
-                              <tr>\
-                                <th>\
-                                  Relay 5\
-                                </th>\
-                              </tr>\
-                              <tr>\
-                                <td>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(4,1)\">\
-                                    ON\
-                                  </button>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(4,0)\">\
-                                    OFF\
-                                  </button>\
-                                </td>\
-                              </tr>\
-                              <tr>\
-                                <th>\
-                                  Relay 6\
-                                </th>\
-                              </tr>\
-                              <tr>\
-                                <td>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(5,1)\">\
-                                    ON\
-                                  </button>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(5,0)\">\
-                                    OFF\
-                                  </button>\
-                                </td>\
-                              </tr>\
-                              <tr>\
-                                <th>\
-                                  Relay 7\
-                                </th>\
-                              </tr>\
-                              <tr>\
-                                <td>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(6,1)\">\
-                                    ON\
-                                  </button>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(6,0)\">\
-                                    OFF\
-                                  </button>\
-                                </td>\
-                              </tr>\
-                              <tr>\
-                                <th>\
-                                  Relay 8\
-                                </th>\
-                              </tr>\
-                              <tr>\
-                                <td>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(7,1)\">\
-                                    ON\
-                                  </button>\
-                                  <button class=\"style_btn\" onclick=\"httpGet(7,0)\">\
-                                    OFF\
-                                  </button>\
-                                </td>\
-                              </tr>\
+                            <div align=\"right\">\
+                              <button onclick=\"httpGet(0,0,'reset_device')\">Reset</button>\
+                              <button onclick=\"httpGet(0,0,'reboot_device')\">Reboot</button>\
+                            </div>\
+                            <table id=\"relay_table\">\
                             </table>\
                             </center>\
                         </body>\
@@ -389,6 +308,28 @@ void handleWebControl()
       relay_action(relay, action, "");
       doc["done"] = 1;
       serializeJson(doc, message);
+    }
+    if(webServer.argName(i) == "device")
+    {
+      String command = webServer.arg(i);
+      DeserializationError error = deserializeJson(doc, command);
+      if (error) 
+      {
+        String return_msg = "";
+        StaticJsonDocument<200> return_doc;
+        return_doc["done"] = 0;
+        return_doc["error"] = error;
+        serializeJson(return_doc, return_msg);
+        webServer.send(200, "application/json", return_msg); 
+        return;
+      }
+      String action = doc["action"];
+      doc["done"] = 1;
+      serializeJson(doc, message);
+      if(comp(action.c_str(),"reset"))
+        reset();
+      if(comp(action.c_str(),"reboot"))
+        ESP.reset();
     }
   }
   webServer.send(200, "application/json", message);       //Response to the HTTP request
