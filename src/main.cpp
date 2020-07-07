@@ -205,6 +205,8 @@ Ticker TickerForcheckReset;
 Ticker TickerForfetchIP;
 Ticker TickerForconnectToMqtt;
 Ticker TickerForFeedbackLED;
+Ticker TickerForSerialListner;
+Ticker TickerForUARTUpdater;
 /*--------------Tickers for Async Meathods------------------*/
 void relay_action(int no, bool value, String by);
 void handleWebControl();
@@ -230,6 +232,8 @@ void updateESP();
 String IpAddress2String(const IPAddress& ipAddress);
 void blank();
 void (*callback)(void);                                 //Callback function meathod
+void SerialListner();
+void send_status_uart();
 void configModeCallback(WiFiManager *myWiFiManager)
 {
   TickerForFeedbackLED.attach(0.1, feedbackLED);
@@ -313,6 +317,11 @@ void setup() {
   TickerForconnectToMqtt.attach_ms(10000, connectToMqtt);
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   TickerForfetchIP.attach(30, fetchIP);
+  if(!debugging)
+  {
+    TickerForSerialListner.attach_ms(10, SerialListner);
+    TickerForUARTUpdater.attach(1,send_status_uart);
+  }
 /*-------Setting up the trikers-----------------------------*/    
 /*-------Web Server Setup-----------------------------------*/
   webServer.on("/control", handleWebControl);
@@ -323,6 +332,36 @@ void setup() {
   webServer.begin();
 /*-------Web Server Setup-----------------------------------*/
 }
+/*-------Serial Listener Setup-----------------------------------*/
+void SerialListner()
+{
+  String message = "";
+  StaticJsonDocument<200> doc;
+  if(Serial.available())
+  {
+    char n;
+    while(Serial.available())
+    {
+      n = Serial.read();
+      message += n;
+    }
+    message.trim();
+    DeserializationError error = deserializeJson(doc, message);
+    if(error)
+    {
+      return;
+    }
+    String action = doc["a"];
+    int relay = doc["n"];
+    bool val = doc["v"];
+    if(action == "R")
+    {
+      relay_action(relay, val, "");
+    }
+  }
+
+}
+/*-------Serial Listener Setup-----------------------------------*/
 /*-------Web Server Controller------------------------------*/
 void handleWebControl()
 {
@@ -688,6 +727,20 @@ void send_status()
   sendToMQTT(espstatus, r);
 }
 /*----Meathod for sending relay status----------------------*/
+/*----Meathod for sending relay status on UART--------------*/
+void send_status_uart()
+{
+  StaticJsonDocument<200> doc;
+  doc["a"] = "RS";
+  JsonArray data = doc.createNestedArray("n");
+  for(int t=0; t<8; t++)
+  {
+    data.add(sr.get(t));
+  }
+  serializeJson(doc, Serial);
+  Serial.println();
+}
+/*----Meathod for sending relay status on UART--------------*/
 /*----Meathod for sending MQTT Data-------------------------*/
 void sendToMQTT(String topic, String msg)
 {
