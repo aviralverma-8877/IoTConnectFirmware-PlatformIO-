@@ -29,7 +29,7 @@
 
 //Configuring Device
 #define FIRMWARE_V "0.1.5"                //Current firmware version. (Displayed on Device Portal)
-#define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
+#define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
 bool debugging = false;                   //Turn On or Off the serial output.
@@ -320,7 +320,7 @@ void setup() {
   if(!debugging)
   {
     TickerForSerialListner.attach_ms(10, SerialListner);
-    TickerForUARTUpdater.attach(1,send_status_uart);
+    send_status_uart();
   }
 /*-------Setting up the trikers-----------------------------*/    
 /*-------Web Server Setup-----------------------------------*/
@@ -725,6 +725,7 @@ void send_status()
   serializeJson(doc, r);
   sendToMQTT(outtopic, r);
   sendToMQTT(espstatus, r);
+  send_status_uart();
 }
 /*----Meathod for sending relay status----------------------*/
 /*----Meathod for sending relay status on UART--------------*/
