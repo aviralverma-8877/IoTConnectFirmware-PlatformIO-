@@ -14,7 +14,7 @@
 #include <WiFiManager.h>                  //WiFi Manager library.
 #include <ESP8266HTTPClient.h>            //HTTP Client library.
 #include <ESP8266httpUpdate.h>            //ESP Update Library.
-
+#include <ESP8266mDNS.h>                  //mdns for setting hostname
 #define MQTT_HOST "iot-connect.in"        //MQTT Server address
 #define MQTT_PORT 1883                    //MQTT Server port
 //MQTT Cred
@@ -28,7 +28,7 @@
 #define DHTTYPE DHT11                     //Type of DHT sensor.
 
 //Configuring Device
-#define FIRMWARE_V "0.1.5"                //Current firmware version. (Displayed on Device Portal)
+#define FIRMWARE_V "2.0.0"                //Current firmware version. (Displayed on Device Portal)
 #define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
@@ -66,10 +66,14 @@ String responseHTML = "<!DOCTYPE html>\
                           <head>\
                             <meta name=\"viewport\" content=\"width=device-width,user-scalable=no,initial-scale=1\">\
                             <title>\
-                              IoT Connect : Solutions for smart homes.\
+                              ESPID : "+chipid+" | IoT Connect : Solutions for smart homes.\
                             </title>\
+                            <link href=\"https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap\" rel=\"stylesheet\">\
                           </head>\
                           <style>\
+                          body{\
+                            background-color: #e7eaf9;\
+                          }\
                           .style_btn\
                           {\
                               background-color: #4CAF50;\
@@ -83,7 +87,6 @@ String responseHTML = "<!DOCTYPE html>\
                               margin: 4px 2px;\
                               cursor: pointer;\
                           }\
-                          tr:nth-child(even) {background-color: #f2f2f2;}\
                           </style>\
                           <script>\
                           function httpGet(relay, value, action)\
@@ -150,7 +153,7 @@ String responseHTML = "<!DOCTYPE html>\
                                 }\
                                 var cont = \"\";\
                                 wifi_ssid = json['wifi_ssid'];\
-                                cont = \"Connected to <b>\"+wifi_ssid;\
+                                cont = \"Hostname : <a href='http://iot-connect-"+chipid+".local/'>iot-connect-"+chipid+".local</a> | Connected to <b>\"+wifi_ssid;\
                                 if(json['temp'] != undefined)\
                                 {\
                                   temp = json['temp'];\
@@ -165,15 +168,15 @@ String responseHTML = "<!DOCTYPE html>\
                           }\
                           </script>\
                         <body onload=\"print_table()\">\
-                            <h1>IOT Connect : Solutions for smart homes.</h1>\
+                            <h1 style=\"font-family: 'Fjalla One'\">IOT Connect : Solutions for smart homes.</h1>\
                             <hr /><center>\
+                            <div id='WiFi_Status' align=\"left\" style=\"font-family: 'Fjalla One'\">\
+                            </div>\
                             <div align=\"right\">\
-                              <button onclick=\"if(confirm('Are you sure you want to reset this device?')){httpGet(0,0,'reset_device')}\">Reset</button>\
-                              <button onclick=\"httpGet(0,0,'reboot_device')\">Reboot</button>\
+                              <button class='style_btn' onclick=\"if(confirm('Are you sure you want to reset this device?')){httpGet(0,0,'reset_device')}\">Reset</button>\
+                              <button class='style_btn' onclick=\"httpGet(0,0,'reboot_device')\">Reboot</button>\
                             </div>\
-                            <div id='WiFi_Status' align=\"left\">\
-                            </div>\
-                            <table id=\"relay_table\" cellspacing=\"15\">\
+                            <table id=\"relay_table\" cellspacing=\"15\" style=\"border:#ccc solid thin\">\
                             </table>\
                             </center>\
                         </body>\
@@ -266,7 +269,6 @@ void setup() {
  {
    wifiManager.setDebugOutput(false); //Set WiFi manager debug output.
  }
- 
 /*-------Start WiFi Manager---------------------------------*/
   if(conf.setupFlag)
   {
@@ -323,6 +325,10 @@ void setup() {
     send_status_uart();
   }
 /*-------Setting up the trikers-----------------------------*/    
+/*-------HOST Name Setup------------------------------------*/
+ WiFi.hostname("iot-connect-"+chipid);
+ MDNS.begin("iot-connect-"+chipid);
+/*-------HOST Name Setup------------------------------------*/
 /*-------Web Server Setup-----------------------------------*/
   webServer.on("/control", handleWebControl);
   webServer.on("/get_status", handleWebStatus);
@@ -331,6 +337,10 @@ void setup() {
   });
   webServer.begin();
 /*-------Web Server Setup-----------------------------------*/
+/*-------HOST Name Setup------------------------------------*/
+ MDNS.addService("http", "tcp", 80);
+/*-------HOST Name Setup------------------------------------*/
+
 }
 /*-------Serial Listener Setup-----------------------------------*/
 void SerialListner()
@@ -842,6 +852,7 @@ void blank()
 /*-----Blank function-----------------------------------------*/
 void loop() 
 {
+  MDNS.update();
   callback();
   if(strcmp(DEVICE_V, "v2") == 0)
   {
