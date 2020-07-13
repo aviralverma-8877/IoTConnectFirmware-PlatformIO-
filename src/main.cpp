@@ -15,6 +15,7 @@
 #include <ESP8266HTTPClient.h>            //HTTP Client library.
 #include <ESP8266httpUpdate.h>            //ESP Update Library.
 #include <ESP8266mDNS.h>                  //mdns for setting hostname
+#include <ESP8266HTTPUpdateServer.h>      //Web Update Server
 #define MQTT_HOST "iot-connect.in"        //MQTT Server address
 #define MQTT_PORT 1883                    //MQTT Server port
 //MQTT Cred
@@ -29,7 +30,7 @@
 
 //Configuring Device
 #define FIRMWARE_V "2.0.0"                //Current firmware version. (Displayed on Device Portal)
-#define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
+#define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
 bool debugging = false;                   //Turn On or Off the serial output.
@@ -60,6 +61,7 @@ uint32_t delayMS;                         //Global variables
 String updateAddress;                     //Update address
 DNSServer dnsServer;                      //Global variables
 ESP8266WebServer webServer(80);           //Global variables
+ESP8266HTTPUpdateServer httpUpdater;      //Global variables
 /*----------------------------------------------------------*/
 /*-------------Webpage Data---------------------------------*/
 String responseHTML = "<!DOCTYPE html>\
@@ -153,7 +155,9 @@ String responseHTML = "<!DOCTYPE html>\
                                 }\
                                 var cont = \"\";\
                                 wifi_ssid = json['wifi_ssid'];\
-                                cont = \"Hostname : <a href='http://iot-connect-"+chipid+".local/'>iot-connect-"+chipid+".local</a> | Connected to <b>\"+wifi_ssid;\
+                                wifi_type = json['type'];\
+                                cont = \"Connected to <b>\"+wifi_ssid+\"</b>\";\
+                                cont += \" | Device Type <b>\"+wifi_type+\"</b>\";\
                                 if(json['temp'] != undefined)\
                                 {\
                                   temp = json['temp'];\
@@ -168,13 +172,14 @@ String responseHTML = "<!DOCTYPE html>\
                           }\
                           </script>\
                         <body onload=\"print_table()\">\
-                            <h1 style=\"font-family: 'Fjalla One'\">IOT Connect : Solutions for smart homes.</h1>\
+                            <h1 style=\"font-family: 'Fjalla One'\">IoT Connect : Solutions for smart homes.</h1>\
                             <hr /><center>\
                             <div id='WiFi_Status' align=\"left\" style=\"font-family: 'Fjalla One'\">\
                             </div>\
                             <div align=\"right\">\
                               <button class='style_btn' onclick=\"if(confirm('Are you sure you want to reset this device?')){httpGet(0,0,'reset_device')}\">Reset</button>\
                               <button class='style_btn' onclick=\"httpGet(0,0,'reboot_device')\">Reboot</button>\
+                              <button class='style_btn' onclick=\"location.href = ('http://iot-connect-"+chipid+".local/update')\">Update Firmware</button>\
                             </div>\
                             <table id=\"relay_table\" cellspacing=\"15\" style=\"border:#ccc solid thin\">\
                             </table>\
@@ -329,6 +334,9 @@ void setup() {
  WiFi.hostname("iot-connect-"+chipid);
  MDNS.begin("iot-connect-"+chipid);
 /*-------HOST Name Setup------------------------------------*/
+/*-------Web Update Server----------------------------------*/
+  httpUpdater.setup(&webServer);
+/*-------Web Update Server----------------------------------*/
 /*-------Web Server Setup-----------------------------------*/
   webServer.on("/control", handleWebControl);
   webServer.on("/get_status", handleWebStatus);
