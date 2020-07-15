@@ -116,7 +116,7 @@ String responseHTML = "<!DOCTYPE html>\
                             {\
                               content = content + \"<tr>\
                                 <th>\
-                                  Relay \"+(i+1)+\" : <span id='status-\"+i+\"'></span>\
+                                  Relay \"+i+\" : <span id='status-\"+i+\"'></span>\
                                 </th>\
                                 <th>\
                                   <button class='style_btn' onclick='httpGet(\"+i+\",1,\\\"toggle_relay\\\")'>\
