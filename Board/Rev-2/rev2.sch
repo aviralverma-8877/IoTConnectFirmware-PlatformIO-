@@ -158,6 +158,7 @@
 <layer number="255" name="routoute" color="7" fill="1" visible="yes" active="yes"/>
 </layers>
 <schematic xreflabel="%F%N/%S.%C%R" xrefpart="/%S.%C%R">
+<fusionteam huburn="a.cGVyc29uYWw6dWUyYjdhYjY5" projecturn="a.cGVyc29uYWw6dWUyYjdhYjY5IzIwMTcwNzA4ODMxMDc1NTY" folderUrn="urn:adsk.wipprod:fs.folder:co.GYMhV0F4TrqMDaTDnEaPZQ" urn="urn:adsk.wipprod:dm.lineage:vdobf5GQRR2KW7lB7SkkhQ"  versionUrn="urn:adsk.wipprod:fs.file:vf.vdobf5GQRR2KW7lB7SkkhQ?version=1" camFileUrn="" camFileVersionUrn="" lastpublishedchangeguid="3e6122c4-38b2-c95b-5d0c-4e25600ed0c6"/>
 <libraries>
 <library name="74xx">
 <packages>
@@ -5288,12 +5289,59 @@ W = angled&lt;p&gt;
 <rectangle x1="1.016" y1="-0.254" x2="1.524" y2="0.254" layer="51"/>
 <rectangle x1="6.096" y1="-0.254" x2="6.604" y2="0.254" layer="51"/>
 </package>
+<package name="MA04-1" urn="urn:adsk.eagle:footprint:8285/1" library_version="2">
+<description>&lt;b&gt;PIN HEADER&lt;/b&gt;</description>
+<wire x1="-4.445" y1="1.27" x2="-3.175" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="-3.175" y1="1.27" x2="-2.54" y2="0.635" width="0.1524" layer="21"/>
+<wire x1="-2.54" y1="-0.635" x2="-3.175" y2="-1.27" width="0.1524" layer="21"/>
+<wire x1="-2.54" y1="0.635" x2="-1.905" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="-1.905" y1="1.27" x2="-0.635" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="-0.635" y1="1.27" x2="0" y2="0.635" width="0.1524" layer="21"/>
+<wire x1="0" y1="-0.635" x2="-0.635" y2="-1.27" width="0.1524" layer="21"/>
+<wire x1="-0.635" y1="-1.27" x2="-1.905" y2="-1.27" width="0.1524" layer="21"/>
+<wire x1="-1.905" y1="-1.27" x2="-2.54" y2="-0.635" width="0.1524" layer="21"/>
+<wire x1="-5.08" y1="0.635" x2="-5.08" y2="-0.635" width="0.1524" layer="21"/>
+<wire x1="-4.445" y1="1.27" x2="-5.08" y2="0.635" width="0.1524" layer="21"/>
+<wire x1="-5.08" y1="-0.635" x2="-4.445" y2="-1.27" width="0.1524" layer="21"/>
+<wire x1="-3.175" y1="-1.27" x2="-4.445" y2="-1.27" width="0.1524" layer="21"/>
+<wire x1="0" y1="0.635" x2="0.635" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="0.635" y1="1.27" x2="1.905" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="1.905" y1="1.27" x2="2.54" y2="0.635" width="0.1524" layer="21"/>
+<wire x1="2.54" y1="-0.635" x2="1.905" y2="-1.27" width="0.1524" layer="21"/>
+<wire x1="1.905" y1="-1.27" x2="0.635" y2="-1.27" width="0.1524" layer="21"/>
+<wire x1="0.635" y1="-1.27" x2="0" y2="-0.635" width="0.1524" layer="21"/>
+<wire x1="3.175" y1="1.27" x2="4.445" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="4.445" y1="1.27" x2="5.08" y2="0.635" width="0.1524" layer="21"/>
+<wire x1="5.08" y1="0.635" x2="5.08" y2="-0.635" width="0.1524" layer="21"/>
+<wire x1="5.08" y1="-0.635" x2="4.445" y2="-1.27" width="0.1524" layer="21"/>
+<wire x1="3.175" y1="1.27" x2="2.54" y2="0.635" width="0.1524" layer="21"/>
+<wire x1="2.54" y1="-0.635" x2="3.175" y2="-1.27" width="0.1524" layer="21"/>
+<wire x1="4.445" y1="-1.27" x2="3.175" y2="-1.27" width="0.1524" layer="21"/>
+<pad name="1" x="-3.81" y="0" drill="1.016" shape="long" rot="R90"/>
+<pad name="2" x="-1.27" y="0" drill="1.016" shape="long" rot="R90"/>
+<pad name="3" x="1.27" y="0" drill="1.016" shape="long" rot="R90"/>
+<pad name="4" x="3.81" y="0" drill="1.016" shape="long" rot="R90"/>
+<text x="-5.08" y="1.651" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="-6.223" y="-0.635" size="1.27" layer="21" ratio="10">1</text>
+<text x="0.635" y="1.651" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
+<text x="5.334" y="-0.635" size="1.27" layer="21" ratio="10">4</text>
+<rectangle x1="-1.524" y1="-0.254" x2="-1.016" y2="0.254" layer="51"/>
+<rectangle x1="-4.064" y1="-0.254" x2="-3.556" y2="0.254" layer="51"/>
+<rectangle x1="1.016" y1="-0.254" x2="1.524" y2="0.254" layer="51"/>
+<rectangle x1="3.556" y1="-0.254" x2="4.064" y2="0.254" layer="51"/>
+</package>
 </packages>
 <packages3d>
 <package3d name="MA06-1" urn="urn:adsk.eagle:package:8340/1" type="box" library_version="1">
 <description>PIN HEADER</description>
 <packageinstances>
 <packageinstance name="MA06-1"/>
+</packageinstances>
+</package3d>
+<package3d name="MA04-1" urn="urn:adsk.eagle:package:8337/1" type="box" library_version="2">
+<description>PIN HEADER</description>
+<packageinstances>
+<packageinstance name="MA04-1"/>
 </packageinstances>
 </package3d>
 </packages3d>
@@ -5317,6 +5365,22 @@ W = angled&lt;p&gt;
 <pin name="4" x="7.62" y="0" visible="pad" length="middle" direction="pas" swaplevel="1" rot="R180"/>
 <pin name="5" x="7.62" y="2.54" visible="pad" length="middle" direction="pas" swaplevel="1" rot="R180"/>
 <pin name="6" x="7.62" y="5.08" visible="pad" length="middle" direction="pas" swaplevel="1" rot="R180"/>
+</symbol>
+<symbol name="MA04-1" urn="urn:adsk.eagle:symbol:8284/1" library_version="2">
+<wire x1="3.81" y1="-7.62" x2="-1.27" y2="-7.62" width="0.4064" layer="94"/>
+<wire x1="1.27" y1="0" x2="2.54" y2="0" width="0.6096" layer="94"/>
+<wire x1="1.27" y1="-2.54" x2="2.54" y2="-2.54" width="0.6096" layer="94"/>
+<wire x1="1.27" y1="-5.08" x2="2.54" y2="-5.08" width="0.6096" layer="94"/>
+<wire x1="-1.27" y1="5.08" x2="-1.27" y2="-7.62" width="0.4064" layer="94"/>
+<wire x1="3.81" y1="-7.62" x2="3.81" y2="5.08" width="0.4064" layer="94"/>
+<wire x1="-1.27" y1="5.08" x2="3.81" y2="5.08" width="0.4064" layer="94"/>
+<wire x1="1.27" y1="2.54" x2="2.54" y2="2.54" width="0.6096" layer="94"/>
+<text x="-1.27" y="-10.16" size="1.778" layer="96">&gt;VALUE</text>
+<text x="-1.27" y="5.842" size="1.778" layer="95">&gt;NAME</text>
+<pin name="1" x="7.62" y="-5.08" visible="pad" length="middle" direction="pas" swaplevel="1" rot="R180"/>
+<pin name="2" x="7.62" y="-2.54" visible="pad" length="middle" direction="pas" swaplevel="1" rot="R180"/>
+<pin name="3" x="7.62" y="0" visible="pad" length="middle" direction="pas" swaplevel="1" rot="R180"/>
+<pin name="4" x="7.62" y="2.54" visible="pad" length="middle" direction="pas" swaplevel="1" rot="R180"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -5344,6 +5408,34 @@ W = angled&lt;p&gt;
 <attribute name="MPN" value="" constant="no"/>
 <attribute name="OC_FARNELL" value="unknown" constant="no"/>
 <attribute name="OC_NEWARK" value="unknown" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="MA04-1" urn="urn:adsk.eagle:component:8375/2" prefix="SV" uservalue="yes" library_version="2">
+<description>&lt;b&gt;PIN HEADER&lt;/b&gt;</description>
+<gates>
+<gate name="1" symbol="MA04-1" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="MA04-1">
+<connects>
+<connect gate="1" pin="1" pad="1"/>
+<connect gate="1" pin="2" pad="2"/>
+<connect gate="1" pin="3" pad="3"/>
+<connect gate="1" pin="4" pad="4"/>
+</connects>
+<package3dinstances>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:8337/1"/>
+</package3dinstances>
+<technologies>
+<technology name="">
+<attribute name="MF" value="" constant="no"/>
+<attribute name="MPN" value="" constant="no"/>
+<attribute name="OC_FARNELL" value="unknown" constant="no"/>
+<attribute name="OC_NEWARK" value="unknown" constant="no"/>
+<attribute name="POPULARITY" value="41" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -7595,140 +7687,6 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 </deviceset>
 </devicesets>
 </library>
-<library name="con-amp-quick" urn="urn:adsk.eagle:library:125">
-<description>&lt;b&gt;AMP Connectors, Type QUICK&lt;/b&gt;&lt;p&gt;
-&lt;author&gt;Created by librarian@cadsoft.de&lt;/author&gt;</description>
-<packages>
-<package name="02PA" urn="urn:adsk.eagle:footprint:5939/1" library_version="1">
-<description>&lt;b&gt;AMP QUICK CONNECTOR&lt;/b&gt;</description>
-<wire x1="-2.286" y1="8.763" x2="-2.286" y2="8.509" width="0.1524" layer="21"/>
-<wire x1="-2.286" y1="8.509" x2="-0.381" y2="8.509" width="0.1524" layer="21"/>
-<wire x1="-0.381" y1="8.509" x2="0" y2="8.128" width="0.1524" layer="21"/>
-<wire x1="0" y1="8.128" x2="0.381" y2="8.509" width="0.1524" layer="21"/>
-<wire x1="-0.381" y1="8.509" x2="-0.381" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="0" y1="8.128" x2="0" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="0.381" y1="8.509" x2="0.381" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="2.286" y1="5.842" x2="2.286" y2="8.509" width="0.1524" layer="21"/>
-<wire x1="-0.381" y1="5.842" x2="-0.254" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="0" y1="5.842" x2="0.254" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="0.254" y1="5.842" x2="0.381" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="-0.254" y1="5.842" x2="0" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="-0.254" y1="-0.381" x2="-0.762" y2="-0.381" width="0.1524" layer="51"/>
-<wire x1="-2.286" y1="-0.127" x2="-1.778" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="-2.286" y1="8.509" x2="-2.286" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="-2.286" y1="5.842" x2="-2.286" y2="-0.381" width="0.1524" layer="21"/>
-<wire x1="-1.778" y1="-0.381" x2="-1.778" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="-1.778" y1="-0.381" x2="-2.286" y2="-0.381" width="0.1524" layer="51"/>
-<wire x1="-0.254" y1="-0.127" x2="-0.762" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="-0.254" y1="5.842" x2="-0.254" y2="-0.127" width="0.1524" layer="21"/>
-<wire x1="-0.254" y1="-0.127" x2="-0.254" y2="-0.381" width="0.1524" layer="21"/>
-<wire x1="-0.762" y1="-0.381" x2="-0.762" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="-2.286" y1="5.842" x2="-1.524" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="-1.524" y1="5.842" x2="-1.016" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="-1.016" y1="5.842" x2="-0.381" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="0.381" y1="5.842" x2="1.016" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="1.016" y1="5.842" x2="1.524" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="1.524" y1="5.842" x2="2.286" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="1.143" y1="8.001" x2="1.397" y2="8.001" width="0.1524" layer="21"/>
-<wire x1="1.397" y1="8.001" x2="1.524" y2="7.366" width="0.1524" layer="21"/>
-<wire x1="1.524" y1="7.366" x2="1.016" y2="7.366" width="0.1524" layer="21"/>
-<wire x1="1.016" y1="7.366" x2="1.143" y2="8.001" width="0.1524" layer="21"/>
-<wire x1="1.016" y1="7.366" x2="1.016" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="1.524" y1="7.366" x2="1.524" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="-1.397" y1="8.001" x2="-1.143" y2="8.001" width="0.1524" layer="21"/>
-<wire x1="-1.143" y1="8.001" x2="-1.016" y2="7.366" width="0.1524" layer="21"/>
-<wire x1="-1.016" y1="7.366" x2="-1.524" y2="7.366" width="0.1524" layer="21"/>
-<wire x1="-1.524" y1="7.366" x2="-1.397" y2="8.001" width="0.1524" layer="21"/>
-<wire x1="-1.524" y1="7.366" x2="-1.524" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="-1.016" y1="7.366" x2="-1.016" y2="5.842" width="0.1524" layer="21"/>
-<wire x1="-1.016" y1="-0.381" x2="-1.016" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="-1.016" y1="-0.381" x2="-1.524" y2="-0.381" width="0.1524" layer="51"/>
-<wire x1="-1.524" y1="-0.381" x2="-1.524" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="-1.524" y1="-0.127" x2="-1.778" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="-0.762" y1="-0.127" x2="-1.016" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="0.254" y1="-0.127" x2="-0.254" y2="-0.127" width="0.1524" layer="21"/>
-<wire x1="0.254" y1="5.842" x2="0.254" y2="-0.127" width="0.1524" layer="21"/>
-<wire x1="2.286" y1="-0.381" x2="1.778" y2="-0.381" width="0.1524" layer="51"/>
-<wire x1="0.254" y1="-0.127" x2="0.762" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="0.254" y1="-0.127" x2="0.254" y2="-0.381" width="0.1524" layer="21"/>
-<wire x1="0.762" y1="-0.381" x2="0.762" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="0.762" y1="-0.381" x2="0.254" y2="-0.381" width="0.1524" layer="51"/>
-<wire x1="2.286" y1="-0.127" x2="1.778" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="2.286" y1="5.842" x2="2.286" y2="-0.381" width="0.1524" layer="21"/>
-<wire x1="1.778" y1="-0.381" x2="1.778" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="1.524" y1="-0.381" x2="1.524" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="1.524" y1="-0.381" x2="1.016" y2="-0.381" width="0.1524" layer="51"/>
-<wire x1="1.016" y1="-0.381" x2="1.016" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="1.016" y1="-0.127" x2="0.762" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="1.778" y1="-0.127" x2="1.524" y2="-0.127" width="0.1524" layer="51"/>
-<wire x1="-2.286" y1="8.763" x2="2.286" y2="8.763" width="0.1524" layer="21"/>
-<wire x1="0.381" y1="8.509" x2="2.286" y2="8.509" width="0.1524" layer="21"/>
-<wire x1="2.286" y1="8.509" x2="2.286" y2="8.763" width="0.1524" layer="21"/>
-<pad name="1" x="-1.27" y="0" drill="0.9144" shape="long" rot="R90"/>
-<pad name="2" x="1.27" y="0" drill="0.9144" shape="long" rot="R90"/>
-<text x="-1.651" y="1.3208" size="1.27" layer="21" ratio="10">1</text>
-<text x="-2.286" y="9.1694" size="1.27" layer="25" ratio="10">&gt;NAME</text>
-<text x="-2.286" y="-2.1844" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
-<rectangle x1="1.016" y1="5.842" x2="1.524" y2="7.366" layer="21"/>
-<rectangle x1="1.143" y1="7.366" x2="1.397" y2="8.001" layer="21"/>
-<rectangle x1="1.397" y1="7.366" x2="1.524" y2="7.62" layer="21"/>
-<rectangle x1="1.016" y1="7.366" x2="1.143" y2="7.62" layer="21"/>
-<rectangle x1="-1.524" y1="5.842" x2="-1.016" y2="7.366" layer="21"/>
-<rectangle x1="-1.397" y1="7.366" x2="-1.143" y2="8.001" layer="21"/>
-<rectangle x1="-1.143" y1="7.366" x2="-1.016" y2="7.62" layer="21"/>
-<rectangle x1="-1.524" y1="7.366" x2="-1.397" y2="7.62" layer="21"/>
-</package>
-</packages>
-<packages3d>
-<package3d name="02PA" urn="urn:adsk.eagle:package:5970/1" type="box" library_version="1">
-<description>AMP QUICK CONNECTOR</description>
-<packageinstances>
-<packageinstance name="02PA"/>
-</packageinstances>
-</package3d>
-</packages3d>
-<symbols>
-<symbol name="M02" urn="urn:adsk.eagle:symbol:5909/1" library_version="1">
-<wire x1="3.81" y1="-2.54" x2="-2.54" y2="-2.54" width="0.4064" layer="94"/>
-<wire x1="1.27" y1="2.54" x2="2.54" y2="2.54" width="0.6096" layer="94"/>
-<wire x1="1.27" y1="0" x2="2.54" y2="0" width="0.6096" layer="94"/>
-<wire x1="-2.54" y1="5.08" x2="-2.54" y2="-2.54" width="0.4064" layer="94"/>
-<wire x1="3.81" y1="-2.54" x2="3.81" y2="5.08" width="0.4064" layer="94"/>
-<wire x1="-2.54" y1="5.08" x2="3.81" y2="5.08" width="0.4064" layer="94"/>
-<text x="-2.54" y="-5.08" size="1.778" layer="96">&gt;VALUE</text>
-<text x="-2.54" y="5.842" size="1.778" layer="95">&gt;NAME</text>
-<pin name="1" x="7.62" y="0" visible="pad" length="middle" direction="pas" swaplevel="1" rot="R180"/>
-<pin name="2" x="7.62" y="2.54" visible="pad" length="middle" direction="pas" swaplevel="1" rot="R180"/>
-</symbol>
-</symbols>
-<devicesets>
-<deviceset name="MA02" urn="urn:adsk.eagle:component:6011/1" prefix="SL" uservalue="yes" library_version="1">
-<description>&lt;b&gt;AMP QUICK CONNECTOR&lt;/b&gt;</description>
-<gates>
-<gate name="G$1" symbol="M02" x="-2.54" y="0"/>
-</gates>
-<devices>
-<device name="" package="02PA">
-<connects>
-<connect gate="G$1" pin="1" pad="1"/>
-<connect gate="G$1" pin="2" pad="2"/>
-</connects>
-<package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:5970/1"/>
-</package3dinstances>
-<technologies>
-<technology name="">
-<attribute name="MF" value="" constant="no"/>
-<attribute name="MPN" value="" constant="no"/>
-<attribute name="OC_FARNELL" value="unknown" constant="no"/>
-<attribute name="OC_NEWARK" value="unknown" constant="no"/>
-</technology>
-</technologies>
-</device>
-</devices>
-</deviceset>
-</devicesets>
-</library>
 <library name="LD1117V33">
 <packages>
 <package name="LD1117V33">
@@ -8193,6 +8151,51 @@ General purpose 1N400x type rectifier
 </deviceset>
 </devicesets>
 </library>
+<library name="Toggle Switch">
+<packages>
+<package name="TOGGLE_SWITCH">
+<pad name="ON" x="0" y="0" drill="0.6" shape="long" rot="R90"/>
+<pad name="IN" x="2" y="0" drill="0.6" shape="long" rot="R90"/>
+<pad name="OFF" x="4" y="0" drill="0.6" shape="long" rot="R90"/>
+<wire x1="-2" y1="2" x2="6" y2="2" width="0.1524" layer="21"/>
+<wire x1="6" y1="2" x2="6" y2="-2" width="0.1524" layer="21"/>
+<wire x1="6" y1="-2" x2="-2" y2="-2" width="0.1524" layer="21"/>
+<wire x1="-2" y1="2" x2="-2" y2="-2" width="0.1524" layer="21"/>
+<text x="-1.5" y="1" size="0.5" layer="21">ON</text>
+<text x="4.5" y="1" size="0.5" layer="21">OFF</text>
+</package>
+</packages>
+<symbols>
+<symbol name="TOGGL_SWITCH">
+<pin name="ON" x="-5.08" y="-7.62" length="middle" rot="R90"/>
+<pin name="IN" x="0" y="-7.62" length="middle" rot="R90"/>
+<pin name="OFF" x="5.08" y="-7.62" length="middle" rot="R90"/>
+<wire x1="-10.16" y1="5.08" x2="10.16" y2="5.08" width="0.1524" layer="94"/>
+<wire x1="10.16" y1="5.08" x2="10.16" y2="-7.62" width="0.1524" layer="94"/>
+<wire x1="10.16" y1="-7.62" x2="-10.16" y2="-7.62" width="0.1524" layer="94"/>
+<wire x1="-10.16" y1="-7.62" x2="-10.16" y2="5.08" width="0.1524" layer="94"/>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="TOGGLE_SWITCH">
+<gates>
+<gate name="G$1" symbol="TOGGL_SWITCH" x="33.02" y="-12.7"/>
+</gates>
+<devices>
+<device name="" package="TOGGLE_SWITCH">
+<connects>
+<connect gate="G$1" pin="IN" pad="IN"/>
+<connect gate="G$1" pin="OFF" pad="OFF"/>
+<connect gate="G$1" pin="ON" pad="ON"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -8250,16 +8253,15 @@ General purpose 1N400x type rectifier
 <part name="9V8" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="LED" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="3MM" package3d_urn="urn:adsk.eagle:package:15797/1" value="3.5 mm"/>
 <part name="GND13" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="RESET" library="buttons" deviceset="10-XX" device="" value="tackswitch"/>
+<part name="SETUP_MODE" library="buttons" deviceset="10-XX" device="" value="tackswitch"/>
 <part name="GND14" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="PULLDOWN" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:25945/1" value="10kohm"/>
-<part name="ESP-RESET" library="buttons" deviceset="10-XX" device="" value="tackswitch"/>
+<part name="MCU-RESET" library="buttons" deviceset="10-XX" device="" value="tackswitch"/>
 <part name="GND15" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="C1" library="SparkFun-Capacitors" deviceset="0.1UF" device="-KIT-EZ-50V-20%" value="0.1 nF"/>
 <part name="P+1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="GND16" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND17" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="SL1" library="con-amp-quick" library_urn="urn:adsk.eagle:library:125" deviceset="MA02" device="" package3d_urn="urn:adsk.eagle:package:5970/1" value="Flash"/>
 <part name="GND19" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="REG1" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:25945/1" value="1kohm"/>
 <part name="U$1" library="LD1117V33" deviceset="LD1117V33" device=""/>
@@ -8268,8 +8270,8 @@ General purpose 1N400x type rectifier
 <part name="MAINPOWER" library="con-phoenix-350" library_urn="urn:adsk.eagle:library:174" deviceset="1751248" device="" package3d_urn="urn:adsk.eagle:package:9395/1"/>
 <part name="HLK-5M05" library="HLKPM01EaglesLib" deviceset="HKLPM01" device="" value="AC to DC Converter"/>
 <part name="U$2" library="diy-modules" deviceset="TEMP-HUM-SENSOR-DHT11" device="" value="DHT11"/>
-<part name="R1" library="LDR" deviceset="PHOTOCELL" device="ONB"/>
-<part name="PHOTOREG" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:25945/1" value="1kohm"/>
+<part name="PHOTO_REG" library="LDR" deviceset="PHOTOCELL" device="ONB"/>
+<part name="RESET_REG" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:25945/1" value="1kohm"/>
 <part name="CON-REL-1" library="3 PIN AC Connector" deviceset="3PINAC" device=""/>
 <part name="CON-REL-2" library="3 PIN AC Connector" deviceset="3PINAC" device=""/>
 <part name="CON-REL-3" library="3 PIN AC Connector" deviceset="3PINAC" device=""/>
@@ -8286,6 +8288,11 @@ General purpose 1N400x type rectifier
 <part name="D7" library="adafruit" library_urn="urn:adsk.eagle:library:420" deviceset="1N4004" device="" package3d_urn="urn:adsk.eagle:package:6240344/1"/>
 <part name="D6" library="adafruit" library_urn="urn:adsk.eagle:library:420" deviceset="1N4004" device="" package3d_urn="urn:adsk.eagle:package:6240344/1"/>
 <part name="D5" library="adafruit" library_urn="urn:adsk.eagle:library:420" deviceset="1N4004" device="" package3d_urn="urn:adsk.eagle:package:6240344/1"/>
+<part name="GND_SWITCH" library="Toggle Switch" deviceset="TOGGLE_SWITCH" device=""/>
+<part name="VCC_SWITCH" library="Toggle Switch" deviceset="TOGGLE_SWITCH" device=""/>
+<part name="FLASH" library="Toggle Switch" deviceset="TOGGLE_SWITCH" device=""/>
+<part name="SV1" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA04-1" device="" package3d_urn="urn:adsk.eagle:package:8337/1"/>
+<part name="PULLUP" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:25945/1" value="10kohm"/>
 </parts>
 <sheets>
 <sheet>
@@ -8461,7 +8468,7 @@ General purpose 1N400x type rectifier
 <instance part="GND13" gate="1" x="-38.1" y="66.04" smashed="yes" rot="R270">
 <attribute name="VALUE" x="-40.64" y="68.58" size="1.778" layer="96" rot="R270"/>
 </instance>
-<instance part="RESET" gate="1" x="43.18" y="83.82" smashed="yes">
+<instance part="SETUP_MODE" gate="1" x="43.18" y="83.82" smashed="yes">
 <attribute name="NAME" x="40.64" y="77.47" size="1.778" layer="95"/>
 <attribute name="VALUE" x="46.355" y="87.63" size="1.778" layer="96"/>
 </instance>
@@ -8472,7 +8479,7 @@ General purpose 1N400x type rectifier
 <attribute name="NAME" x="62.23" y="97.5614" size="1.778" layer="95" rot="R180"/>
 <attribute name="VALUE" x="59.69" y="94.742" size="1.778" layer="96" rot="R180"/>
 </instance>
-<instance part="ESP-RESET" gate="1" x="-22.86" y="83.82" smashed="yes">
+<instance part="MCU-RESET" gate="1" x="-22.86" y="83.82" smashed="yes">
 <attribute name="NAME" x="-25.4" y="90.17" size="1.778" layer="95"/>
 <attribute name="VALUE" x="-19.685" y="87.63" size="1.778" layer="96"/>
 </instance>
@@ -8491,10 +8498,6 @@ General purpose 1N400x type rectifier
 </instance>
 <instance part="GND17" gate="1" x="25.4" y="60.96" smashed="yes" rot="R90">
 <attribute name="VALUE" x="27.94" y="58.42" size="1.778" layer="96" rot="R90"/>
-</instance>
-<instance part="SL1" gate="G$1" x="50.8" y="63.5" smashed="yes" rot="R90">
-<attribute name="VALUE" x="55.88" y="60.96" size="1.778" layer="96" rot="R90"/>
-<attribute name="NAME" x="44.958" y="60.96" size="1.778" layer="95" rot="R90"/>
 </instance>
 <instance part="GND19" gate="1" x="38.1" y="66.04" smashed="yes" rot="R90">
 <attribute name="VALUE" x="40.64" y="63.5" size="1.778" layer="96" rot="R90"/>
@@ -8528,11 +8531,11 @@ General purpose 1N400x type rectifier
 <attribute name="NAME" x="-71.12" y="99.06" size="1.778" layer="95" rot="R90"/>
 <attribute name="VALUE" x="-68.58" y="99.06" size="1.778" layer="95" rot="R90"/>
 </instance>
-<instance part="R1" gate="G$1" x="-30.48" y="106.68" smashed="yes">
+<instance part="PHOTO_REG" gate="G$1" x="-30.48" y="106.68" smashed="yes">
 <attribute name="NAME" x="-35.56" y="109.728" size="1.778" layer="95"/>
 <attribute name="VALUE" x="-35.56" y="101.6" size="1.778" layer="96"/>
 </instance>
-<instance part="PHOTOREG" gate="G$1" x="-12.7" y="106.68" smashed="yes" rot="R180">
+<instance part="RESET_REG" gate="G$1" x="-12.7" y="106.68" smashed="yes" rot="R180">
 <attribute name="NAME" x="-8.89" y="105.1814" size="1.778" layer="95" rot="R180"/>
 <attribute name="VALUE" x="-8.89" y="109.982" size="1.778" layer="96" rot="R180"/>
 </instance>
@@ -8575,6 +8578,17 @@ General purpose 1N400x type rectifier
 <instance part="D5" gate="1" x="104.14" y="-7.62" smashed="yes">
 <attribute name="NAME" x="106.68" y="-7.1374" size="1.778" layer="95"/>
 <attribute name="VALUE" x="106.68" y="-9.9314" size="1.778" layer="96"/>
+</instance>
+<instance part="GND_SWITCH" gate="G$1" x="121.92" y="119.38" smashed="yes" rot="R180"/>
+<instance part="VCC_SWITCH" gate="G$1" x="177.8" y="142.24" smashed="yes"/>
+<instance part="FLASH" gate="G$1" x="53.34" y="40.64" smashed="yes" rot="R180"/>
+<instance part="SV1" gate="1" x="144.78" y="139.7" smashed="yes" rot="R270">
+<attribute name="VALUE" x="134.62" y="140.97" size="1.778" layer="96" rot="R270"/>
+<attribute name="NAME" x="150.622" y="140.97" size="1.778" layer="95" rot="R270"/>
+</instance>
+<instance part="PULLUP" gate="G$1" x="48.26" y="58.42" smashed="yes" rot="R270">
+<attribute name="NAME" x="49.7586" y="62.23" size="1.778" layer="95" rot="R270"/>
+<attribute name="VALUE" x="44.958" y="67.31" size="1.778" layer="96" rot="R270"/>
 </instance>
 </instances>
 <busses>
@@ -8627,9 +8641,10 @@ General purpose 1N400x type rectifier
 <wire x1="60.96" y1="73.66" x2="60.96" y2="91.44" width="0.1524" layer="91"/>
 <junction x="60.96" y="91.44"/>
 <wire x1="60.96" y1="73.66" x2="60.96" y2="71.12" width="0.1524" layer="91"/>
-<wire x1="60.96" y1="71.12" x2="50.8" y2="71.12" width="0.1524" layer="91"/>
-<pinref part="SL1" gate="G$1" pin="1"/>
 <junction x="60.96" y="73.66"/>
+<pinref part="FLASH" gate="G$1" pin="ON"/>
+<wire x1="58.42" y1="48.26" x2="58.42" y2="71.12" width="0.1524" layer="91"/>
+<wire x1="58.42" y1="71.12" x2="60.96" y2="71.12" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="GND16" gate="1" pin="GND"/>
@@ -8647,7 +8662,7 @@ General purpose 1N400x type rectifier
 </segment>
 <segment>
 <pinref part="GND15" gate="1" pin="GND"/>
-<pinref part="ESP-RESET" gate="1" pin="P1"/>
+<pinref part="MCU-RESET" gate="1" pin="P1"/>
 <wire x1="-27.94" y1="76.2" x2="-27.94" y2="81.28" width="0.1524" layer="91"/>
 </segment>
 <segment>
@@ -8697,9 +8712,19 @@ General purpose 1N400x type rectifier
 <label x="-53.34" y="88.9" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
-<pinref part="PHOTOREG" gate="G$1" pin="1"/>
+<pinref part="RESET_REG" gate="G$1" pin="1"/>
 <wire x1="-7.62" y1="106.68" x2="-2.54" y2="106.68" width="0.1524" layer="91"/>
 <label x="-2.54" y="106.68" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="GND_SWITCH" gate="G$1" pin="IN"/>
+<wire x1="121.92" y1="127" x2="121.92" y2="139.7" width="0.1524" layer="91"/>
+<label x="121.92" y="139.7" size="1.778" layer="95" rot="R180"/>
+</segment>
+<segment>
+<pinref part="PULLUP" gate="G$1" pin="1"/>
+<wire x1="48.26" y1="63.5" x2="48.26" y2="68.58" width="0.1524" layer="91"/>
+<label x="45.72" y="68.58" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$1" class="0">
@@ -8809,6 +8834,11 @@ General purpose 1N400x type rectifier
 <wire x1="35.56" y1="25.4" x2="27.94" y2="25.4" width="0.1524" layer="91"/>
 <pinref part="9V9" gate="VCC" pin="VCC"/>
 </segment>
+<segment>
+<pinref part="VCC_SWITCH" gate="G$1" pin="IN"/>
+<wire x1="177.8" y1="134.62" x2="177.8" y2="121.92" width="0.1524" layer="91"/>
+<label x="177.8" y="121.92" size="1.778" layer="95"/>
+</segment>
 </net>
 <net name="RX" class="0">
 <segment>
@@ -8821,6 +8851,11 @@ General purpose 1N400x type rectifier
 <wire x1="2.54" y1="93.98" x2="2.54" y2="88.9" width="0.1524" layer="91"/>
 <label x="2.54" y="88.9" size="1.778" layer="95" rot="R90"/>
 </segment>
+<segment>
+<pinref part="SV1" gate="1" pin="2"/>
+<wire x1="142.24" y1="132.08" x2="142.24" y2="124.46" width="0.1524" layer="91"/>
+<label x="142.24" y="124.46" size="1.778" layer="95" rot="R90"/>
+</segment>
 </net>
 <net name="TX" class="0">
 <segment>
@@ -8832,6 +8867,11 @@ General purpose 1N400x type rectifier
 <pinref part="PROGRAMMER" gate="1" pin="3"/>
 <wire x1="5.08" y1="93.98" x2="5.08" y2="88.9" width="0.1524" layer="91"/>
 <label x="5.08" y="88.9" size="1.778" layer="95" rot="R90"/>
+</segment>
+<segment>
+<pinref part="SV1" gate="1" pin="3"/>
+<wire x1="144.78" y1="132.08" x2="144.78" y2="124.46" width="0.1524" layer="91"/>
+<label x="144.78" y="124.46" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="DS" class="0">
@@ -8975,21 +9015,14 @@ General purpose 1N400x type rectifier
 <pinref part="ESP8266" gate="G$1" pin="GPIO4"/>
 <wire x1="22.86" y1="73.66" x2="35.56" y2="73.66" width="0.1524" layer="91"/>
 <wire x1="35.56" y1="73.66" x2="35.56" y2="81.28" width="0.1524" layer="91"/>
-<pinref part="RESET" gate="1" pin="P1"/>
+<pinref part="SETUP_MODE" gate="1" pin="P1"/>
 <wire x1="35.56" y1="81.28" x2="38.1" y2="81.28" width="0.1524" layer="91"/>
 <junction x="38.1" y="81.28"/>
 </segment>
 </net>
-<net name="N$28" class="0">
-<segment>
-<pinref part="ESP8266" gate="G$1" pin="GPIO0"/>
-<wire x1="22.86" y1="71.12" x2="48.26" y2="71.12" width="0.1524" layer="91"/>
-<pinref part="SL1" gate="G$1" pin="2"/>
-</segment>
-</net>
 <net name="N$31" class="0">
 <segment>
-<pinref part="ESP-RESET" gate="1" pin="S1"/>
+<pinref part="MCU-RESET" gate="1" pin="S1"/>
 <pinref part="ESP8266" gate="G$1" pin="RESET"/>
 <wire x1="-17.78" y1="81.28" x2="-10.16" y2="81.28" width="0.1524" layer="91"/>
 <junction x="-17.78" y="81.28"/>
@@ -9004,11 +9037,11 @@ General purpose 1N400x type rectifier
 <junction x="-10.16" y="78.74"/>
 </segment>
 <segment>
-<pinref part="R1" gate="G$1" pin="P$2"/>
+<pinref part="PHOTO_REG" gate="G$1" pin="P$2"/>
 <wire x1="-22.86" y1="106.68" x2="-22.86" y2="96.52" width="0.1524" layer="91"/>
 <label x="-20.32" y="96.52" size="1.778" layer="95"/>
 <wire x1="-22.86" y1="106.68" x2="-17.78" y2="106.68" width="0.1524" layer="91"/>
-<pinref part="PHOTOREG" gate="G$1" pin="2"/>
+<pinref part="RESET_REG" gate="G$1" pin="2"/>
 </segment>
 </net>
 <net name="CS0" class="0">
@@ -9082,7 +9115,7 @@ General purpose 1N400x type rectifier
 </net>
 <net name="N$29" class="0">
 <segment>
-<pinref part="RESET" gate="1" pin="P"/>
+<pinref part="SETUP_MODE" gate="1" pin="P"/>
 <wire x1="38.1" y1="83.82" x2="38.1" y2="91.44" width="0.1524" layer="91"/>
 <pinref part="PULLDOWN" gate="G$1" pin="2"/>
 <wire x1="38.1" y1="91.44" x2="50.8" y2="91.44" width="0.1524" layer="91"/>
@@ -9193,7 +9226,7 @@ General purpose 1N400x type rectifier
 <label x="-15.24" y="63.5" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="RESET" gate="1" pin="S1"/>
+<pinref part="SETUP_MODE" gate="1" pin="S1"/>
 <wire x1="48.26" y1="81.28" x2="53.34" y2="81.28" width="0.1524" layer="91"/>
 <label x="53.34" y="83.82" size="1.778" layer="95"/>
 </segment>
@@ -9208,7 +9241,7 @@ General purpose 1N400x type rectifier
 <label x="-60.96" y="88.9" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
-<pinref part="R1" gate="G$1" pin="P$1"/>
+<pinref part="PHOTO_REG" gate="G$1" pin="P$1"/>
 <wire x1="-38.1" y1="106.68" x2="-38.1" y2="96.52" width="0.1524" layer="91"/>
 <label x="-35.56" y="96.52" size="1.778" layer="95"/>
 </segment>
@@ -9216,6 +9249,15 @@ General purpose 1N400x type rectifier
 <pinref part="ESP8266" gate="G$1" pin="CH_PD"/>
 <wire x1="-10.16" y1="76.2" x2="-15.24" y2="76.2" width="0.1524" layer="91"/>
 <label x="-15.24" y="76.2" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="FLASH" gate="G$1" pin="OFF"/>
+<pinref part="PULLUP" gate="G$1" pin="2"/>
+<wire x1="48.26" y1="48.26" x2="48.26" y2="50.8" width="0.1524" layer="91"/>
+<wire x1="48.26" y1="50.8" x2="48.26" y2="53.34" width="0.1524" layer="91"/>
+<wire x1="35.56" y1="50.8" x2="48.26" y2="50.8" width="0.1524" layer="91"/>
+<junction x="48.26" y="50.8"/>
+<label x="35.56" y="48.26" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="LIVE" class="0">
@@ -9466,6 +9508,30 @@ General purpose 1N400x type rectifier
 <pinref part="REL5" gate="G$1" pin="COIL1"/>
 <wire x1="101.6" y1="-7.62" x2="101.6" y2="-2.54" width="0.1524" layer="91"/>
 <pinref part="D5" gate="1" pin="A"/>
+</segment>
+</net>
+<net name="N$28" class="0">
+<segment>
+<pinref part="ESP8266" gate="G$1" pin="GPIO0"/>
+<wire x1="22.86" y1="71.12" x2="53.34" y2="71.12" width="0.1524" layer="91"/>
+<pinref part="FLASH" gate="G$1" pin="IN"/>
+<wire x1="53.34" y1="48.26" x2="53.34" y2="71.12" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$55" class="0">
+<segment>
+<pinref part="GND_SWITCH" gate="G$1" pin="ON"/>
+<pinref part="SV1" gate="1" pin="1"/>
+<wire x1="127" y1="127" x2="127" y2="132.08" width="0.1524" layer="91"/>
+<wire x1="127" y1="132.08" x2="139.7" y2="132.08" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$56" class="0">
+<segment>
+<pinref part="VCC_SWITCH" gate="G$1" pin="ON"/>
+<pinref part="SV1" gate="1" pin="4"/>
+<wire x1="172.72" y1="134.62" x2="172.72" y2="132.08" width="0.1524" layer="91"/>
+<wire x1="172.72" y1="132.08" x2="147.32" y2="132.08" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
