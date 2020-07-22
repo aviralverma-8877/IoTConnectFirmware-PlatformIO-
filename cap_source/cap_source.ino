@@ -35,7 +35,7 @@ void loop()
         doc["n"] = i;
         doc["v"] = value;
         serializeJson(doc, Serial);
-        delay(100);
+        delay(500);
       }
     }
   }

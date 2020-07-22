@@ -179,7 +179,7 @@ String responseHTML = "<!DOCTYPE html>\
                             <div align=\"right\">\
                               <button class='style_btn' onclick=\"if(confirm('Are you sure you want to reset this device?')){httpGet(0,0,'reset_device')}\">Reset</button>\
                               <button class='style_btn' onclick=\"httpGet(0,0,'reboot_device')\">Reboot</button>\
-                              <button class='style_btn' onclick=\"location.href = ('http://iot-connect-"+chipid+".local/update')\">Update Firmware</button>\
+                              <button class='style_btn' onclick=\"location.href = ('/update')\">Update Firmware</button>\
                             </div>\
                             <table id=\"relay_table\" cellspacing=\"15\" style=\"border:#ccc solid thin\">\
                             </table>\
