@@ -469,6 +469,12 @@ void handleWebStatus()
   return_doc["type"] = DEVICE_V;
   return_doc["wifi_ssid"] = Wifi_ssid;
   return_doc["wifi_rssi"] = String(WiFi.RSSI());
+  if(strcmp(DEVICE_V, "v2") == 0)
+  {
+    return_doc["t"] = int(temp);
+    return_doc["h"] = int(humid);
+    return_doc["l"] = int(light);
+  }
   serializeJson(return_doc, return_msg);
   webServer.send(200, "application/json", return_msg); 
 }
