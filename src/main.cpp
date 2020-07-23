@@ -16,6 +16,7 @@
 #include <ESP8266httpUpdate.h>            //ESP Update Library.
 #include <ESP8266mDNS.h>                  //mdns for setting hostname
 #include <ESP8266HTTPUpdateServer.h>      //Web Update Server
+#include <FS.h>                           //File System Read
 #define MQTT_HOST "iot-connect.in"        //MQTT Server address
 #define MQTT_PORT 1883                    //MQTT Server port
 //MQTT Cred
@@ -44,27 +45,9 @@ ShiftRegister74HC595<1> sr (16, 14, 12);  //Setting up shift register.
 String chipid = String(ESP.getChipId());  //Fetching ESP device ID.
 sensor_t sensor;                          //DTH sensor
 sensors_event_t event;                    //Creating event variable for DHT sensor.
-
-/*----------------------------------------------------------*/
-String payload;                           //Global variables
-String IpAddress = "";                    //Global variables
-String LocalIP = "";                      //Global variables
-String data;                              //Global variables
-String Wifi_ssid;                         //Global variables
-bool mqtt_setup = false;                  //Global variables
-byte loopCount = 0;                       //Global variables
-uint8_t attempts = 0;                     //Global variables
-uint8_t i;                                //Global variables
-HTTPClient http;                          //Global variables
-int temp, humid, light;                   //Global variables
-uint32_t delayMS;                         //Global variables
-String updateAddress;                     //Update address
-DNSServer dnsServer;                      //Global variables
-ESP8266WebServer webServer(80);           //Global variables
-ESP8266HTTPUpdateServer httpUpdater;      //Global variables
 /*----------------------------------------------------------*/
 /*-------------Webpage Data---------------------------------*/
-String responseHTML = "<!DOCTYPE html>\
+String DefaultResponseHTML = "<!DOCTYPE html>\
                           <head>\
                             <meta name=\"viewport\" content=\"width=device-width,user-scalable=no,initial-scale=1\">\
                             <title>\
@@ -187,6 +170,24 @@ String responseHTML = "<!DOCTYPE html>\
                         </body>\
                       </html>";
 /*-------------Webpage Data---------------------------------*/
+/*----------------------------------------------------------*/
+String payload;                           //Global variables
+String IpAddress = "";                    //Global variables
+String LocalIP = "";                      //Global variables
+String data;                              //Global variables
+String Wifi_ssid;                         //Global variables
+bool mqtt_setup = false;                  //Global variables
+byte loopCount = 0;                       //Global variables
+uint8_t attempts = 0;                     //Global variables
+uint8_t i;                                //Global variables
+HTTPClient http;                          //Global variables
+int temp, humid, light;                   //Global variables
+uint32_t delayMS;                         //Global variables
+String updateAddress;                     //Update address
+DNSServer dnsServer;                      //Global variables
+ESP8266WebServer webServer(80);           //Global variables
+ESP8266HTTPUpdateServer httpUpdater;      //Global variables
+/*----------------------------------------------------------*/
 /*--------------MQTT Configration---------------------------*/
 String outtopic = chipid+"-out";          //MQTT Topic for sending data from ESP.
 String intopic = chipid+"-in";            //MQTT Topic for reciving data to ESP.
@@ -216,9 +217,11 @@ Ticker TickerForFeedbackLED;
 Ticker TickerForSerialListner;
 Ticker TickerForUARTUpdater;
 /*--------------Tickers for Async Meathods------------------*/
+String serveHTML(String page);
 void relay_action(int no, bool value, String by);
 void handleWebControl();
 void handleWebStatus();
+void handleWebContent();
 void feedbackLED();
 void connectToMqtt();
 void serialDisplay(String head,String body);
@@ -249,6 +252,7 @@ void configModeCallback(WiFiManager *myWiFiManager)
 }
 void setup() {
   Serial.begin(115200);
+  SPIFFS.begin();
 /*--------Reading Configs from EEPROM------------------------*/
   EEPROM.begin(sizeof(configuration));
   if(EEPROM.percentUsed()>=0) {
@@ -340,8 +344,14 @@ void setup() {
 /*-------Web Server Setup-----------------------------------*/
   webServer.on("/control", handleWebControl);
   webServer.on("/get_status", handleWebStatus);
+  webServer.on("/js",[](){
+      webServer.send(200, "application/javascript",serveHTML("/script.js"));
+  });
+  webServer.on("/css",[](){
+      webServer.send(200, "text/css",serveHTML("/style.css"));
+  });
   webServer.onNotFound([]() {
-    webServer.send(200, "text/html", responseHTML);
+    webServer.send(200, "text/html", serveHTML("/index.html"));
   });
   webServer.begin();
 /*-------Web Server Setup-----------------------------------*/
@@ -349,6 +359,21 @@ void setup() {
  MDNS.addService("http", "tcp", 80);
 /*-------HOST Name Setup------------------------------------*/
 
+}
+/*-------Server HTML---------------------------------------------*/
+String serveHTML(String page)
+{
+  File file = SPIFFS.open(page, "r");
+  if (file) 
+  {
+    String content = file.readString();
+    file.close();
+    return content;
+  }
+  else
+  {
+    return DefaultResponseHTML;
+  }
 }
 /*-------Serial Listener Setup-----------------------------------*/
 void SerialListner()
@@ -396,7 +421,7 @@ void handleWebControl()
         String return_msg = "";
         StaticJsonDocument<200> return_doc;
         return_doc["done"] = 0;
-        return_doc["error"] = error;
+        return_doc["error"] = "error in parsing";
         serializeJson(return_doc, return_msg);
         webServer.send(200, "application/json", return_msg); 
         return;
@@ -416,7 +441,7 @@ void handleWebControl()
         String return_msg = "";
         StaticJsonDocument<200> return_doc;
         return_doc["done"] = 0;
-        return_doc["error"] = error;
+        return_doc["error"] = "Error in parsing";
         serializeJson(return_doc, return_msg);
         webServer.send(200, "application/json", return_msg); 
         return;
@@ -449,7 +474,6 @@ void handleWebStatus()
 }
 
 /*-------Web Server Controller------------------------------*/
-
 /*-------feedbackLED----------------------------------------*/
 void feedbackLED()
 {
@@ -472,7 +496,7 @@ void serialDisplay(String head,String body)
 {
   if(debugging)
   {
-    StaticJsonDocument<400> doc;
+    StaticJsonDocument<200> doc;
     doc["action"] = "display";
     doc["head"] = head;
     doc["body"] = body;
@@ -533,7 +557,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-------Action command for reconfigring WiFi---------------*/
     if(comp(action,"RESET_DEVICE"))
     {
-      StaticJsonDocument<400> doc;
+      StaticJsonDocument<200> doc;
       doc["action"] = "ResetDevice";
       doc["stat"] = "Reset Success.";
       String r;
@@ -545,7 +569,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-------Action command for fetching WiFi SSID--------------*/
     if(comp(action,"SSID"))
     {
-      StaticJsonDocument<400> doc;
+      StaticJsonDocument<200> doc;
       doc["SSID"] = Wifi_ssid;
       doc["RSSI"] = String(WiFi.RSSI());
       String r;
@@ -567,7 +591,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-------Action command for getting Sensor Frequency--------------*/
     if(comp(action,"GETFREQ"))
     {
-      StaticJsonDocument<400> doc;
+      StaticJsonDocument<200> doc;
       doc["FREQ"] = delayMS;
       String r;
       serializeJson(doc, r);
@@ -577,7 +601,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-------Action command for fetching ESP Chip ID------------*/
     if(comp(action,"ESPID"))
     {
-      StaticJsonDocument<400> doc;
+      StaticJsonDocument<200> doc;
       doc["CHIPID"] = chipid;
       String r;
       serializeJson(doc, r);
@@ -588,7 +612,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-------Action command for resetting ESP-------------------*/
     if(comp(action,"RESET"))
     {
-      StaticJsonDocument<400> doc;
+      StaticJsonDocument<200> doc;
       doc["action"] = "ResetStatus";
       doc["stat"] = "Resetting Device...";
       String r;
@@ -616,7 +640,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-------Action command for getting getting device version--*/
     else if(comp(action,"GET_DEVICE_VERSION"))
     {
-      StaticJsonDocument<400> doc;
+      StaticJsonDocument<200> doc;
       doc["action"] = "Device Version";
       doc["value"] = DEVICE_V;
       String r;
@@ -627,7 +651,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*-----Action command for getting getting firmware version--*/
     else if(comp(action,"GET_VERSION"))
     {
-      StaticJsonDocument<400> doc;
+      StaticJsonDocument<200> doc;
       doc["action"] = "Firmware Version";
       doc["value"] = FIRMWARE_V;
       String r;
@@ -654,7 +678,7 @@ void relay_action(int no, bool value, String by)
   delay(100);
   
 //sending nortification
-  StaticJsonDocument<400> doc;
+  StaticJsonDocument<200> doc;
   if(by != "")
   {
     doc["by"] = by;
@@ -677,7 +701,7 @@ void relay_action(int no, bool value, String by)
 /*-------Meathod to update ESP------------------------------*/
 void updateESP()
 {
-  StaticJsonDocument<400> doc;
+  StaticJsonDocument<200> doc;
   doc["action"] = "UpdateStatus";
   doc["stat"] = "Updating Device...";
   String r;
@@ -699,7 +723,7 @@ void updateESP()
         stat = "Update Successfull...";
         break;
   }
-  StaticJsonDocument<400> doc_1;
+  StaticJsonDocument<200> doc_1;
   doc_1["action"] = "UpdateStatus";
   doc_1["stat"] = stat;
   r = "";
@@ -731,7 +755,7 @@ void reset()
 /*----Meathod for sending relay status----------------------*/
 void send_status()
 {
-  StaticJsonDocument<400> doc;
+  StaticJsonDocument<200> doc;
   doc["d"] = chipid;
   doc["action"] = "s";
   JsonArray data = doc.createNestedArray("v");
@@ -769,7 +793,7 @@ void sendToMQTT(String topic, String msg)
 /*---Meathod for pinging MQTT Server for active connection--*/
 void pinging()
 {
-  StaticJsonDocument<400> doc;
+  StaticJsonDocument<200> doc;
   doc["d"] = chipid;
   if(strcmp(DEVICE_V, "v2") == 0)
     doc["s"] = true;
@@ -785,7 +809,7 @@ void pinging()
 /*-----Meathod for sending sensor data----------------------*/
 void sendSensorData()
 {
-  StaticJsonDocument<400> doc;
+  StaticJsonDocument<200> doc;
   doc["d"] = chipid;
   doc["t"] = temp;
   doc["h"] = humid;
@@ -830,7 +854,7 @@ void fetchIP()
     {  
       String payload = httpAPI.getString();
       httpAPI.end();
-      StaticJsonDocument<400> doc;
+      StaticJsonDocument<200> doc;
       deserializeJson(doc, payload);
       IpAddress = "";
       const char* s = doc["ip"];
