@@ -1,20 +1,28 @@
-function httpGet(relay, value, action)
+function httpGet(relay, value, action, options = {})
 {
     if(action == "toggle_relay")
     {
-    theUrl = '/control?command={"relay":'+relay+',"action":'+value+'}';
+        theUrl = '/control?command={"relay":'+relay+',"action":'+value+'}';
     }
     if(action == "reset_device")
     {
-    theUrl = '/control?device={"action":"reset"}';
+        theUrl = '/control?device={"action":"reset"}';
     }
     if(action == "reboot_device")
     {
-    theUrl = '/control?device={\"action\":\"reboot\"}';
+        theUrl = '/control?device={\"action\":\"reboot\"}';
     }
     if(action == "get_status")
     {
-    theUrl = '/get_status';
+        theUrl = '/get_status';
+    }
+    if(action == "scan_wifi")
+    {
+        theUrl = '/scan_wifi';
+    }
+    if(action == "set_wifi")
+    {
+        theUrl = '/set_wifi?options='+JSON.stringify(options);
     }
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", theUrl, false );
@@ -76,4 +84,30 @@ function print_table()
         element.innerHTML = cont;
         }
     },1000);
+}
+function update_wifi(ssid, pass)
+{
+    response = httpGet(0,0,"set_wifi",{"ssid":ssid,"pass":pass});
+}
+function scan_wifi()
+{
+    element = document.getElementById('ssid_list');
+    element.innerHTML = "\
+    <tr>\
+        <td>\
+            Scanning...\
+        </td>\
+    </tr>";
+    response = httpGet(0,0,"scan_wifi");
+    ssid_list = JSON.parse(response)["ssid"];
+    content = "";
+    for(i=0; i < ssid_list.length; i++)
+    {
+        content = content + "<tr>\
+                                <td>\
+                                    <a href='#ssid_input' onclick='ssid_input.value=\""+ssid_list[i]+"\"'>"+ssid_list[i]+"</a>\
+                                </td>\
+                            </tr>"
+    }
+    element.innerHTML = content;
 }

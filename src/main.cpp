@@ -222,6 +222,7 @@ void relay_action(int no, bool value, String by);
 void handleWebControl();
 void handleWebStatus();
 void handleWebContent();
+void web_set_wifi();
 void feedbackLED();
 void connectToMqtt();
 void serialDisplay(String head,String body);
@@ -241,6 +242,8 @@ bool comp(const char *val1,const char *val2);
 void fetchIP();
 void updateESP();
 String IpAddress2String(const IPAddress& ipAddress);
+StaticJsonDocument<200> scan_ssid();
+void web_scan_wifi();
 void blank();
 void (*callback)(void);                                 //Callback function meathod
 void SerialListner();
@@ -344,6 +347,8 @@ void setup() {
 /*-------Web Server Setup-----------------------------------*/
   webServer.on("/control", handleWebControl);
   webServer.on("/get_status", handleWebStatus);
+  webServer.on("/scan_wifi", web_scan_wifi);
+  webServer.on("/set_wifi", web_set_wifi);
   webServer.on("/js",[](){
       webServer.send(200, "application/javascript",serveHTML("/script.js"));
   });
@@ -478,8 +483,70 @@ void handleWebStatus()
   serializeJson(return_doc, return_msg);
   webServer.send(200, "application/json", return_msg); 
 }
-
+void web_scan_wifi()
+{
+  StaticJsonDocument<200> wifi_ssid = scan_ssid();
+  String return_msg;
+  serializeJson(wifi_ssid, return_msg);
+  webServer.send(200, "application/json", return_msg);
+}
+void web_set_wifi()
+{
+  for (int i = 0; i < webServer.args(); i++) 
+  {
+    if(webServer.argName(i) == "options")
+    {
+      StaticJsonDocument<200> wifi_option;
+      String option = webServer.arg(i);
+      DeserializationError error = deserializeJson(wifi_option, option);
+      if (error) 
+      {
+        String return_msg = "";
+        StaticJsonDocument<200> return_doc;
+        return_doc["done"] = false;
+        serializeJson(return_doc, return_msg);
+        webServer.send(200, "application/json", return_msg); 
+        return;
+      }
+      String ssid = wifi_option["ssid"];
+      String pass = wifi_option["pass"];
+      WiFi.disconnect();
+      WiFi.begin(ssid,pass);
+      int retry = 0;
+      while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        if(debugging)
+          Serial.print(".");
+        checkReset();
+        retry++;
+        if(retry > 60)
+        {
+          reset();
+        }
+      }
+      fetchIP();
+      String return_msg = "";
+      StaticJsonDocument<200> return_doc;
+      return_doc["done"] = true;
+      serializeJson(return_doc, return_msg);
+      webServer.send(200, "application/json", return_msg); 
+    }
+  }
+}
 /*-------Web Server Controller------------------------------*/
+/*-------Scan SSID------------------------------------------*/
+StaticJsonDocument<200> scan_ssid()
+{
+  StaticJsonDocument<200> doc;
+  JsonArray ssid = doc.createNestedArray("ssid");
+  int n = WiFi.scanNetworks();
+  for(int i=0; i<n; i++)
+  {
+    ssid.add(String(WiFi.SSID(i)));
+  }
+  return doc;
+}
+/*-------Scan SSID------------------------------------------*/
 /*-------feedbackLED----------------------------------------*/
 void feedbackLED()
 {
