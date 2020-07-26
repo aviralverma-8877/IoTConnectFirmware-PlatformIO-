@@ -17,35 +17,34 @@
             <div align="right">
                 <button class='style_btn' onclick="if(confirm('Are you sure you want to reset this device?')){httpGet(0,0,'reset_device')}">Reset</button>
                 <button class='style_btn' onclick="httpGet(0,0,'reboot_device')">Reboot</button>
-                <button class='style_btn' onclick="location.href = ('/update')">Update Firmware</button>
+                <button class='style_btn' onclick="location.href = ('/update')">Update</button>
             </div>
             <hr />
             <table id="relay_table" cellspacing="15" style="border:#ccc solid thin">
             </table>
             <hr/>
-            <table>
-                <tr>
-                    <td>
-                        <input type="text" id="ssid_input" placeholder="WiFi SSID" style="margin:1px"/><br />
-                        <input type="password" id="pass_input" placeholder="WiFi Password" style="margin:1px"/>
-                    </td>
-                    <td>
-                        <button class='style_btn' onclick="if(confirm('Make sure that you have proivided the correct WiFi details,\nIncorrect details will reset the device and start an access point to re-configure after 30 sec.')) update_wifi(ssid_input.value, pass_input.value)">Update Wifi</button>
-                        <button class='style_btn' onclick="scan_wifi()">Scan WiFi</button>                                    
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <table id="ssid_list" cellspacing="15" style="border:#ccc solid thin; width:100%">
-                            <tr>
-                                <td>
-                                    No SSID
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
+            <div>
+                <table>
+                    <tr>
+                        <td>
+                            <input type="text" id="ssid_input" placeholder="WiFi SSID" style="margin:1px"/><br />
+                            <input type="password" id="pass_input" placeholder="WiFi Password" style="margin:1px"/>
+                        </td>
+                        <td>
+                            <button class='style_btn' onclick="if(confirm('Make sure that you have proivided the correct WiFi details,\nIncorrect details will reset the device and start an access point to re-configure after 30 sec.')) update_wifi(ssid_input.value, pass_input.value)">Update Wifi</button>
+                            <button class='style_btn' onclick="scan_wifi()">Scan</button>                               
+                        </td>
+                    </tr>
+                </table>
+                <table id="ssid_list" cellspacing="15" style="border:#ccc solid thin; width:100%">
+                    <tr>
+                        <td style="font:Fjalla One">
+                            <b>No SSID</b>
+                        </td>
+                    </tr>
+                </table>
+                <hr />
+            </div>
         </center>
     </body>
 </html>

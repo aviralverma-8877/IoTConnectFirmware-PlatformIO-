@@ -94,20 +94,23 @@ function scan_wifi()
     element = document.getElementById('ssid_list');
     element.innerHTML = "\
     <tr>\
-        <td>\
-            Scanning...\
+        <td style='font:Fjalla One'>\
+            <b>Scanning...</b>\
         </td>\
     </tr>";
-    response = httpGet(0,0,"scan_wifi");
-    ssid_list = JSON.parse(response)["ssid"];
-    content = "";
-    for(i=0; i < ssid_list.length; i++)
-    {
-        content = content + "<tr>\
-                                <td>\
-                                    <a href='#ssid_input' onclick='ssid_input.value=\""+ssid_list[i]+"\"'>"+ssid_list[i]+"</a>\
-                                </td>\
-                            </tr>"
-    }
-    element.innerHTML = content;
+    setTimeout(function(){
+        response = httpGet(0,0,"scan_wifi");
+        ssid_list = JSON.parse(response)["ssid"];
+        content = "";
+        for(i=0; i < ssid_list.length; i++)
+        {
+            content = content + "<tr>\
+                                    <td style='font:Fjalla One'>\
+                                        <a href='#ssid_input' onclick='ssid_input.value=\""+ssid_list[i]+"\"'><b>"+ssid_list[i]+"</b></a>\
+                                    </td>\
+                                </tr>"
+        }
+        element = document.getElementById('ssid_list');
+        element.innerHTML = content;
+    },10);
 }
