@@ -24,10 +24,16 @@ function httpGet(relay, value, action, options = {})
     {
         theUrl = '/set_wifi?options='+JSON.stringify(options);
     }
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", theUrl, false );
-    xmlHttp.send( null );
-    return xmlHttp.responseText;
+    try
+    {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open( "GET", theUrl, false );
+        xmlHttp.send( null );
+        return xmlHttp.responseText;
+    }
+    catch(err){
+        return {"done":0}
+    }
 }
 function print_table()
 {
@@ -37,7 +43,7 @@ function print_table()
     {
         content = content + "<tr>\
         <th>\
-            Relay "+i+" : <span id='status-"+i+"'></span>\
+            Relay "+(i+1)+" : <span id='status-"+i+"'></span>\
         </th>\
         <th>\
             <button class='style_btn' onclick='httpGet("+i+",1,\"toggle_relay\")'>\

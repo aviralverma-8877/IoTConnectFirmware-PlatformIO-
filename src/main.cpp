@@ -25,13 +25,13 @@
 
 #define LDR_PIN A0                        //LDR Pin address
 #define reset_btn 4                       //Reset Button pin
-#define indicator_led 12                  //LED Pin
+#define indicator_led 13                  //LED Pin
 #define DHTPIN 2                          //DHT single wire interface pin
 #define DHTTYPE DHT11                     //Type of DHT sensor.
 
 //Configuring Device
 #define FIRMWARE_V "2.0.1"                //Current firmware version. (Displayed on Device Portal)
-#define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
+#define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
 bool debugging = false;                   //Turn On or Off the serial output.
