@@ -30,8 +30,8 @@
 #define DHTTYPE DHT11                     //Type of DHT sensor.
 
 //Configuring Device
-#define FIRMWARE_V "2.0.1"                //Current firmware version. (Displayed on Device Portal)
-#define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
+#define FIRMWARE_V "2.0.3"                //Current firmware version. (Displayed on Device Portal)
+#define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
 bool debugging = false;                   //Turn On or Off the serial output.
@@ -177,6 +177,7 @@ String LocalIP = "";                      //Global variables
 String data;                              //Global variables
 String Wifi_ssid;                         //Global variables
 bool mqtt_setup = false;                  //Global variables
+bool first_connect = false;               //Global variables
 byte loopCount = 0;                       //Global variables
 uint8_t attempts = 0;                     //Global variables
 uint8_t i;                                //Global variables
@@ -583,6 +584,7 @@ void serialDisplay(String head,String body)
 /*-------Meathod called when connected to MQTT--------------*/
 void onMqttConnect(bool sessionPresent) {
   serialDisplay("MQTT","MQTT is Connected");
+  first_connect = true;
   mqtt.subscribe(intopic.c_str(), 2);
   TickerForPinging.attach_ms(10000, pinging);
   if(strcmp(DEVICE_V, "v2") == 0)
@@ -608,6 +610,11 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   if (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
+    if(first_connect)
+    {
+      WiFi.reconnect();
+      WiFi.waitForConnectResult();
+    }
   }
   connectToMqtt();
 }
