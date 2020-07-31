@@ -4,13 +4,9 @@ function httpGet(relay, value, action, options = {})
     {
         theUrl = '/control?command={"relay":'+relay+',"action":'+value+'}';
     }
-    if(action == "reset_device")
+    if(action == "device")
     {
-        theUrl = '/control?device={"action":"reset"}';
-    }
-    if(action == "reboot_device")
-    {
-        theUrl = '/control?device={\"action\":\"reboot\"}';
+        theUrl = '/control?device='+options;
     }
     if(action == "get_status")
     {
@@ -56,39 +52,42 @@ function print_table()
         </tr>";
     }
     table.innerHTML = content;
-    setInterval(function()
+    setTimeout(function run()
     {
         data = httpGet(0, 0, 'get_status');
         json = JSON.parse(data);
         if(json != null)
         {
-        for(var i=0; i<json['relay_status'].length; i++)
-        {
-            var element = document.getElementById('status-'+i);
-            if(json['relay_status'][i] == 0)
+            for(var i=0; i<json['relay_status'].length; i++)
             {
-            element.innerHTML = 'OFF';
+                var element = document.getElementById('status-'+i);
+                if(json['relay_status'][i] == 0)
+                {
+                    element.innerHTML = 'OFF';
+                }
+                if(json['relay_status'][i] == 1)
+                {
+                    element.innerHTML = 'ON';
+                }
             }
-            if(json['relay_status'][i] == 1)
+            onb_status = json['onb_led'];
+            document.getElementById("on_board_led").checked = onb_status
+            var cont = "";
+            wifi_ssid = json['wifi_ssid'];
+            wifi_type = json['type'];
+            cont = "Connected to <b>"+wifi_ssid+"</b>";
+            cont += " | Device Type <b>"+wifi_type+"</b>";
+            if(json['temp'] != undefined)
             {
-            element.innerHTML = 'ON';
+                temp = json['temp'];
+                humid = json['humid'];
+                lumin = json['lumin'];
+                cont = cont + " | Temperature : "+temp+" C | Humidity : "+humid+" % | Lumin : "+lumin+" % "
             }
+            element = document.getElementById('WiFi_Status');
+            element.innerHTML = cont;
         }
-        var cont = "";
-        wifi_ssid = json['wifi_ssid'];
-        wifi_type = json['type'];
-        cont = "Connected to <b>"+wifi_ssid+"</b>";
-        cont += " | Device Type <b>"+wifi_type+"</b>";
-        if(json['temp'] != undefined)
-        {
-            temp = json['temp'];
-            humid = json['humid'];
-            lumin = json['lumin'];
-            cont = cont + " | Temperature : "+temp+" C | Humidity : "+humid+" % | Lumin : "+lumin+" % "
-        }
-        element = document.getElementById('WiFi_Status');
-        element.innerHTML = cont;
-        }
+        setTimeout(run, 1000);
     },1000);
 }
 function update_wifi(ssid, pass)

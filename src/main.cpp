@@ -31,7 +31,7 @@
 
 //Configuring Device
 #define FIRMWARE_V "2.0.3"                //Current firmware version. (Displayed on Device Portal)
-#define DEVICE_V   "v2"                   //Device type version (V1 - Without Sensor)
+#define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
 bool debugging = false;                   //Turn On or Off the serial output.
@@ -204,6 +204,7 @@ struct configuration{
   bool pinValues[8] = { 0,0,0,0,0,0,0,0 };  //Default relay values.
   bool setupFlag = false;
   bool updateFlag = false;
+  bool led_enabled = true;
   int pingTime = 2000;
 } conf;
 
@@ -252,7 +253,6 @@ void send_status_uart();
 void configModeCallback(WiFiManager *myWiFiManager)
 {
   TickerForFeedbackLED.attach(0.1, feedbackLED);
-  serialDisplay("EEPROM","Callback meathod");
 }
 void setup() {
   Serial.begin(115200);
@@ -261,10 +261,7 @@ void setup() {
   EEPROM.begin(sizeof(configuration));
   if(EEPROM.percentUsed()>=0) {
     EEPROM.get(0, conf);
-    serialDisplay("EEPROM","EEPROM has data from a previous run.");
-    serialDisplay("EEPROM",String(EEPROM.percentUsed())+"% of ESP flash space currently used");
   } else {
-    serialDisplay("EEPROM","EEPROM size changed");
     EEPROM.commit();
   }
 /*--------Reading Configs from EEPROM------------------------*/
@@ -272,6 +269,7 @@ void setup() {
   pinMode(reset_btn,INPUT);
   pinMode(indicator_led,OUTPUT);
   pinMode(LDR_PIN,INPUT);
+  TickerForFeedbackLED.attach(0.6, feedbackLED);
 /*--------Setting up the GPIOs-------------------------------*/  
 
  if(debugging)
@@ -330,7 +328,6 @@ void setup() {
 /*-------Setting up the trikers-----------------------------*/
   TickerForcheckReset.attach_ms(10, checkReset);
   TickerForconnectToMqtt.attach_ms(10000, connectToMqtt);
-  TickerForFeedbackLED.attach(0.6, feedbackLED);
   TickerForfetchIP.attach(30, fetchIP);
   if(!debugging)
   {
@@ -459,6 +456,13 @@ void handleWebControl()
         reset();
       if(comp(action.c_str(),"reboot"))
         ESP.reset();
+      if(comp(action.c_str(),"toggle_onb"))
+      {
+        bool status = doc["status"];
+        conf.led_enabled = status;
+        EEPROM.put(0, conf);
+        EEPROM.commit();
+      }
     }
   }
   webServer.send(200, "application/json", message);       //Response to the HTTP request
@@ -466,7 +470,7 @@ void handleWebControl()
 void handleWebStatus()
 {
   String return_msg = "";
-  StaticJsonDocument<200> return_doc;
+  StaticJsonDocument<500> return_doc;
   JsonArray relay_status = return_doc.createNestedArray("relay_status");
   for(int t=0; t<8; t++)
   {
@@ -474,12 +478,13 @@ void handleWebStatus()
   }
   return_doc["type"] = DEVICE_V;
   return_doc["wifi_ssid"] = Wifi_ssid;
-  return_doc["wifi_rssi"] = String(WiFi.RSSI());
+  return_doc["wifi_rssi"] = WiFi.RSSI();
+  return_doc["onb_led"] = conf.led_enabled;
   if(strcmp(DEVICE_V, "v2") == 0)
   {
-    return_doc["t"] = int(temp);
-    return_doc["h"] = int(humid);
-    return_doc["l"] = int(light);
+    return_doc["t"] = temp;
+    return_doc["h"] = humid;
+    return_doc["l"] = light;
   }
   serializeJson(return_doc, return_msg);
   webServer.send(200, "application/json", return_msg); 
@@ -551,8 +556,16 @@ StaticJsonDocument<200> scan_ssid()
 /*-------feedbackLED----------------------------------------*/
 void feedbackLED()
 {
-  int state = digitalRead(indicator_led);  // get the current state of GPIO1 pin
-  digitalWrite(indicator_led, !state);     // set pin to the opposite state
+  if(conf.led_enabled)
+  {
+    int state = digitalRead(indicator_led);  // get the current state of GPIO1 pin
+    digitalWrite(indicator_led, !state);     // set pin to the opposite state
+  }
+  else
+  {
+    digitalWrite(indicator_led, LOW);
+  }
+  
 }
 /*-------feedbackLED----------------------------------------*/
 
