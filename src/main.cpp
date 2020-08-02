@@ -1,7 +1,9 @@
 //Including Libraries
 #include <Arduino.h>
-#include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
-#include <ESP8266WebServer.h>             //Local WebServer used to serve the configuration portal
+#include <ESP8266WiFi.h>                  //https://github.com/esp8266/Arduino
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <ESPAsyncWiFiManager.h>          //Async WiFi Manager
 #include <AsyncMqttClient.h>              //Async MQTT Library
 #include <Ticker.h>                       //Ticker for running multithread
 #include <ESP_EEPROM.h>                   //Reading and writing on EEPROM
@@ -11,11 +13,9 @@
 #include <DHT_U.h>                        //For DHT Temperature and Humidity Sensor
 #include <ShiftRegister74HC595.h>         //For controlling Relays from 74HC595 shift register
 #include <DNSServer.h>                    //For redirecting the user on connecting to device WiFi
-#include <WiFiManager.h>                  //WiFi Manager library.
 #include <ESP8266HTTPClient.h>            //HTTP Client library.
 #include <ESP8266httpUpdate.h>            //ESP Update Library.
 #include <ESP8266mDNS.h>                  //mdns for setting hostname
-#include <ESP8266HTTPUpdateServer.h>      //Web Update Server
 #include <FS.h>                           //File System Read
 #define MQTT_HOST "iot-connect.in"        //MQTT Server address
 #define MQTT_PORT 1883                    //MQTT Server port
@@ -37,7 +37,6 @@
 bool debugging = false;                   //Turn On or Off the serial output.
 
 AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
-WiFiManager wifiManager;                  //Variable to initiate WiFi Manager
 
 DHT_Unified dht(DHTPIN, DHTTYPE);         //Initializing DHT sensor. 
 
@@ -186,8 +185,8 @@ int temp, humid, light;                   //Global variables
 uint32_t delayMS;                         //Global variables
 String updateAddress;                     //Update address
 DNSServer dnsServer;                      //Global variables
-ESP8266WebServer webServer(80);           //Global variables
-ESP8266HTTPUpdateServer httpUpdater;      //Global variables
+AsyncWebServer webServer(80);             //Global variables
+bool shouldReboot = false;
 /*----------------------------------------------------------*/
 /*--------------MQTT Configration---------------------------*/
 String outtopic = chipid+"-out";          //MQTT Topic for sending data from ESP.
@@ -218,13 +217,18 @@ Ticker TickerForconnectToMqtt;
 Ticker TickerForFeedbackLED;
 Ticker TickerForSerialListner;
 Ticker TickerForUARTUpdater;
+Ticker TickerForTimeOut;
 /*--------------Tickers for Async Meathods------------------*/
+void firmware_web_updater();
 String serveHTML(String page);
 void relay_action(int no, bool value, String by);
-void handleWebControl();
-void handleWebStatus();
-void handleWebContent();
-void web_set_wifi();
+
+void handleWebControl(AsyncWebServerRequest *request);
+void handleWebStatus(AsyncWebServerRequest *request);
+void web_set_wifi(AsyncWebServerRequest *request);
+void web_scan_wifi(AsyncWebServerRequest *request);
+
+
 void feedbackLED();
 void connectToMqtt();
 void serialDisplay(String head,String body);
@@ -244,17 +248,13 @@ bool comp(const char *val1,const char *val2);
 void fetchIP();
 void updateESP();
 String IpAddress2String(const IPAddress& ipAddress);
-StaticJsonDocument<200> scan_ssid();
-void web_scan_wifi();
+StaticJsonDocument<500> scan_ssid();
 void blank();
 void (*callback)(void);                                 //Callback function meathod
 void SerialListner();
 void send_status_uart();
-void configModeCallback(WiFiManager *myWiFiManager)
+void setup() 
 {
-  TickerForFeedbackLED.attach(0.1, feedbackLED);
-}
-void setup() {
   Serial.begin(115200);
   SPIFFS.begin();
 /*--------Reading Configs from EEPROM------------------------*/
@@ -271,7 +271,7 @@ void setup() {
   pinMode(LDR_PIN,INPUT);
   TickerForFeedbackLED.attach(0.6, feedbackLED);
 /*--------Setting up the GPIOs-------------------------------*/  
-
+ AsyncWiFiManager wifiManager(&webServer,&dnsServer);
  if(debugging)
  {
   wifiManager.setDebugOutput(true); //Set WiFi manager debug output.
@@ -287,7 +287,7 @@ void setup() {
     EEPROM.put(0, conf);
     EEPROM.commit();
     TickerForFeedbackLED.attach(0.2, feedbackLED);
-    wifiManager.setAPCallback(configModeCallback);
+    wifiManager.resetSettings();
     wifiManager.setBreakAfterConfig(true);
     wifiManager.startConfigPortal("IOT Connect");
   }
@@ -340,44 +340,76 @@ void setup() {
  MDNS.begin("iot-connect-"+chipid);
 /*-------HOST Name Setup------------------------------------*/
 /*-------Web Update Server----------------------------------*/
-  httpUpdater.setup(&webServer);
+  firmware_web_updater();
 /*-------Web Update Server----------------------------------*/
 /*-------Web Server Setup-----------------------------------*/
-  webServer.on("/control", handleWebControl);
-  webServer.on("/get_status", handleWebStatus);
-  webServer.on("/scan_wifi", web_scan_wifi);
-  webServer.on("/set_wifi", web_set_wifi);
-  webServer.on("/js",[](){
-      webServer.send(200, "application/javascript",serveHTML("/script.js"));
+  webServer.on("/control", HTTP_GET, [](AsyncWebServerRequest *request){
+    handleWebControl(request);
   });
-  webServer.on("/css",[](){
-      webServer.send(200, "text/css",serveHTML("/style.css"));
+
+  webServer.on("/get_status", HTTP_GET, [](AsyncWebServerRequest *request){
+    handleWebStatus(request);
   });
-  webServer.onNotFound([]() {
-    webServer.send(200, "text/html", serveHTML("/index.html"));
+  webServer.on("/scan_wifi", HTTP_GET, [](AsyncWebServerRequest *request){
+    web_scan_wifi(request);
   });
+  webServer.on("/set_wifi", HTTP_GET, [](AsyncWebServerRequest *request){
+    web_set_wifi(request);
+  });
+  webServer.serveStatic("/js", SPIFFS, "/script.js");
+  webServer.serveStatic("/css", SPIFFS, "/style.css");
+  webServer.serveStatic("/", SPIFFS, "/index.html");
+  webServer.onNotFound([](AsyncWebServerRequest *request){
+    request->send(SPIFFS, "/index.html", "text/html");
+  });
+
   webServer.begin();
 /*-------Web Server Setup-----------------------------------*/
 /*-------HOST Name Setup------------------------------------*/
  MDNS.addService("http", "tcp", 80);
 /*-------HOST Name Setup------------------------------------*/
+}
 
-}
-/*-------Server HTML---------------------------------------------*/
-String serveHTML(String page)
+/*---------Firmware Update---------------------------------*/
+// Simple Firmware Update Form
+void firmware_web_updater()
 {
-  File file = SPIFFS.open(page, "r");
-  if (file) 
-  {
-    String content = file.readString();
-    file.close();
-    return content;
-  }
-  else
-  {
-    return DefaultResponseHTML;
-  }
+  webServer.on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/html", "<form method='POST' action='/update' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>");
+  });
+  webServer.on("/update", HTTP_POST, [](AsyncWebServerRequest *request){
+    shouldReboot = !Update.hasError();
+    AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", shouldReboot?"OK":"FAIL");
+    response->addHeader("Connection", "close");
+    request->send(response);
+  },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
+    if(!index){
+      if(debugging)
+        Serial.printf("Update Start: %s\n", filename.c_str());
+      Update.runAsync(true);
+      if(!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)){
+        Update.printError(Serial);
+      }
+    }
+    if(!Update.hasError()){
+      if(Update.write(data, len) != len){
+      if(debugging)
+        Update.printError(Serial);
+      }
+    }
+    if(final){
+      if(Update.end(true)){
+        if(debugging)
+          Serial.printf("Update Success: %uB\n", index+len);
+        ESP.reset();
+      } else {
+        if(debugging)
+          Update.printError(Serial);
+      }
+    }
+  });
 }
+/*---------Firmware Update---------------------------------*/
 /*-------Serial Listener Setup-----------------------------------*/
 void SerialListner()
 {
@@ -409,65 +441,63 @@ void SerialListner()
 }
 /*-------Serial Listener Setup-----------------------------------*/
 /*-------Web Server Controller------------------------------*/
-void handleWebControl()
+void handleWebControl(AsyncWebServerRequest *request)
 {
   String message;
   StaticJsonDocument<200> doc;
-  for (int i = 0; i < webServer.args(); i++) 
+  int params = request->params();
+  if(request->hasParam("command"))
   {
-    if(webServer.argName(i) == "command")
+    String command = request->arg("command");
+    DeserializationError error = deserializeJson(doc, command);
+    if (error) 
     {
-      String command = webServer.arg(i);
-      DeserializationError error = deserializeJson(doc, command);
-      if (error) 
-      {
-        String return_msg = "";
-        StaticJsonDocument<200> return_doc;
-        return_doc["done"] = 0;
-        return_doc["error"] = "error in parsing";
-        serializeJson(return_doc, return_msg);
-        webServer.send(200, "application/json", return_msg); 
-        return;
-      }
-      int relay = doc["relay"];
-      bool action = doc["action"];
-      relay_action(relay, action, "");
-      doc["done"] = 1;
-      serializeJson(doc, message);
+      String return_msg = "";
+      StaticJsonDocument<200> return_doc;
+      return_doc["done"] = 0;
+      return_doc["error"] = "error in parsing";
+      serializeJson(return_doc, return_msg);
+      request->send(200, "application/json", return_msg);
+      return;
     }
-    if(webServer.argName(i) == "device")
+    int relay = doc["relay"];
+    bool action = doc["action"];
+    relay_action(relay, action, "");
+    doc["done"] = 1;
+    serializeJson(doc, message);
+  }
+  if(request->hasParam("device"))
+  {
+    String command = request->arg("device");
+    DeserializationError error = deserializeJson(doc, command);
+    if (error) 
     {
-      String command = webServer.arg(i);
-      DeserializationError error = deserializeJson(doc, command);
-      if (error) 
-      {
-        String return_msg = "";
-        StaticJsonDocument<200> return_doc;
-        return_doc["done"] = 0;
-        return_doc["error"] = "Error in parsing";
-        serializeJson(return_doc, return_msg);
-        webServer.send(200, "application/json", return_msg); 
-        return;
-      }
-      String action = doc["action"];
-      doc["done"] = 1;
-      serializeJson(doc, message);
-      if(comp(action.c_str(),"reset"))
-        reset();
-      if(comp(action.c_str(),"reboot"))
-        ESP.reset();
-      if(comp(action.c_str(),"toggle_onb"))
-      {
-        bool status = doc["status"];
-        conf.led_enabled = status;
-        EEPROM.put(0, conf);
-        EEPROM.commit();
-      }
+      String return_msg = "";
+      StaticJsonDocument<200> return_doc;
+      return_doc["done"] = 0;
+      return_doc["error"] = "Error in parsing";
+      serializeJson(return_doc, return_msg);
+      request->send(200, "application/json", return_msg); 
+      return;
+    }
+    String action = doc["action"];
+    doc["done"] = 1;
+    serializeJson(doc, message);
+    if(comp(action.c_str(),"reset"))
+      reset();
+    if(comp(action.c_str(),"reboot"))
+      ESP.reset();
+    if(comp(action.c_str(),"toggle_onb"))
+    {
+      bool status = doc["status"];
+      conf.led_enabled = status;
+      EEPROM.put(0, conf);
+      EEPROM.commit();
     }
   }
-  webServer.send(200, "application/json", message);       //Response to the HTTP request
+  request->send(200, "application/json", message);
 }
-void handleWebStatus()
+void handleWebStatus(AsyncWebServerRequest *request)
 {
   String return_msg = "";
   StaticJsonDocument<500> return_doc;
@@ -487,72 +517,62 @@ void handleWebStatus()
     return_doc["l"] = light;
   }
   serializeJson(return_doc, return_msg);
-  webServer.send(200, "application/json", return_msg); 
+  request->send(200, "application/json", return_msg); 
 }
-void web_scan_wifi()
+//    Serial.printf("%d: %s, Ch:%d (%ddBm) %s\n", i + 1, WiFi.SSID(i).c_str(), WiFi.channel(i), WiFi.RSSI(i), WiFi.encryptionType(i) == ENC_TYPE_NONE ? "open" : "");
+
+void web_scan_wifi(AsyncWebServerRequest *request)
 {
-  StaticJsonDocument<200> wifi_ssid = scan_ssid();
-  String return_msg;
-  serializeJson(wifi_ssid, return_msg);
-  webServer.send(200, "application/json", return_msg);
-}
-void web_set_wifi()
-{
-  for (int i = 0; i < webServer.args(); i++) 
-  {
-    if(webServer.argName(i) == "options")
+  WiFi.scanNetworksAsync([request](int networksFound){
+    StaticJsonDocument<500> wifi_ssid;    
+    JsonArray ssid = wifi_ssid.createNestedArray("ssid");
+    for(int i=0; i<networksFound; i++)
     {
-      StaticJsonDocument<200> wifi_option;
-      String option = webServer.arg(i);
-      DeserializationError error = deserializeJson(wifi_option, option);
-      if (error) 
-      {
-        String return_msg = "";
-        StaticJsonDocument<200> return_doc;
-        return_doc["done"] = false;
-        serializeJson(return_doc, return_msg);
-        webServer.send(200, "application/json", return_msg); 
-        return;
-      }
-      String ssid = wifi_option["ssid"];
-      String pass = wifi_option["pass"];
-      WiFi.disconnect();
-      WiFi.begin(ssid,pass);
-      int retry = 0;
-      while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        if(debugging)
-          Serial.print(".");
-        checkReset();
-        retry++;
-        if(retry > 60)
-        {
-          reset();
-        }
-      }
+      ssid.add(String(WiFi.SSID(i)));
+    }
+    String return_msg;
+    serializeJson(wifi_ssid, return_msg);
+    request->send(200, "application/json", return_msg);
+  });
+}
+void web_set_wifi(AsyncWebServerRequest *request)
+{
+  if(request->hasParam("options"))
+  {
+    StaticJsonDocument<200> wifi_option;
+    String option = request->arg("options");
+    DeserializationError error = deserializeJson(wifi_option, option);
+    if (error) 
+    {
+      String return_msg = "";
+      StaticJsonDocument<200> return_doc;
+      return_doc["done"] = false;
+      serializeJson(return_doc, return_msg);
+      request->send(200, "application/json", return_msg); 
+      return;
+    }
+    String ssid = wifi_option["ssid"];
+    String pass = wifi_option["pass"];
+    WiFi.disconnect();
+    WiFi.begin(ssid,pass);
+    TickerForTimeOut.once(10,[request](){
+      if(WiFi.status() != WL_CONNECTED)
+        reset();
       fetchIP();
       String return_msg = "";
       StaticJsonDocument<200> return_doc;
       return_doc["done"] = true;
       serializeJson(return_doc, return_msg);
-      webServer.send(200, "application/json", return_msg); 
-    }
+      request->send(200, "application/json", return_msg); 
+    });
   }
+  else
+  {
+    request->send(404);
+  }
+  
 }
 /*-------Web Server Controller------------------------------*/
-/*-------Scan SSID------------------------------------------*/
-StaticJsonDocument<200> scan_ssid()
-{
-  StaticJsonDocument<200> doc;
-  JsonArray ssid = doc.createNestedArray("ssid");
-  int n = WiFi.scanNetworks();
-  for(int i=0; i<n; i++)
-  {
-    ssid.add(String(WiFi.SSID(i)));
-  }
-  return doc;
-}
-/*-------Scan SSID------------------------------------------*/
 /*-------feedbackLED----------------------------------------*/
 void feedbackLED()
 {
@@ -767,9 +787,7 @@ void relay_action(int no, bool value, String by)
 {
   sr.set(no, value);
 //sending status
-  send_status();
-  delay(100);
-  
+  send_status();  
 //sending nortification
   StaticJsonDocument<200> doc;
   if(by != "")
@@ -992,5 +1010,4 @@ void loop()
       light = map(analogRead(LDR_PIN), 0, 255, 0, 100);
     }
   }
-  webServer.handleClient();
 }

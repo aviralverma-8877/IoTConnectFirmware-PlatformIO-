@@ -38,7 +38,7 @@ function print_table()
     for(var i = 0; i<8; i++)
     {
         content = content + "<tr>\
-        <th>\
+        <th style='font:Fjalla One'>\
             Relay "+(i+1)+" : <span id='status-"+i+"'></span>\
         </th>\
         <th>\
