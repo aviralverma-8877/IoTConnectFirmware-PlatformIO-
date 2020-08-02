@@ -187,6 +187,8 @@ String updateAddress;                     //Update address
 DNSServer dnsServer;                      //Global variables
 AsyncWebServer webServer(80);             //Global variables
 bool shouldReboot = false;
+String wifi_ssid = "";
+String wifi_pass = "";
 /*----------------------------------------------------------*/
 /*--------------MQTT Configration---------------------------*/
 String outtopic = chipid+"-out";          //MQTT Topic for sending data from ESP.
@@ -228,7 +230,7 @@ void handleWebStatus(AsyncWebServerRequest *request);
 void web_set_wifi(AsyncWebServerRequest *request);
 void web_scan_wifi(AsyncWebServerRequest *request);
 
-
+void switch_wifi();
 void feedbackLED();
 void connectToMqtt();
 void serialDisplay(String head,String body);
@@ -484,7 +486,7 @@ void handleWebControl(AsyncWebServerRequest *request)
     doc["done"] = 1;
     serializeJson(doc, message);
     if(comp(action.c_str(),"reset"))
-      reset();
+      callback = &reset;
     if(comp(action.c_str(),"reboot"))
       ESP.reset();
     if(comp(action.c_str(),"toggle_onb"))
@@ -519,7 +521,6 @@ void handleWebStatus(AsyncWebServerRequest *request)
   serializeJson(return_doc, return_msg);
   request->send(200, "application/json", return_msg); 
 }
-//    Serial.printf("%d: %s, Ch:%d (%ddBm) %s\n", i + 1, WiFi.SSID(i).c_str(), WiFi.channel(i), WiFi.RSSI(i), WiFi.encryptionType(i) == ENC_TYPE_NONE ? "open" : "");
 
 void web_scan_wifi(AsyncWebServerRequest *request)
 {
@@ -553,17 +554,23 @@ void web_set_wifi(AsyncWebServerRequest *request)
     }
     String ssid = wifi_option["ssid"];
     String pass = wifi_option["pass"];
-    WiFi.disconnect();
-    WiFi.begin(ssid,pass);
-    TickerForTimeOut.once(10,[request](){
+    wifi_ssid = ssid;
+    wifi_pass = pass;
+    callback = &switch_wifi;
+    String return_msg = "";
+    StaticJsonDocument<200> return_doc;
+    return_doc["done"] = true;
+    serializeJson(return_doc, return_msg);
+    request->send(200, "application/json", return_msg);
+    TickerForTimeOut.once(30,[](){
       if(WiFi.status() != WL_CONNECTED)
-        reset();
-      fetchIP();
-      String return_msg = "";
-      StaticJsonDocument<200> return_doc;
-      return_doc["done"] = true;
-      serializeJson(return_doc, return_msg);
-      request->send(200, "application/json", return_msg); 
+      {
+        callback = &reset;
+      }
+      else
+      {
+        callback = &fetchIP; 
+      }
     });
   }
   else
@@ -573,6 +580,12 @@ void web_set_wifi(AsyncWebServerRequest *request)
   
 }
 /*-------Web Server Controller------------------------------*/
+void switch_wifi()
+{
+  WiFi.disconnect();
+  WiFi.begin(wifi_ssid,wifi_pass);
+  callback = &blank;
+}
 /*-------feedbackLED----------------------------------------*/
 void feedbackLED()
 {
@@ -676,7 +689,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       String r;
       serializeJson(doc, r);
       sendToMQTT(outtopic, r);
-      reset();
+      callback = &reset;
     }
 /*-------Action command for reconfigring WiFi---------------*/
 /*-------Action command for fetching WiFi SSID--------------*/
@@ -854,13 +867,17 @@ void onMqttPublish(uint16_t packetId) {
 /*----Meathod for reconfiguring WiFi settings---------------*/
 void reset()
 {
-  digitalWrite(indicator_led,HIGH);
+  TickerForFeedbackLED.attach(0.2, feedbackLED);
   WiFi.disconnect();
-  EEPROM.wipe();
-  conf.setupFlag = true;
-  EEPROM.put(0, conf);
-  EEPROM.commit();
-  ESP.reset();
+  TickerForTimeOut.once(1,[](){
+    EEPROM.wipe();
+    conf.setupFlag = true;
+    EEPROM.put(0, conf);
+    EEPROM.commit();
+    TickerForTimeOut.once(1,[](){
+      ESP.reset();
+    });
+  });  
 }
 /*----Meathod for reconfiguring WiFi settings---------------*/
 /*----Meathod for sending relay status----------------------*/
@@ -935,7 +952,8 @@ void checkReset()
 {
   if(digitalRead(reset_btn) == HIGH)
   {
-    reset();
+    digitalWrite(indicator_led, HIGH);
+    callback = &reset;
   }
 }
 /*-----Meathod for checking reset button--------------------*/
@@ -976,6 +994,7 @@ void fetchIP()
       serialDisplay("IP Address",IpAddress);
     }
   }
+  callback = &blank;
 }
 /*-----Meathod for fetching IP Address----------------------*/
 /*-----Meathod to convert IP Address to String -------------*/
