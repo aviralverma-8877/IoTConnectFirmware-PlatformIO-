@@ -17,6 +17,11 @@
 #include <ESP8266httpUpdate.h>            //ESP Update Library.
 #include <ESP8266mDNS.h>                  //mdns for setting hostname
 #include <FS.h>                           //File System Read
+
+extern "C" uint32_t _FS_start;
+extern "C" uint32_t _FS_end;
+
+
 #define MQTT_HOST "iot-connect.in"        //MQTT Server address
 #define MQTT_PORT 1883                    //MQTT Server port
 //MQTT Cred
@@ -423,7 +428,7 @@ void firmware_web_updater()
     shouldReboot = !Update.hasError();
     if(shouldReboot)
     {
-      request->send(200, "text/html", "Upload successfull, Rebooting....");
+      request->send_P(200, PSTR("text/html"), "Upload successfull, Rebooting....");
     }
   },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
     if(!index){
