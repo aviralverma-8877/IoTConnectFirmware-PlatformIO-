@@ -52,7 +52,7 @@ function print_table()
         </tr>";
     }
     table.innerHTML = content;
-    setTimeout(function run()
+    setInterval(function ()
     {
         data = httpGet(0, 0, 'get_status');
         json = JSON.parse(data);
@@ -87,7 +87,6 @@ function print_table()
             element = document.getElementById('WiFi_Status');
             element.innerHTML = cont;
         }
-        setTimeout(run, 1000);
     },1000);
 }
 function update_wifi(ssid, pass)

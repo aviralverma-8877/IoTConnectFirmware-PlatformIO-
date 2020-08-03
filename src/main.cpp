@@ -377,19 +377,60 @@ void setup()
 void firmware_web_updater()
 {
   webServer.on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/html", "<form method='POST' action='/update' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>");
+    request->send(200, "text/html", "\
+    <form method='POST' action='/update_flash' enctype='multipart/form-data'>\
+      <input type='file' placeholder='firmware.bin' name='update'><input type='submit' value='Update'> Firmware\
+    </form></ br>\
+    <form method='POST' action='/update_spiffs' enctype='multipart/form-data'>\
+      <input type='file' placeholder='spiffs.bin' name='update'><input type='submit' value='Update'> File System\
+    </form>");
   });
-  webServer.on("/update", HTTP_POST, [](AsyncWebServerRequest *request){
+
+  webServer.on("/update_flash", HTTP_POST, [](AsyncWebServerRequest *request){
     shouldReboot = !Update.hasError();
-    AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", shouldReboot?"OK":"FAIL");
-    response->addHeader("Connection", "close");
-    request->send(response);
+    if(shouldReboot)
+    {
+      request->send(200, "text/html", "Upload successfull, Rebooting....");
+    }
   },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
     if(!index){
       if(debugging)
         Serial.printf("Update Start: %s\n", filename.c_str());
       Update.runAsync(true);
-      if(!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)){
+      if(!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000, U_FLASH)){
+        Update.printError(Serial);
+      }
+    }
+    if(!Update.hasError()){
+      if(Update.write(data, len) != len){
+      if(debugging)
+        Update.printError(Serial);
+      }
+    }
+    if(final){
+      if(Update.end(true)){
+        if(debugging)
+          Serial.printf("Update Success: %uB\n", index+len);
+        ESP.reset();
+      } else {
+        if(debugging)
+          Update.printError(Serial);
+      }
+    }
+  });
+
+  webServer.on("/update_spiffs", HTTP_POST, [](AsyncWebServerRequest *request){
+    shouldReboot = !Update.hasError();
+    if(shouldReboot)
+    {
+      request->send(200, "text/html", "Upload successfull, Rebooting....");
+    }
+  },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
+    if(!index){
+      if(debugging)
+        Serial.printf("Update Start: %s\n", filename.c_str());
+      Update.runAsync(true);
+      if(!Update.begin(request->contentLength(), U_FS)){
         Update.printError(Serial);
       }
     }
@@ -525,7 +566,7 @@ void handleWebStatus(AsyncWebServerRequest *request)
 void web_scan_wifi(AsyncWebServerRequest *request)
 {
   WiFi.scanNetworksAsync([request](int networksFound){
-    StaticJsonDocument<500> wifi_ssid;    
+    StaticJsonDocument<500> wifi_ssid;
     JsonArray ssid = wifi_ssid.createNestedArray("ssid");
     for(int i=0; i<networksFound; i++)
     {
