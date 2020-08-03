@@ -430,7 +430,9 @@ void firmware_web_updater()
       if(debugging)
         Serial.printf("Update Start: %s\n", filename.c_str());
       Update.runAsync(true);
-      if(!Update.begin(request->contentLength(), U_FS)){
+      size_t fsSize = ((size_t) &_FS_end - (size_t) &_FS_start);
+      close_all_fs();
+      if (!Update.begin(fsSize, U_FS)){//start with max available size
         Update.printError(Serial);
       }
     }
