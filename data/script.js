@@ -54,44 +54,48 @@ function print_table()
     table.innerHTML = content;
     setInterval(function ()
     {
-        data = httpGet(0, 0, 'get_status');
-        json = JSON.parse(data);
-        if(json != null)
-        {
-            for(var i=0; i<json['relay_status'].length; i++)
+        return new Promise (() => {
+            data = httpGet(0, 0, 'get_status');
+            json = JSON.parse(data);
+            if(json != null)
             {
-                var element = document.getElementById('status-'+i);
-                if(json['relay_status'][i] == 0)
+                for(var i=0; i<json['relay_status'].length; i++)
                 {
-                    element.innerHTML = 'OFF';
+                    var element = document.getElementById('status-'+i);
+                    if(json['relay_status'][i] == 0)
+                    {
+                        element.innerHTML = 'OFF';
+                    }
+                    if(json['relay_status'][i] == 1)
+                    {
+                        element.innerHTML = 'ON';
+                    }
                 }
-                if(json['relay_status'][i] == 1)
+                onb_status = json['onb_led'];
+                document.getElementById("on_board_led").checked = onb_status
+                var cont = "";
+                wifi_ssid = json['wifi_ssid'];
+                wifi_type = json['type'];
+                cont = "Connected to <b>"+wifi_ssid+"</b>";
+                cont += " | Device Type <b>"+wifi_type+"</b>";
+                if(json['temp'] != undefined)
                 {
-                    element.innerHTML = 'ON';
+                    temp = json['temp'];
+                    humid = json['humid'];
+                    lumin = json['lumin'];
+                    cont = cont + " | Temperature : "+temp+" C | Humidity : "+humid+" % | Lumin : "+lumin+" % "
                 }
+                element = document.getElementById('WiFi_Status');
+                element.innerHTML = cont;
             }
-            onb_status = json['onb_led'];
-            document.getElementById("on_board_led").checked = onb_status
-            var cont = "";
-            wifi_ssid = json['wifi_ssid'];
-            wifi_type = json['type'];
-            cont = "Connected to <b>"+wifi_ssid+"</b>";
-            cont += " | Device Type <b>"+wifi_type+"</b>";
-            if(json['temp'] != undefined)
-            {
-                temp = json['temp'];
-                humid = json['humid'];
-                lumin = json['lumin'];
-                cont = cont + " | Temperature : "+temp+" C | Humidity : "+humid+" % | Lumin : "+lumin+" % "
-            }
-            element = document.getElementById('WiFi_Status');
-            element.innerHTML = cont;
-        }
+        });
     },1000);
 }
 function update_wifi(ssid, pass)
 {
-    response = httpGet(0,0,"set_wifi",{"ssid":ssid,"pass":pass});
+    return new Promise (() => {
+        response = httpGet(0,0,"set_wifi",{"ssid":ssid,"pass":pass});
+    });
 }
 function scan_wifi()
 {
@@ -103,18 +107,20 @@ function scan_wifi()
         </td>\
     </tr>";
     setTimeout(function(){
-        response = httpGet(0,0,"scan_wifi");
-        ssid_list = JSON.parse(response)["ssid"];
-        content = "";
-        for(i=0; i < ssid_list.length; i++)
-        {
-            content = content + "<tr>\
-                                    <td style='font:Fjalla One'>\
-                                        <a href='#ssid_input' onclick='ssid_input.value=\""+ssid_list[i]+"\"'><b>"+ssid_list[i]+"</b></a>\
-                                    </td>\
-                                </tr>"
-        }
-        element = document.getElementById('ssid_list');
-        element.innerHTML = content;
+        return new Promise (() => {
+            response = httpGet(0,0,"scan_wifi");
+            ssid_list = JSON.parse(response)["ssid"];
+            content = "";
+            for(i=0; i < ssid_list.length; i++)
+            {
+                content = content + "<tr>\
+                                        <td style='font:Fjalla One'>\
+                                            <a href='#ssid_input' onclick='ssid_input.value=\""+ssid_list[i]+"\"'><b>"+ssid_list[i]+"</b></a>\
+                                        </td>\
+                                    </tr>"
+            }
+            element = document.getElementById('ssid_list');
+            element.innerHTML = content;
+        });
     },10);
 }

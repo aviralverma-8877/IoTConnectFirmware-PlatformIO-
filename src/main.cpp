@@ -6,7 +6,6 @@
 #include <ESPAsyncWiFiManager.h>          //Async WiFi Manager
 #include <AsyncMqttClient.h>              //Async MQTT Library
 #include <Ticker.h>                       //Ticker for running multithread
-#include <ESP_EEPROM.h>                   //Reading and writing on EEPROM
 #include <ArduinoJson.h>                  //Encoading and Decoding JSON
 #include <Adafruit_Sensor.h>              //For LDR
 #include <DHT.h>                          //For DHT Temperature and Humidity Sensor
@@ -35,7 +34,7 @@ extern "C" uint32_t _FS_end;
 #define DHTTYPE DHT11                     //Type of DHT sensor.
 
 //Configuring Device
-#define FIRMWARE_V "2.0.3"                //Current firmware version. (Displayed on Device Portal)
+#define FIRMWARE_V "2.1.1"                //Current firmware version. (Displayed on Device Portal)
 #define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
                                                               //(V2 - With Sensor)
                                           //Should not modify the vesions, as website device portal is set accordingly.
@@ -182,6 +181,7 @@ String data;                              //Global variables
 String Wifi_ssid;                         //Global variables
 bool mqtt_setup = false;                  //Global variables
 bool first_connect = false;               //Global variables
+bool inSetup = true;
 byte loopCount = 0;                       //Global variables
 uint8_t attempts = 0;                     //Global variables
 uint8_t i;                                //Global variables
@@ -207,11 +207,13 @@ String espraw = "ESPRAW";                 //MQTT Topic for sending device attend
 
 /*--------------Relay Default Configration------------------*/
 struct configuration{
-  bool pinValues[8] = { 0,0,0,0,0,0,0,0 };  //Default relay values.
+  uint8 pinValues[8] = { 0,0,0,0,0,0,0,0 };  //Default relay values.
   bool setupFlag = false;
   bool updateFlag = false;
   bool led_enabled = true;
   int pingTime = 2000;
+  const char * http_username = "admin";
+  const char * http_password = "admin";
 } conf;
 
 /*--------------Relay Default Configration------------------*/
@@ -260,23 +262,32 @@ void blank();
 void (*callback)(void);                                 //Callback function meathod
 void SerialListner();
 void send_status_uart();
+void read_config();
+void write_config();
 void setup() 
 {
   Serial.begin(115200);
   SPIFFS.begin();
-/*--------Reading Configs from EEPROM------------------------*/
-  EEPROM.begin(sizeof(configuration));
-  if(EEPROM.percentUsed()>=0) {
-    EEPROM.get(0, conf);
-  } else {
-    EEPROM.commit();
+  if (SPIFFS.exists("/config.json")) {
+    read_config();
   }
-/*--------Reading Configs from EEPROM------------------------*/
+  else{
+    write_config();
+  }
 /*--------Setting up the GPIOs-------------------------------*/
   pinMode(reset_btn,INPUT);
   pinMode(indicator_led,OUTPUT);
   pinMode(LDR_PIN,INPUT);
   TickerForFeedbackLED.attach(0.6, feedbackLED);
+  TickerForcheckReset.attach_ms(10, checkReset);
+/*--------Reading data from SPIFFS for last relay status ----*/
+  for(int t=0; t<8; t++)
+  {
+    sr.set(t,conf.pinValues[t]);           //Overwriting saved values on default values.
+    delay(100);
+  }
+/*--------Reading data from SPIFFS for last relay status ----*/
+
 /*--------Setting up the GPIOs-------------------------------*/  
  AsyncWiFiManager wifiManager(&webServer,&dnsServer);
  if(debugging)
@@ -291,8 +302,7 @@ void setup()
   if(conf.setupFlag)
   {
     conf.setupFlag = false;
-    EEPROM.put(0, conf);
-    EEPROM.commit();
+    write_config();
     TickerForFeedbackLED.attach(0.2, feedbackLED);
     wifiManager.resetSettings();
     wifiManager.setBreakAfterConfig(true);
@@ -305,13 +315,6 @@ void setup()
     delayMS = conf.pingTime;
     dht.begin();          //Initalizing DHT sensor.
   }
-/*--------Reading data from EEPROM for last relay status ----*/
-  for(int t=0; t<8; t++)
-  {
-    sr.set(t,conf.pinValues[t]);           //Overwriting saved values on default values.
-    delay(100);
-  }
-/*--------Reading data from EEPROM for last relay status ----*/
 /*-------Fetch IP Address-----------------------------------*/
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -333,7 +336,6 @@ void setup()
   mqtt.setServer(MQTT_HOST, MQTT_PORT);
 /*-------Setting up MQTT------------------------------------*/
 /*-------Setting up the trikers-----------------------------*/
-  TickerForcheckReset.attach_ms(10, checkReset);
   TickerForconnectToMqtt.attach_ms(10000, connectToMqtt);
   TickerForfetchIP.attach(30, fetchIP);
   if(!debugging)
@@ -366,15 +368,22 @@ void setup()
   webServer.serveStatic("/js", SPIFFS, "/script.js");
   webServer.serveStatic("/css", SPIFFS, "/style.css");
   webServer.serveStatic("/", SPIFFS, "/index.html");
+  webServer.serveStatic("/config", SPIFFS, "/config.json");
+  webServer.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
   webServer.onNotFound([](AsyncWebServerRequest *request){
+    // if(!request->authenticate(conf.http_username, conf.http_password))
+    // {
+    //   return request->requestAuthentication();
+    // }
     request->send(SPIFFS, "/index.html", "text/html");
   });
 
   webServer.begin();
 /*-------Web Server Setup-----------------------------------*/
 /*-------HOST Name Setup------------------------------------*/
- MDNS.addService("http", "tcp", 80);
+  MDNS.addService("http", "tcp", 80);
 /*-------HOST Name Setup------------------------------------*/
+  inSetup = false;
 }
 
 /*---------Firmware Update---------------------------------*/
@@ -384,10 +393,10 @@ void firmware_web_updater()
   webServer.on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/html", "\
     <form method='POST' action='/update_flash' enctype='multipart/form-data'>\
-      <input type='file' placeholder='firmware.bin' name='update'><input type='submit' value='Update'> Firmware\
+      <input type='file' placeholder='firmware.bin' name='update'><input type='submit' value='Update'> firmware.bin\
     </form></ br>\
     <form method='POST' action='/update_spiffs' enctype='multipart/form-data'>\
-      <input type='file' placeholder='spiffs.bin' name='update'><input type='submit' value='Update'> File System\
+      <input type='file' placeholder='spiffs.bin' name='update'><input type='submit' value='Update'> spiffs.bin\
     </form>");
   });
 
@@ -541,8 +550,7 @@ void handleWebControl(AsyncWebServerRequest *request)
     {
       bool status = doc["status"];
       conf.led_enabled = status;
-      EEPROM.put(0, conf);
-      EEPROM.commit();
+      write_config();
     }
   }
   request->send(200, "application/json", message);
@@ -610,7 +618,7 @@ void web_set_wifi(AsyncWebServerRequest *request)
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);
     request->send(200, "application/json", return_msg);
-    TickerForTimeOut.once(30,[](){
+    TickerForTimeOut.once(15,[](){
       if(WiFi.status() != WL_CONNECTED)
       {
         callback = &reset;
@@ -652,12 +660,13 @@ void feedbackLED()
 
 void connectToMqtt() {
   if(WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
+    if(debugging)
+      Serial.print(".");
   }
   else
   {
+    mqtt.connect();
   }
-  mqtt.connect();
 }
 /*-------Meathod for displaying serial data in JSON---------*/
 void serialDisplay(String head,String body)
@@ -703,14 +712,11 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
   serialDisplay("MQTT","MQTT is disconnected.");
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    if(first_connect)
-    {
-      WiFi.reconnect();
-      WiFi.waitForConnectResult();
-    }
+    if(debugging)
+      Serial.print(".");
   }
-  connectToMqtt();
+  else
+    connectToMqtt();
 }
 /*-------Meathod called when disconnected from MQTT Topic---*/
 
@@ -755,9 +761,8 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     if(comp(action,"FREQ"))
     {
       delayMS = root["f"];
-      conf.pingTime = delayMS;      //Saving the delay time in eeprom
-      EEPROM.put(0, conf);
-      EEPROM.commit();
+      conf.pingTime = delayMS;      //Saving the delay time in config
+      write_config();
       TickerForsendSensorData.detach();
       TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
     }
@@ -862,13 +867,12 @@ void relay_action(int no, bool value, String by)
   serializeJson(doc, r);
   sendToMQTT(norttopic, r);
 
-//saving to eeprom
+//saving to config
   for(int t=0; t<8; t++)
   {
     conf.pinValues[t] = sr.get(t);
   }
-  EEPROM.put(0, conf);
-  EEPROM.commit();
+  write_config();
 }
 /*-------Meathod to update ESP------------------------------*/
 void updateESP()
@@ -915,17 +919,13 @@ void onMqttPublish(uint16_t packetId) {
 /*----Meathod for reconfiguring WiFi settings---------------*/
 void reset()
 {
-  TickerForFeedbackLED.attach(0.2, feedbackLED);
-  WiFi.disconnect();
-  TickerForTimeOut.once(1,[](){
-    EEPROM.wipe();
-    conf.setupFlag = true;
-    EEPROM.put(0, conf);
-    EEPROM.commit();
-    TickerForTimeOut.once(1,[](){
-      ESP.reset();
-    });
-  });  
+  if (WiFi.status() == WL_CONNECTED) {
+    WiFi.disconnect();
+    delay(1000);
+  }
+  conf.setupFlag = true;
+  write_config();
+  ESP.reset();
 }
 /*----Meathod for reconfiguring WiFi settings---------------*/
 /*----Meathod for sending relay status----------------------*/
@@ -1000,8 +1000,10 @@ void checkReset()
 {
   if(digitalRead(reset_btn) == HIGH)
   {
-    digitalWrite(indicator_led, HIGH);
-    callback = &reset;
+    if(inSetup)
+      reset();
+    else
+      callback = &reset;
   }
 }
 /*-----Meathod for checking reset button--------------------*/
@@ -1054,6 +1056,51 @@ String IpAddress2String(const IPAddress& ipAddress)
   String(ipAddress[3])  ;
 }
 /*-----Meathod to convert IP Address to String -------------*/
+void read_config()
+{
+  if (SPIFFS.exists("/config.json")) {
+    File configFile = SPIFFS.open("/config.json", "r");
+    if (configFile) {
+      size_t size = configFile.size();
+      // Allocate a buffer to store contents of the file.
+      std::unique_ptr<char[]> buf(new char[size]);
+
+      configFile.readBytes(buf.get(), size);
+      StaticJsonDocument<500> jsonBuffer;
+      DeserializationError error = deserializeJson(jsonBuffer, buf.get());
+      conf.led_enabled = jsonBuffer["led_enabled"];
+      conf.pingTime = jsonBuffer["pingTime"];
+      conf.setupFlag = jsonBuffer["setupFlag"];
+      conf.updateFlag = jsonBuffer["updateFlag"];
+      conf.http_username = jsonBuffer["http_username"];
+      conf.http_password = jsonBuffer["http_password"];
+      for(int t=0; t<8; t++)
+      {
+        bool pinVal = jsonBuffer["relay_status"][t]; 
+        conf.pinValues[t] = pinVal;
+      }
+    }
+  }
+}
+void write_config()
+{
+  File configFile = SPIFFS.open("/config.json", "w");
+  StaticJsonDocument<500> jsonBuffer;
+  JsonArray relay_status = jsonBuffer.createNestedArray("relay_status");
+  for(int t=0; t<8; t++)
+  {
+    relay_status.add(conf.pinValues[t]);
+  }
+  jsonBuffer["setupFlag"] = conf.setupFlag;
+  jsonBuffer["updateFlag"] = conf.updateFlag;
+  jsonBuffer["led_enabled"] = conf.led_enabled;
+  jsonBuffer["pingTime"] = conf.pingTime;
+  jsonBuffer["http_username"] = conf.http_username;
+  jsonBuffer["http_password"] = conf.http_password;
+  String r;
+  serializeJson(jsonBuffer, r);
+  configFile.print(r); 
+}
 /*-----Blank function-----------------------------------------*/
 void blank()
 {
