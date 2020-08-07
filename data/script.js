@@ -20,6 +20,10 @@ function httpGet(relay, value, action, options = {})
     {
         theUrl = '/set_wifi?options='+JSON.stringify(options);
     }
+    if(action == "update_login")
+    {
+        theUrl = '/update_login?options='+JSON.stringify(options);
+    }
     try
     {
         var xmlHttp = new XMLHttpRequest();
@@ -123,4 +127,35 @@ function scan_wifi()
             element.innerHTML = content;
         });
     },10);
+}
+
+function update_login(login_uname_input, login_pass_input, login_confirm_pass_input)
+{
+    if(login_pass_input.value == login_confirm_pass_input.value)
+    {
+        if(login_uname_input.value.length > 6){
+            if(login_pass_input.value.length > 6)
+            {
+                response = httpGet(0,0,"update_login",
+                {
+                    "uname":login_uname_input.value,
+                    "password":login_pass_input.value
+                });
+                data = JSON.parse(response);
+                done = data["done"];
+                if(done)
+                {
+                    alert("Username and password updated.")
+                }
+            }
+            else{
+                alert("Password length should be more than 6 charecter.");
+            }
+        }
+        else{
+            alert("Username length should be more than 6 charecter.");
+        }
+    }
+    else 
+        alert('Password and confirm password not matching.');
 }

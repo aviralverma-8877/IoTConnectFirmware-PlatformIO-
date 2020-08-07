@@ -212,8 +212,8 @@ struct configuration{
   bool updateFlag = false;
   bool led_enabled = true;
   int pingTime = 2000;
-  const char * http_username = "admin";
-  const char * http_password = "admin";
+  String http_username = "admin";
+  String http_password = "admin";
 } conf;
 
 /*--------------Relay Default Configration------------------*/
@@ -236,6 +236,7 @@ void handleWebControl(AsyncWebServerRequest *request);
 void handleWebStatus(AsyncWebServerRequest *request);
 void web_set_wifi(AsyncWebServerRequest *request);
 void web_scan_wifi(AsyncWebServerRequest *request);
+void web_update_login(AsyncWebServerRequest *request);
 
 void switch_wifi();
 void feedbackLED();
@@ -263,7 +264,7 @@ void (*callback)(void);                                 //Callback function meat
 void SerialListner();
 void send_status_uart();
 void read_config();
-void write_config();
+void write_config(configuration config);
 void setup() 
 {
   Serial.begin(115200);
@@ -272,7 +273,8 @@ void setup()
     read_config();
   }
   else{
-    write_config();
+    configuration newConfig;
+    write_config(newConfig);
   }
 /*--------Setting up the GPIOs-------------------------------*/
   pinMode(reset_btn,INPUT);
@@ -302,7 +304,7 @@ void setup()
   if(conf.setupFlag)
   {
     conf.setupFlag = false;
-    write_config();
+    write_config(conf);
     TickerForFeedbackLED.attach(0.2, feedbackLED);
     wifiManager.resetSettings();
     wifiManager.setBreakAfterConfig(true);
@@ -365,16 +367,18 @@ void setup()
   webServer.on("/set_wifi", HTTP_GET, [](AsyncWebServerRequest *request){
     web_set_wifi(request);
   });
+  webServer.on("/update_login", HTTP_GET, [](AsyncWebServerRequest *request){
+    web_update_login(request);
+  });
   webServer.serveStatic("/js", SPIFFS, "/script.js");
   webServer.serveStatic("/css", SPIFFS, "/style.css");
   webServer.serveStatic("/", SPIFFS, "/index.html");
-  webServer.serveStatic("/config", SPIFFS, "/config.json");
   webServer.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
   webServer.onNotFound([](AsyncWebServerRequest *request){
-    // if(!request->authenticate(conf.http_username, conf.http_password))
-    // {
-    //   return request->requestAuthentication();
-    // }
+    if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+    {
+      return request->requestAuthentication();
+    }
     request->send(SPIFFS, "/index.html", "text/html");
   });
 
@@ -401,10 +405,14 @@ void firmware_web_updater()
   });
 
   webServer.on("/update_flash", HTTP_POST, [](AsyncWebServerRequest *request){
+    if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+    {
+      return request->requestAuthentication();
+    }
     shouldReboot = !Update.hasError();
     if(shouldReboot)
     {
-      request->send(200, "text/html", "Upload successfull, Rebooting....");
+      request->send_P(200, "text/html", "Upload successfull, Rebooting....<br /><a href='/'>Home Page</a>");
     }
   },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
     if(!index){
@@ -425,7 +433,9 @@ void firmware_web_updater()
       if(Update.end(true)){
         if(debugging)
           Serial.printf("Update Success: %uB\n", index+len);
-        ESP.reset();
+        TickerForTimeOut.attach(1,[](){
+          ESP.reset();
+        });
       } else {
         if(debugging)
           Update.printError(Serial);
@@ -437,7 +447,15 @@ void firmware_web_updater()
     shouldReboot = !Update.hasError();
     if(shouldReboot)
     {
-      request->send_P(200, PSTR("text/html"), "Upload successfull, Rebooting....");
+      request->send_P(200, PSTR("text/html"), "Spiffs Upload successfull. Rebooting...<br /><a href='/'>Home Page</a>");
+      read_config();
+      /*--------Reading data from SPIFFS for last relay status ----*/
+      for(int t=0; t<8; t++)
+      {
+        sr.set(t,conf.pinValues[t]);           //Overwriting saved values on default values.
+        delay(100);
+      }
+      /*--------Reading data from SPIFFS for last relay status ----*/
     }
   },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
     if(!index){
@@ -460,7 +478,9 @@ void firmware_web_updater()
       if(Update.end(true)){
         if(debugging)
           Serial.printf("Update Success: %uB\n", index+len);
-        ESP.reset();
+        TickerForTimeOut.attach(1,[](){
+          ESP.reset();
+        });
       } else {
         if(debugging)
           Update.printError(Serial);
@@ -550,7 +570,7 @@ void handleWebControl(AsyncWebServerRequest *request)
     {
       bool status = doc["status"];
       conf.led_enabled = status;
-      write_config();
+      write_config(conf);
     }
   }
   request->send(200, "application/json", message);
@@ -564,6 +584,7 @@ void handleWebStatus(AsyncWebServerRequest *request)
   {
     relay_status.add(sr.get(t));
   }
+  return_doc["uname"] = conf.http_username;
   return_doc["type"] = DEVICE_V;
   return_doc["wifi_ssid"] = Wifi_ssid;
   return_doc["wifi_rssi"] = WiFi.RSSI();
@@ -591,6 +612,35 @@ void web_scan_wifi(AsyncWebServerRequest *request)
     serializeJson(wifi_ssid, return_msg);
     request->send(200, "application/json", return_msg);
   });
+}
+void web_update_login(AsyncWebServerRequest *request)
+{
+  if(request->hasParam("options"))
+  {
+    StaticJsonDocument<200> login_option;
+    String option = request->arg("options");
+    DeserializationError error = deserializeJson(login_option, option);
+    if (error) 
+    {
+      String return_msg = "";
+      StaticJsonDocument<200> return_doc;
+      return_doc["done"] = false;
+      serializeJson(return_doc, return_msg);
+      request->send(200, "application/json", return_msg); 
+      return;
+    }
+    String http_username = login_option["uname"];
+    String http_password = login_option["password"];
+    conf.http_username = http_username;
+    conf.http_password = http_password;
+    write_config(conf);
+
+    String return_msg = "";
+    StaticJsonDocument<200> return_doc;
+    return_doc["done"] = true;
+    serializeJson(return_doc, return_msg);
+    request->send(200, "application/json", return_msg); 
+  }
 }
 void web_set_wifi(AsyncWebServerRequest *request)
 {
@@ -762,7 +812,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     {
       delayMS = root["f"];
       conf.pingTime = delayMS;      //Saving the delay time in config
-      write_config();
+      write_config(conf);
       TickerForsendSensorData.detach();
       TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
     }
@@ -872,7 +922,7 @@ void relay_action(int no, bool value, String by)
   {
     conf.pinValues[t] = sr.get(t);
   }
-  write_config();
+  write_config(conf);
 }
 /*-------Meathod to update ESP------------------------------*/
 void updateESP()
@@ -923,8 +973,9 @@ void reset()
     WiFi.disconnect();
     delay(1000);
   }
-  conf.setupFlag = true;
-  write_config();
+  configuration newConf;
+  newConf.setupFlag = true;
+  write_config(newConf);
   ESP.reset();
 }
 /*----Meathod for reconfiguring WiFi settings---------------*/
@@ -1068,12 +1119,16 @@ void read_config()
       configFile.readBytes(buf.get(), size);
       StaticJsonDocument<500> jsonBuffer;
       DeserializationError error = deserializeJson(jsonBuffer, buf.get());
+      if(error)
+        return;
       conf.led_enabled = jsonBuffer["led_enabled"];
       conf.pingTime = jsonBuffer["pingTime"];
       conf.setupFlag = jsonBuffer["setupFlag"];
       conf.updateFlag = jsonBuffer["updateFlag"];
-      conf.http_username = jsonBuffer["http_username"];
-      conf.http_password = jsonBuffer["http_password"];
+      String http_username = jsonBuffer["http_username"];
+      String http_password = jsonBuffer["http_password"];
+      conf.http_username = http_username;
+      conf.http_password = http_password;
       for(int t=0; t<8; t++)
       {
         bool pinVal = jsonBuffer["relay_status"][t]; 
@@ -1082,21 +1137,21 @@ void read_config()
     }
   }
 }
-void write_config()
+void write_config(configuration config)
 {
   File configFile = SPIFFS.open("/config.json", "w");
   StaticJsonDocument<500> jsonBuffer;
   JsonArray relay_status = jsonBuffer.createNestedArray("relay_status");
   for(int t=0; t<8; t++)
   {
-    relay_status.add(conf.pinValues[t]);
+    relay_status.add(config.pinValues[t]);
   }
-  jsonBuffer["setupFlag"] = conf.setupFlag;
-  jsonBuffer["updateFlag"] = conf.updateFlag;
-  jsonBuffer["led_enabled"] = conf.led_enabled;
-  jsonBuffer["pingTime"] = conf.pingTime;
-  jsonBuffer["http_username"] = conf.http_username;
-  jsonBuffer["http_password"] = conf.http_password;
+  jsonBuffer["setupFlag"] = config.setupFlag;
+  jsonBuffer["updateFlag"] = config.updateFlag;
+  jsonBuffer["led_enabled"] = config.led_enabled;
+  jsonBuffer["pingTime"] = config.pingTime;
+  jsonBuffer["http_username"] = config.http_username;
+  jsonBuffer["http_password"] = config.http_password;
   String r;
   serializeJson(jsonBuffer, r);
   configFile.print(r); 
