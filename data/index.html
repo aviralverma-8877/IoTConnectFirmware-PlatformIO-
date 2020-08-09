@@ -1,6 +1,7 @@
 <!DOCTYPE html>
     <head>
         <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1">
+        <link rel="icon" href="favicon.ico" type="image/gif">
         <title>
             IoT Connect : Solutions for smart homes.
         </title>
@@ -18,6 +19,7 @@
                 <button class='style_btn' onclick="if(confirm('Are you sure you want to reset this device?')){httpGet(0,0,'device','{\'action\':\'reset\'}')}">Reset</button>
                 <button class='style_btn' onclick="httpGet(0,0,'device','{\'action\':\'reboot\'}')">Reboot</button>
                 <button class='style_btn' onclick="location.href = ('/update')">Update</button>
+                <br />
             </div>
             <div>
                 <input type="checkbox" id="on_board_led" onchange="httpGet(0,0,'device','{\'action\':\'toggle_onb\',\'status\':'+this.checked+'}')" /> <span style="font-family: 'Fjalla One'">Enable/Disable On Board LED</span>
@@ -26,6 +28,21 @@
             <table id="relay_table" cellspacing="15" style="border:#ccc solid thin">
             </table>
             <hr/>
+            <div>
+                <table>
+                    <tr>
+                        <td>
+                            <input type="text" id="login_uname_input" placeholder="Login Username" style="margin:1px"/><br />
+                            <input type="password" id="login_pass_input" placeholder="Login Password" style="margin:1px"/><br />
+                            <input type="password" id="login_confirm_pass_input" placeholder="Confirm Password" style="margin:1px"/><br />
+                        </td>
+                        <td style="height:100%">
+                            <button class='style_btn' onclick="update_login(login_uname_input, login_pass_input, login_confirm_pass_input)">Update Login Details</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <hr />
             <div>
                 <table>
                     <tr>
