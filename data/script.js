@@ -89,10 +89,12 @@ function update_table_data(json)
             var element = document.getElementById('status-'+i);
             if(json['v'][i] == 0)
             {
+                document.getElementById('status-'+i).style.color = "red";
                 element.innerHTML = 'OFF';
             }
             if(json['v'][i] == 1)
             {
+                document.getElementById('status-'+i).style.color = "green";
                 element.innerHTML = 'ON';
             }
         }
