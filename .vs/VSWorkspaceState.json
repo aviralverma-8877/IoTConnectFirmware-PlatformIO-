@@ -1,9 +1,7 @@
 {
   "ExpandedNodes": [
-    "",
-    "\\lib",
-    "\\src"
+    ""
   ],
-  "SelectedNode": "\\src\\main.cpp",
+  "SelectedNode": "\\platformio.ini",
   "PreviewInSolutionExplorer": false
 }
