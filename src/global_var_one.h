@@ -1,5 +1,5 @@
 #ifndef global_var_one
-    #define global_var_one 1
+    #define global_var_one
     #include <Arduino.h>
     #include <AsyncMqttClient.h>              //Async MQTT Library
     #include <Ticker.h>                       //Ticker for running multithread
@@ -52,55 +52,55 @@
     #endif
 
 
-    configuration conf;
+    extern configuration conf;
 
-    AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
+    extern AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
 
-    DHT_Unified dht(DHTPIN, DHTTYPE);         //Initializing DHT sensor. 
+    extern  DHT_Unified dht;         //Initializing DHT sensor. 
 
 
-    ShiftRegister74HC595<1> sr (16, 14, 12);  //Setting up shift register.
-    sensor_t sensor;                          //DTH sensor
-    sensors_event_t event;                    //Creating event variable for DHT sensor.
+    extern ShiftRegister74HC595<1> sr;  //Setting up shift register.
+    extern sensor_t sensor;                          //DTH sensor
+    extern sensors_event_t event;                    //Creating event variable for DHT sensor.
     /*----------------------------------------------------------*/
     /*----------------------------------------------------------*/
-    String payload;                           //Global variables
-    String IpAddress;                    //Global variables
-    String LocalIP;                      //Global variables
-    String data;                              //Global variables
-    String Wifi_ssid;                         //Global variables
-    bool mqtt_setup;                  //Global variables
-    bool first_connect;               //Global variables
-    bool inSetup;
-    byte loopCount;                       //Global variables
-    uint8_t attempts;                     //Global variables
-    uint8_t i;                                //Global variables
-    HTTPClient http;                          //Global variables
-    int temp, humid, light;                   //Global variables
-    uint32_t delayMS;                         //Global variables
-    String updateAddress;                     //Update address
-    DNSServer dnsServer;                      //Global variables
-    AsyncWebServer webServer(80);             //Global variables
-    bool shouldReboot;
-    String wifi_ssid;
-    String wifi_pass;
+    extern String payload;                           //Global variables
+    extern String IpAddress;                    //Global variables
+    extern String LocalIP;                      //Global variables
+    extern String data;                              //Global variables
+    extern String Wifi_ssid;                         //Global variables
+    extern bool mqtt_setup;                  //Global variables
+    extern bool first_connect;               //Global variables
+    extern bool inSetup;
+    extern byte loopCount;                       //Global variables
+    extern uint8_t attempts;                     //Global variables
+    extern uint8_t i;                                //Global variables
+    extern HTTPClient http;                          //Global variables
+    extern int temp, humid, light;                   //Global variables
+    extern uint32_t delayMS;                         //Global variables
+    extern String updateAddress;                     //Update address
+    extern DNSServer dnsServer;                      //Global variables
+    extern AsyncWebServer webServer;             //Global variables
+    extern bool shouldReboot;
+    extern String wifi_ssid;
+    extern String wifi_pass;
     /*----------------------------------------------------------*/
     /*--------------MQTT Configration---------------------------*/
-    String norttopic;                //MQTT Topic for sending nortifications.
-    String sensortopic;         //MQTT Topic for sending sensor data.
-    String espstatus;           //MQTT Topic for sending relay status data.
-    String espraw;                 //MQTT Topic for sending device attendence.
+    extern String norttopic;                //MQTT Topic for sending nortifications.
+    extern String sensortopic;         //MQTT Topic for sending sensor data.
+    extern String espstatus;           //MQTT Topic for sending relay status data.
+    extern String espraw;                 //MQTT Topic for sending device attendence.
     /*--------------MQTT Configration---------------------------*/
 
     /*--------------Tickers for Async Meathods------------------*/
-    Ticker TickerForPinging;
-    Ticker TickerForsendSensorData;
-    Ticker TickerForcheckReset;
-    Ticker TickerForfetchIP;
-    Ticker TickerForconnectToMqtt;
-    Ticker TickerForFeedbackLED;
-    Ticker TickerForSerialListner;
-    Ticker TickerForUARTUpdater;
-    Ticker TickerForTimeOut;
+    extern Ticker TickerForPinging;
+    extern Ticker TickerForsendSensorData;
+    extern Ticker TickerForcheckReset;
+    extern Ticker TickerForfetchIP;
+    extern Ticker TickerForconnectToMqtt;
+    extern Ticker TickerForFeedbackLED;
+    extern Ticker TickerForSerialListner;
+    extern Ticker TickerForUARTUpdater;
+    extern Ticker TickerForTimeOut;
     /*--------------Tickers for Async Meathods------------------*/
 #endif

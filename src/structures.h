@@ -1,5 +1,5 @@
 #ifndef structures
-  #define structures 1
+  #define structures
   #include <Arduino.h>
 
   struct configuration{

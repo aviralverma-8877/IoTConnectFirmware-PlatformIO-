@@ -3,6 +3,7 @@
 #include <ESP8266mDNS.h>        // Include the mDNS library
 #include "global_var_two.h"
 #include "global_var_one.h"
+#include "structures.h"
 #include "common_meathods.h"
 #include "web_handler.h"
 #include "mqtt_handler.h"

@@ -1,5 +1,5 @@
 #ifndef web_handler
-    #define web_handler 1
+    #define web_handler
     #include <Arduino.h>
     #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>

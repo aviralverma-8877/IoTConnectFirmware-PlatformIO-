@@ -1,5 +1,5 @@
 #ifndef device_handler
-    #define device_handler 1
+    #define device_handler
     #include<Arduino.h>
     void relay_action(int no, bool value, String by);
     void updateESP();

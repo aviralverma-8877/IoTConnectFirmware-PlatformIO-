@@ -4,7 +4,9 @@
 #include "structures.h"
 #include "mqtt_handler.h"
 #include "global_var_two.h"
+#include "global_var_one.h"
 
+void (*callback)(void);
 void write_config(configuration config)
 {
   File configFile = SPIFFS.open("/config.json", "w");
