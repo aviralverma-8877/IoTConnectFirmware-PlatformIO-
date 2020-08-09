@@ -65,12 +65,10 @@ function print_table()
             Relay "+(i+1)+" : <span id='status-"+i+"'></span>\
         </th>\
         <th>\
-            <button class='style_btn' onclick='httpGet("+i+",1,\"toggle_relay\")'>\
-            ON\
-            </button>\
-            <button class='style_btn' onclick='httpGet("+i+",0,\"toggle_relay\")'>\
-            OFF\
-            </button>\
+            <label class=\"switch\">\
+                <input type=\"checkbox\" id=\"checkbox-"+i+"\" onchange=\"toggle_relay(this,"+i+")\">\
+                <span class=\"slider round\"></span>\
+            </label>\
         </th>\
         </tr>";
     }
@@ -79,6 +77,13 @@ function print_table()
     data = httpGet(0, 0, 'get_status');
     json = JSON.parse(data);
     update_table_data(json);
+}
+function toggle_relay(element, relay_no)
+{
+    if(element.checked) 
+        httpGet(relay_no,1,"toggle_relay"); 
+    else 
+        httpGet(relay_no,0,"toggle_relay");
 }
 function update_table_data(json)
 {
@@ -90,11 +95,13 @@ function update_table_data(json)
             if(json['v'][i] == 0)
             {
                 document.getElementById('status-'+i).style.color = "red";
+                document.getElementById('checkbox-'+i).checked = false;
                 element.innerHTML = 'OFF';
             }
             if(json['v'][i] == 1)
             {
                 document.getElementById('status-'+i).style.color = "green";
+                document.getElementById('checkbox-'+i).checked = true;
                 element.innerHTML = 'ON';
             }
         }
