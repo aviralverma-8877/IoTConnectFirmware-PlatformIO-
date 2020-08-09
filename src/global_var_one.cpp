@@ -12,45 +12,12 @@
     #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>
     #include "structures.h"
-
-    #ifndef MQTT_HOST
-        #define MQTT_HOST "iot-connect.in"        //MQTT Server address
-    #endif
-    #ifndef MQTT_PORT
-        #define MQTT_PORT 1883                    //MQTT Server port
-    #endif
-    //MQTT Cred
-    #ifndef MQTT_UNAME
-        #define MQTT_UNAME "iotconnect"
-    #endif
-    #ifndef MQTT_PASS
-        #define MQTT_PASS "iot-12345"
-    #endif
-    #ifndef LDR_PIN
-        #define LDR_PIN A0                        //LDR Pin address
-    #endif
-    #ifndef reset_btn
-        #define reset_btn 4                       //Reset Button pin
-    #endif
-    #ifndef indicator_led
-        #define indicator_led 13                  //LED Pin
-    #endif
     #ifndef DHTPIN
         #define DHTPIN 2                          //DHT single wire interface pin
     #endif
     #ifndef DHTTYPE
         #define DHTTYPE DHT11                     //Type of DHT sensor.
     #endif
-    //Configuring Device
-    #ifndef FIRMWARE_V
-    #define FIRMWARE_V "2.1.1"                //Current firmware version. (Displayed on Device Portal)
-    #endif
-    #ifndef DEVICE_V
-        #define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
-                                                                //(V2 - With Sensor)
-                                            //Should not modify the vesions, as website device portal is set accordingly.
-    #endif
-
     AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
 
     DHT_Unified dht(DHTPIN, DHTTYPE);         //Initializing DHT sensor. 
