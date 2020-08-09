@@ -128,7 +128,7 @@ void reset()
     WiFi.disconnect();
     delay(1000);
   }
-  configuration newConf;
+  configuration newConf = {{ 0,0,0,0,0,0,0,0 },false,false,true,2000,"admin","admin"};
   newConf.setupFlag = true;
   write_config(newConf);
   ESP.reset();
