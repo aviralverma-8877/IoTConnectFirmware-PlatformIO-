@@ -1,3 +1,22 @@
+var Socket;
+function init_socket()
+{
+    Socket = new WebSocket('ws://'+window.location.hostname+":81/");
+    Socket.onmessage = function(event){
+        json = JSON.parse(event.data);
+        update_table_data(json);
+    }
+    Socket.onopen = function(event){
+        console.log("Connected to web sockets...")
+    }
+    Socket.onclose = function(event){
+        console.log("Connection to websockets closed....")
+    }
+    Socket.onerror = function(event){
+        console.log("Error in websockets");
+    }
+}
+
 function httpGet(relay, value, action, options = {})
 {
     if(action == "toggle_relay")
@@ -56,49 +75,53 @@ function print_table()
         </tr>";
     }
     table.innerHTML = content;
-    setInterval(function ()
+    init_socket();
+    data = httpGet(0, 0, 'get_status');
+    json = JSON.parse(data);
+    update_table_data(json);
+}
+function update_table_data(json)
+{
+    if(json != null)
     {
-        return new Promise (() => {
-            data = httpGet(0, 0, 'get_status');
-            json = JSON.parse(data);
-            if(json != null)
+        for(var i=0; i<json['v'].length; i++)
+        {
+            var element = document.getElementById('status-'+i);
+            if(json['v'][i] == 0)
             {
-                for(var i=0; i<json['relay_status'].length; i++)
-                {
-                    var element = document.getElementById('status-'+i);
-                    if(json['relay_status'][i] == 0)
-                    {
-                        element.innerHTML = 'OFF';
-                    }
-                    if(json['relay_status'][i] == 1)
-                    {
-                        element.innerHTML = 'ON';
-                    }
-                }
-                onb_status = json['onb_led'];
-                document.getElementById("on_board_led").checked = onb_status
-                var cont = "";
-                wifi_ssid = json['wifi_ssid'];
-                wifi_type = json['type'];
-                cont = "Connected to <b>"+wifi_ssid+"</b>";
-                cont += " | Device Type <b>"+wifi_type+"</b>";
-                if(json['temp'] != undefined)
-                {
-                    temp = json['temp'];
-                    humid = json['humid'];
-                    lumin = json['lumin'];
-                    cont = cont + " | Temperature : "+temp+" C | Humidity : "+humid+" % | Lumin : "+lumin+" % "
-                }
-                element = document.getElementById('WiFi_Status');
-                element.innerHTML = cont;
+                element.innerHTML = 'OFF';
             }
-        });
-    },1000);
+            if(json['v'][i] == 1)
+            {
+                element.innerHTML = 'ON';
+            }
+        }
+        onb_status = json['onb_led'];
+        document.getElementById("on_board_led").checked = onb_status
+        var cont = "";
+        wifi_ssid = json['wifi_ssid'];
+        wifi_type = json['type'];
+        cont = "Connected to <b>"+wifi_ssid+"</b>";
+        cont += " | Device Type <b>"+wifi_type+"</b>";
+        if(json['temp'] != undefined)
+        {
+            temp = json['temp'];
+            humid = json['humid'];
+            lumin = json['lumin'];
+            cont = cont + " | Temperature : "+temp+" C | Humidity : "+humid+" % | Lumin : "+lumin+" % "
+        }
+        element = document.getElementById('WiFi_Status');
+        element.innerHTML = cont;
+    }
 }
 function update_wifi(ssid, pass)
 {
     return new Promise (() => {
         response = httpGet(0,0,"set_wifi",{"ssid":ssid,"pass":pass});
+        setTimeout(()=>
+        {
+            location.reload();
+        },20000);
     });
 }
 function scan_wifi()

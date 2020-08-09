@@ -8,6 +8,7 @@
 #include "device_handler.h"
 #include "mqtt_handler.h"
 #include "common_meathods.h"
+#include "web_sockets_handler.h"
 
 /*-------Meathod called when connected to MQTT--------------*/
 void onMqttConnect(bool sessionPresent) {
@@ -183,9 +184,20 @@ void sendToMQTT(String topic, String msg)
 /*----Meathod for sending relay status----------------------*/
 void send_status()
 {
-  StaticJsonDocument<200> doc;
+  StaticJsonDocument<500> doc;
   doc["d"] = chipid;
   doc["action"] = "s";
+  doc["uname"] = conf.http_username;
+  doc["type"] = DEVICE_V;
+  doc["wifi_ssid"] = Wifi_ssid;
+  doc["wifi_rssi"] = WiFi.RSSI();
+  doc["onb_led"] = conf.led_enabled;
+  if(strcmp(DEVICE_V, "v2") == 0)
+  {
+    doc["t"] = temp;
+    doc["h"] = humid;
+    doc["l"] = light;
+  }
   JsonArray data = doc.createNestedArray("v");
   for(int t=0; t<8; t++)
   {
@@ -195,6 +207,7 @@ void send_status()
   serializeJson(doc, r);
   sendToMQTT(outtopic, r);
   sendToMQTT(espstatus, r);
+  send_data_to_webSocket(r);
   send_status_uart();
 }
 /*----Meathod for sending relay status----------------------*/

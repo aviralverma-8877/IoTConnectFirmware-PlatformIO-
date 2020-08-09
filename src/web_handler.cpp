@@ -74,7 +74,7 @@ void handleWebStatus(AsyncWebServerRequest *request)
 {
   String return_msg = "";
   StaticJsonDocument<500> return_doc;
-  JsonArray relay_status = return_doc.createNestedArray("relay_status");
+  JsonArray relay_status = return_doc.createNestedArray("v");
   for(int t=0; t<8; t++)
   {
     relay_status.add(sr.get(t));

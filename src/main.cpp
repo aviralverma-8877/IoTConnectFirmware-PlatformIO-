@@ -8,11 +8,13 @@
 #include "web_handler.h"
 #include "mqtt_handler.h"
 #include "device_handler.h"
+#include "web_sockets_handler.h"
 
 void setup() 
 {
   Serial.begin(115200);
   SPIFFS.begin();
+  webSocket.begin();
   if (SPIFFS.exists("/config.json")) {
     read_config();
   }
@@ -139,6 +141,7 @@ void setup()
 void loop() 
 {
   MDNS.update();
+  webSocket.loop();
   callback();
   if(strcmp(DEVICE_V, "v2") == 0)
   {

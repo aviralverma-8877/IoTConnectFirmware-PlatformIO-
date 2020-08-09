@@ -21,7 +21,6 @@ void relay_action(int no, bool value, String by)
   String r = "";
   serializeJson(doc, r);
   sendToMQTT(norttopic, r);
-
 //saving to config
   for(int t=0; t<8; t++)
   {
@@ -225,6 +224,7 @@ void fetchIP()
       LocalIP = IpAddress2String(WiFi.localIP());
       serialDisplay("SSID",Wifi_ssid);
       serialDisplay("IP Address",IpAddress);
+      send_status();
     }
   }
   callback = &blank;
