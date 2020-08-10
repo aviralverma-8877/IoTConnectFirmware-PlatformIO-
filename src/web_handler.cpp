@@ -9,6 +9,7 @@
 #include "global_var_two.h"
 #include "device_handler.h"
 #include "common_meathods.h"
+#include "mqtt_handler.h"
 
 extern "C" uint32_t _FS_start;
 extern "C" uint32_t _FS_end;
@@ -66,6 +67,7 @@ void handleWebControl(AsyncWebServerRequest *request)
       bool status = doc["status"];
       conf.led_enabled = status;
       write_config(conf);
+      send_status();
     }
   }
   request->send(200, "application/json", message);
