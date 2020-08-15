@@ -43,6 +43,10 @@ function httpGet(relay, value, action, options = {})
     {
         theUrl = '/update_login?options='+JSON.stringify(options);
     }
+    if(action == "update_device_config")
+    {
+        theUrl = '/update_device_config?options='+JSON.stringify(options);
+    }
     try
     {
         var xmlHttp = new XMLHttpRequest();
@@ -76,6 +80,7 @@ function print_table()
     init_socket();
     data = httpGet(0, 0, 'get_status');
     json = JSON.parse(data);
+    console.log(json);
     if(!json.init_setup)
     {
         start_init_setup()
@@ -433,6 +438,16 @@ function save_config()
                 config.device_cofig.light.GPIO = "A0"
             }
         }
-        console.log(config);
+        result = JSON.parse(httpGet(0,0,"update_device_config", config))
+        if(result.done)
+        {
+            alert("Device config saved successfully. Rebooting....");
+            setTimeout(()=>{
+                location.reload();
+            },5000)
+        }
+        else{
+            alert(result.error)
+        }
     }
 }

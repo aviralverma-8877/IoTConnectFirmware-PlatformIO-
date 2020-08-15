@@ -86,9 +86,11 @@ void handleWebStatus(AsyncWebServerRequest *request)
   return_doc["wifi_ssid"] = Wifi_ssid;
   return_doc["wifi_rssi"] = WiFi.RSSI();
   return_doc["onb_led"] = conf.led_enabled;
-  StaticJsonDocument<500> device_config = read_device_config();
-  bool inti_setup = device_config["init_setup_done"];
-  return_doc["init_setup"] = inti_setup;
+  String device_config = read_device_config();
+  StaticJsonDocument<500> doc;
+  DeserializationError error = deserializeJson(doc, device_config);
+  bool init_setup = doc["init_setup_done"];
+  return_doc["init_setup"] = init_setup;
   if(strcmp(DEVICE_V, "v2") == 0)
   {
     return_doc["t"] = temp;
@@ -98,7 +100,41 @@ void handleWebStatus(AsyncWebServerRequest *request)
   serializeJson(return_doc, return_msg);
   request->send(200, "application/json", return_msg); 
 }
+void handleDeviceConfig(AsyncWebServerRequest *request)
+{
+  String return_msg;
+  int params = request->params();
+  if(request->hasParam("options"))
+  {
+    String device_config = request->arg("options");
+    StaticJsonDocument<500> doc;
+    DeserializationError error = deserializeJson(doc, device_config);
+    if (error) 
+    {
+      StaticJsonDocument<200> return_doc;
+      return_doc["done"] = false;
+      return_doc["error"] = "Failed to parse config";
+      serializeJson(return_doc, return_msg);
+      request->send(200, "application/json", return_msg);
+      return;
+    }
+    write_device_config(doc);
+    StaticJsonDocument<200> return_doc;
+    return_doc["done"] = true;
+    serializeJson(return_doc, return_msg);
+    request->send(200, "application/json", return_msg);
+  }
+  else
+  {
+    StaticJsonDocument<200> return_doc;
+    return_doc["done"] = false;
+    return_doc["error"] = "No config available";
+    serializeJson(return_doc, return_msg);
+    request->send(200, "application/json", return_msg);
+  }
+  
 
+}
 void web_scan_wifi(AsyncWebServerRequest *request)
 {
   WiFi.scanNetworksAsync([request](int networksFound){

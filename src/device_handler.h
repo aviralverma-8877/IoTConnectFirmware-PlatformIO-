@@ -15,5 +15,5 @@
     void fetchIP();
     void read_config();
     void send_status_uart();
-    StaticJsonDocument<500> read_device_config();
+    String read_device_config();
 #endif

@@ -116,6 +116,11 @@ void setup()
   webServer.on("/update_login", HTTP_GET, [](AsyncWebServerRequest *request){
     web_update_login(request);
   });
+  webServer.on("/update_device_config", HTTP_GET, [](AsyncWebServerRequest *request){
+    handleDeviceConfig(request);
+  });
+  webServer.serveStatic("/device_config.json", SPIFFS, "/device_config.json");
+  webServer.serveStatic("/config.json", SPIFFS, "/config.json");
   webServer.serveStatic("/script.js", SPIFFS, "/script.js");
   webServer.serveStatic("/style.css", SPIFFS, "/style.css");
   webServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request){

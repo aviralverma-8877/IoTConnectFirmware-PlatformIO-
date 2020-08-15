@@ -263,7 +263,7 @@ void read_config()
   }
 }
 
-StaticJsonDocument<500> read_device_config()
+String read_device_config()
 {
   if (SPIFFS.exists("/device_config.json")) {
     File configFile = SPIFFS.open("/device_config.json", "r");
@@ -273,10 +273,7 @@ StaticJsonDocument<500> read_device_config()
       std::unique_ptr<char[]> buf(new char[size]);
 
       configFile.readBytes(buf.get(), size);
-      StaticJsonDocument<500> jsonBuffer;
-      DeserializationError error = deserializeJson(jsonBuffer, buf.get());
-      if(!error)
-        return jsonBuffer;
+      return buf.get();
     }
   }
 }

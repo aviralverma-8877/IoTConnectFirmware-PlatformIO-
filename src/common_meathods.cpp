@@ -27,6 +27,18 @@ void write_config(configuration config)
   configFile.print(r); 
 }
 
+void write_device_config(StaticJsonDocument<500> jsonBuffer)
+{
+  File configFile = SPIFFS.open("/device_config.json", "w");
+  String r;
+  serializeJsonPretty(jsonBuffer, r);
+  configFile.print(r); 
+  TickerForTimeOut.attach(1,[](){
+    ESP.reset();
+  });
+}
+
+
 /*-------Meathod for displaying serial data in JSON---------*/
 void serialDisplay(String head,String body)
 {
