@@ -7,8 +7,8 @@
             IoT Connect : Solutions for smart homes.
         </title>
         <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
-        <link href="css" rel="stylesheet">
-        <script type="application/javascript" src="js"></script>
+        <link href="style.css" rel="stylesheet">
+        <script type="application/javascript" src="script.js"></script>
     </head>
     <body onload="print_table()">
         <h1 style="font-family: 'Fjalla One'">IoT Connect : Solutions for smart homes.</h1>
@@ -67,5 +67,186 @@
                 <hr />
             </div>
         </center>
+        <div id="cover" class="slow" onclick="close_init_setup()"></div>
+        <div id="popup" class="slow">
+            <h1 style="font-family: 'Fjalla One';">
+                Device Setup
+            </h1><hr />
+            <center>
+                <table class="table_border" style="font-family: 'Fjalla One';">
+                    <tr>
+                        <th>
+                            Device Type :
+                        </th>
+                        <td>
+                            <select onchange="check_board(this.value)" id="device_type">
+                                <option value="IoT Connect Board Rev 1">
+                                    IoT Connect Board Rev 1
+                                </option>
+                                <option value="IoT Connect Board Rev 2">
+                                    IoT Connect Board Rev 2
+                                </option>
+                                <option value="Sonoff Basics">
+                                    Sonoff Basics
+                                </option>
+                                <option value="Custom Board">
+                                    Custom Board
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                <div id="custom_board_configs">
+                    <table class="table_border" style="font-family: 'Fjalla One';">
+                        <tr>
+                            <th>
+                                Shift Register : 
+                            </th>
+                            <td>
+                                Available <input type="checkbox" id="sr_avail" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Data Pin:
+                            </td>
+                            <td>
+                                <select  id="sr_dpin"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Clock Pin:
+                            </td>
+                            <td>
+                                <select  id="sr_cpin"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                latch Pin:
+                            </td>
+                            <td>
+                                <select  id="sr_lpin"></select> 
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="table_border" style="font-family: 'Fjalla One';">
+                        <tr>
+                            <th>
+                                Status LED:
+                            </th>
+                            <th> 
+                                <select  id="status_led"></select>
+                            </th>
+                        </tr>
+                    </table>
+                    <table class="table_border" style="font-family: 'Fjalla One';">
+                        <tr>
+                            <th>
+                                Reset :
+                            </th>
+                            <th>
+                                <select  id="rst_pin"></select>
+                            </th>
+                        </tr>
+                    </table>
+                    <table class="table_border" style="font-family: 'Fjalla One';">
+                        <tr>
+                            <th>
+                                Relay
+                            </th>
+                        </tr>
+                        <tr>
+                            <td>
+                                Relay 1 : 
+                            </td>
+                            <td>
+                                <select  id="rly_1"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Relay 2 :
+                            </td>
+                            <td>
+                                <select  id="rly_2"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Relay 3 :
+                            </td>
+                            <td>
+                                <select  id="rly_3"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Relay 4 :
+                            </td>
+                            <td>
+                                <select  id="rly_4"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Relay 5 :
+                            </td>
+                            <td>
+                                <select  id="rly_5"></select>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="table_border" style="font-family: 'Fjalla One';">
+                        <tr>
+                            <th>
+                                Sensor
+                            </th>
+                            <td>
+                                Available <input type="checkbox" id="dht_sens_avail" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                DHT Sensor Type:
+                            </td>
+                            <td>    
+                                <select id="sensor_type">
+                                    <option value="DHT11">
+                                        DHT 11
+                                    </option>
+                                    <option value="DHT22">
+                                        DHT 22
+                                    </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                PIN :
+                            </td>
+                            <td>
+                                <select  id="sen_pin"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                Light Sensor:
+                            </th>
+                            <td>
+                                Available <input type="checkbox" id="ldr_sens_avail" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                PIN : A0
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <button class='style_btn' onclick="save_config()">Save</button>
+            </center>
+        </div>
     </body>
 </html>

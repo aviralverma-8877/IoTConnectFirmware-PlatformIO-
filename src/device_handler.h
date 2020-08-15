@@ -1,6 +1,7 @@
 #ifndef device_handler
     #define device_handler
     #include<Arduino.h>
+    #include<ArduinoJson.h>
     void relay_action(int no, bool value, String by);
     void updateESP();
     void SerialListner();
@@ -14,4 +15,5 @@
     void fetchIP();
     void read_config();
     void send_status_uart();
+    StaticJsonDocument<500> read_device_config();
 #endif

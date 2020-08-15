@@ -116,16 +116,24 @@ void setup()
   webServer.on("/update_login", HTTP_GET, [](AsyncWebServerRequest *request){
     web_update_login(request);
   });
-  webServer.serveStatic("/js", SPIFFS, "/script.js");
-  webServer.serveStatic("/css", SPIFFS, "/style.css");
-  webServer.serveStatic("/", SPIFFS, "/index.html");
+  webServer.serveStatic("/script.js", SPIFFS, "/script.js");
+  webServer.serveStatic("/style.css", SPIFFS, "/style.css");
+  webServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    File index = SPIFFS.open("/index.html", "r");
+    if (index) {
+      request->send(SPIFFS, "/index.html", "text/html");
+    }
+    else{
+      request->redirect("/update");
+    }
+  });
   webServer.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
   webServer.onNotFound([](AsyncWebServerRequest *request){
     if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
     {
       return request->requestAuthentication();
     }
-    request->send(SPIFFS, "/index.html", "text/html");
+      request->redirect("/");
   });
 
   webServer.begin();

@@ -1,0 +1,26 @@
+{
+    "init_setup_done":false,
+    "device_cofig":{
+        "shift_out_reg" : {
+            "avail" : true,
+            "serialDataPin" : 16,
+            "clockPin" : 14,
+            "latchPin" : 12
+        },
+        "status_led" : 13,
+        "reset_btn" : 4,
+        "relay" : {
+            "count" : 0,
+            "GPIO" : []
+        },
+        "dht":{
+            "TYPE":"DHT11",
+            "GPIO":2,
+            "INSTALLED":false
+        },
+        "light":{
+            "GPIO":"A0",
+            "INSTALLED":false
+        }
+    }
+}

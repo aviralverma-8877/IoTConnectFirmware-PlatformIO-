@@ -86,6 +86,9 @@ void handleWebStatus(AsyncWebServerRequest *request)
   return_doc["wifi_ssid"] = Wifi_ssid;
   return_doc["wifi_rssi"] = WiFi.RSSI();
   return_doc["onb_led"] = conf.led_enabled;
+  StaticJsonDocument<500> device_config = read_device_config();
+  bool inti_setup = device_config["init_setup_done"];
+  return_doc["init_setup"] = inti_setup;
   if(strcmp(DEVICE_V, "v2") == 0)
   {
     return_doc["t"] = temp;

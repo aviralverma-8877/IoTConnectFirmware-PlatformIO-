@@ -128,6 +128,7 @@ void reset()
     WiFi.disconnect();
     delay(1000);
   }
+  SPIFFS.format();
   configuration newConf = {{ 0,0,0,0,0,0,0,0 },false,false,true,2000,"admin","admin"};
   newConf.setupFlag = true;
   write_config(newConf);
@@ -258,6 +259,24 @@ void read_config()
         bool pinVal = jsonBuffer["relay_status"][t]; 
         conf.pinValues[t] = pinVal;
       }
+    }
+  }
+}
+
+StaticJsonDocument<500> read_device_config()
+{
+  if (SPIFFS.exists("/device_config.json")) {
+    File configFile = SPIFFS.open("/device_config.json", "r");
+    if (configFile) {
+      size_t size = configFile.size();
+      // Allocate a buffer to store contents of the file.
+      std::unique_ptr<char[]> buf(new char[size]);
+
+      configFile.readBytes(buf.get(), size);
+      StaticJsonDocument<500> jsonBuffer;
+      DeserializationError error = deserializeJson(jsonBuffer, buf.get());
+      if(!error)
+        return jsonBuffer;
     }
   }
 }
