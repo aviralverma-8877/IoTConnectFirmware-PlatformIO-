@@ -15,5 +15,6 @@
     void fetchIP();
     void read_config();
     void send_status_uart();
+    void generate_mqtt_topics();
     String read_device_config();
 #endif

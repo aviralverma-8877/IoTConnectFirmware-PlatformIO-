@@ -119,6 +119,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
       return;
     }
     write_device_config(doc);
+    generate_mqtt_topics();
     StaticJsonDocument<200> return_doc;
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);

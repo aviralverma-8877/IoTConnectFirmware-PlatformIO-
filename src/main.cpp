@@ -121,6 +121,7 @@ void setup()
   });
   webServer.serveStatic("/device_config.json", SPIFFS, "/device_config.json");
   webServer.serveStatic("/config.json", SPIFFS, "/config.json");
+  webServer.serveStatic("/mqtt_topics.json", SPIFFS, "/mqtt_topics.json");
   webServer.serveStatic("/script.js", SPIFFS, "/script.js");
   webServer.serveStatic("/style.css", SPIFFS, "/style.css");
   webServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request){

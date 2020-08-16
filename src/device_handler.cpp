@@ -277,3 +277,63 @@ String read_device_config()
     }
   }
 }
+
+void generate_mqtt_topics()
+{
+  StaticJsonDocument<500> doc;
+  String device_config = read_device_config();
+  DeserializationError error = deserializeJson(doc, device_config);
+  if(error)
+    return;
+  StaticJsonDocument<1000> topic_doc;
+  int relay_count = 0;
+  bool has_shift_reg = doc["device_cofig"]["shift_out_reg"]["avail"];
+  topic_doc["input"]["COMMAND"] = chipid+"/COMMAND";
+  if(has_shift_reg)
+  {
+    for(int i=0; i<8; i++)
+    {
+      String key = "relay_"+String(relay_count);
+      relay_count++;
+      String value = chipid+"/shift_out_reg/pin_"+i;
+      topic_doc["input"][key] = value;
+    }
+  }
+  int relay_gpio_count = doc["device_cofig"]["relay"]["count"];
+  if(relay_gpio_count > 0)
+  {
+    for(int i=0; i<relay_gpio_count; i++)
+    {
+      String key = "relay_"+String(relay_count);
+      relay_count++;
+      int pin  = doc["device_cofig"]["relay"]["GPIO"][i];
+      String value = chipid+"/gpio_relay/pin_"+pin;
+      topic_doc["input"][key] = value;
+    }
+  }
+  bool has_dht_sensor = doc["device_cofig"]["dht"]["INSTALLED"];
+  if(has_dht_sensor)
+  {
+    String key = "dht";
+    int pin  = doc["device_cofig"]["dht"]["GPIO"];
+    String value = chipid+"/dht/pin_"+pin;
+    topic_doc["output"][key] = value;
+  }
+
+  topic_doc["output"]["ESPSTATUS"] = chipid+"/ESPSTATUS";
+  topic_doc["output"]["NORT"] = chipid+"/NORT";
+  topic_doc["output"]["ESPRAW"] = chipid+"/ESPRAW";
+  
+  bool has_light_sensor = doc["device_cofig"]["light"]["INSTALLED"];
+  if(has_dht_sensor)
+  {
+    String key = "light";
+    String pin  = doc["device_cofig"]["light"]["GPIO"];
+    String value = chipid+"/light/pin_"+pin;
+    topic_doc["output"][key] = value;
+  }
+  File topicFile = SPIFFS.open("/mqtt_topics.json", "w");
+  String r;
+  serializeJsonPretty(topic_doc, r);
+  topicFile.print(r);
+}
