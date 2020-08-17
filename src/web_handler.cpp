@@ -122,7 +122,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);
     request->send(200, "application/json", return_msg);
-    TickerForTimeOut.attach(1,[doc]{
+    TickerForTimeOut.once(1,[doc]{
       write_device_config(doc);
       generate_mqtt_topics();
     });
@@ -240,14 +240,17 @@ void firmware_web_updater()
   });
 
   webServer.on("/update_flash", HTTP_POST, [](AsyncWebServerRequest *request){
-    if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
-    {
-      return request->requestAuthentication();
-    }
     shouldReboot = !Update.hasError();
     if(shouldReboot)
     {
-      request->send_P(200, "text/html", "Upload successfull, Rebooting....<br /><a href='/'>Home Page</a>");
+      request->send_P(200, "text/html", "Upload successfull, Rebooting....<br /><a href='/'>Home Page</a>\
+      <script>\
+        setTimeout(\
+          function()\
+            {\
+              window.location.href = \"/\"\
+            },10000);\
+      </script>");
     }
   },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
     if(!index){
@@ -268,7 +271,7 @@ void firmware_web_updater()
       if(Update.end(true)){
         if(debugging)
           Serial.printf("Update Success: %uB\n", index+len);
-        TickerForTimeOut.attach(1,[](){
+        TickerForTimeOut.once(1,[](){
           ESP.reset();
         });
       } else {
@@ -282,7 +285,14 @@ void firmware_web_updater()
     shouldReboot = !Update.hasError();
     if(shouldReboot)
     {
-      request->send_P(200, PSTR("text/html"), "Spiffs Upload successfull. Rebooting...<br /><a href='/'>Home Page</a>");
+      request->send_P(200, "text/html", "Upload successfull, Rebooting....<br /><a href='/'>Home Page</a>\
+      <script>\
+        setTimeout(\
+          function()\
+            {\
+              window.location.href = \"/\"\
+            },10000);\
+      </script>");
       read_config();
       /*--------Reading data from SPIFFS for last relay status ----*/
       for(int t=0; t<8; t++)
@@ -313,7 +323,7 @@ void firmware_web_updater()
       if(Update.end(true)){
         if(debugging)
           Serial.printf("Update Success: %uB\n", index+len);
-        TickerForTimeOut.attach(1,[](){
+        TickerForTimeOut.once(1,[](){
           ESP.reset();
         });
       } else {

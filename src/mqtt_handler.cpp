@@ -54,7 +54,9 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   {
     p += payload[i];
   }
-  send_data_to_webSocket(String(topic)+" : "+ p);
+  TickerForTimeOut.once_ms(100,[topic,p](){
+    send_data_to_webSocket(String(topic)+" : "+ p);
+  });
   if(comp(topic, intopic.c_str()))
   {
     StaticJsonDocument<200> root;
@@ -177,6 +179,34 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       }
   /*-------Action command for updating firmware---------------*/
     }
+  }
+  else
+  {
+    String mqtt_data = read_mqtt_config();
+    StaticJsonDocument<1000> doc;
+    StaticJsonDocument<200> msg;
+    DeserializationError error_1 = deserializeJson(doc, mqtt_data);
+    if(error_1)
+      return;
+    DeserializationError error_2 = deserializeJson(msg, p);
+    if(error_2)
+      return;
+    if(!msg.containsKey("action"))
+      return;
+    for( const auto& kv : doc["input"].as<JsonObject>() ) 
+    {
+      String config_topic = kv.value()["topic"];
+      if(!comp(config_topic.c_str(), "null"))
+      {
+        if(comp(topic, config_topic.c_str()))
+        {
+          bool action = msg["action"];
+          const char *key = kv.key().c_str();
+          doc["input"][key]["status"] = action;
+        }
+      }
+    }
+    write_mqtt_topics(doc);
   }
 }
 /*-------Meathod called on reciving message from MQTT-------*/
