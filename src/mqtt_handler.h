@@ -13,3 +13,4 @@ void onMqttPublish(uint16_t packetId);
 void sendToMQTT(String topic, String msg);
 void send_status();
 void connectToMqtt();
+void subscribe_mqtt_input();

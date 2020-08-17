@@ -263,6 +263,21 @@ void read_config()
   }
 }
 
+String read_mqtt_config()
+{
+  if (SPIFFS.exists("/mqtt_topics.json")) {
+    File configFile = SPIFFS.open("/mqtt_topics.json", "r");
+    if (configFile) {
+      size_t size = configFile.size();
+      // Allocate a buffer to store contents of the file.
+      std::unique_ptr<char[]> buf(new char[size]);
+
+      configFile.readBytes(buf.get(), size);
+      return buf.get();
+    }
+  }
+}
+
 String read_device_config()
 {
   if (SPIFFS.exists("/device_config.json")) {
@@ -296,7 +311,8 @@ void generate_mqtt_topics()
       String key = "relay_"+String(relay_count);
       relay_count++;
       String value = chipid+"/shift_out_reg/pin_"+i;
-      topic_doc["input"][key] = value;
+      topic_doc["input"][key]["topic"] = value;
+      topic_doc["input"][key]["status"] = false;
     }
   }
   int relay_gpio_count = doc["device_cofig"]["relay"]["count"];
@@ -308,7 +324,8 @@ void generate_mqtt_topics()
       relay_count++;
       int pin  = doc["device_cofig"]["relay"]["GPIO"][i];
       String value = chipid+"/gpio_relay/pin_"+pin;
-      topic_doc["input"][key] = value;
+      topic_doc["input"][key]["topic"] = value;
+      topic_doc["input"][key]["status"] = false;
     }
   }
   bool has_dht_sensor = doc["device_cofig"]["dht"]["INSTALLED"];

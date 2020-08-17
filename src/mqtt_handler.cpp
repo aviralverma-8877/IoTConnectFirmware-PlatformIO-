@@ -15,6 +15,7 @@ void onMqttConnect(bool sessionPresent) {
   serialDisplay("MQTT","MQTT is Connected");
   first_connect = true;
   mqtt.subscribe(intopic.c_str(), 2);
+  subscribe_mqtt_input();
   TickerForPinging.attach_ms(10000, pinging);
   if(strcmp(DEVICE_V, "v2") == 0)
     TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
@@ -53,125 +54,129 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   {
     p += payload[i];
   }
-  StaticJsonDocument<200> root;
-  serialDisplay("MQTT",p);
-  DeserializationError error = deserializeJson(root, p);
-  if (!error) 
+  send_data_to_webSocket(String(topic)+" : "+ p);
+  if(comp(topic, intopic.c_str()))
   {
-    const char *action;
-    action = root["action"];
-/*-------Action command for reconfigring WiFi---------------*/
-    if(comp(action,"RESET_DEVICE"))
+    StaticJsonDocument<200> root;
+    serialDisplay("MQTT",p);
+    DeserializationError error = deserializeJson(root, p);
+    if (!error) 
     {
-      StaticJsonDocument<200> doc;
-      doc["action"] = "ResetDevice";
-      doc["stat"] = "Reset Success.";
-      String r;
-      serializeJson(doc, r);
-      sendToMQTT(outtopic, r);
-      callback = &reset;
-    }
-/*-------Action command for reconfigring WiFi---------------*/
-/*-------Action command for fetching WiFi SSID--------------*/
-    if(comp(action,"SSID"))
-    {
-      StaticJsonDocument<200> doc;
-      doc["SSID"] = Wifi_ssid;
-      doc["RSSI"] = String(WiFi.RSSI());
-      String r;
-      serializeJson(doc, r);
-      sendToMQTT(outtopic, r);
-    }
-/*-------Action command for fetching WiFi SSID--------------*/
-/*-------Action command for setting Sensor Frequency--------------*/
-    if(comp(action,"FREQ"))
-    {
-      delayMS = root["f"];
-      conf.pingTime = delayMS;      //Saving the delay time in config
-      write_config(conf);
-      TickerForsendSensorData.detach();
-      TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
-    }
-/*-------Action command for setting Sensor Frequency--------------*/
-/*-------Action command for getting Sensor Frequency--------------*/
-    if(comp(action,"GETFREQ"))
-    {
-      StaticJsonDocument<200> doc;
-      doc["FREQ"] = delayMS;
-      String r;
-      serializeJson(doc, r);
-      sendToMQTT(outtopic, r);
-    }
-/*-------Action command for getting Sensor Frequency--------*/
-/*-------Action command for fetching ESP Chip ID------------*/
-    if(comp(action,"ESPID"))
-    {
-      StaticJsonDocument<200> doc;
-      doc["CHIPID"] = chipid;
-      String r;
-      serializeJson(doc, r);
-      sendToMQTT(outtopic, r);
-    }
-/*-------Action command for fetching ESP Chip ID------------*/
+      const char *action;
+      action = root["action"];
+  /*-------Action command for reconfigring WiFi---------------*/
+      if(comp(action,"RESET_DEVICE"))
+      {
+        StaticJsonDocument<200> doc;
+        doc["action"] = "ResetDevice";
+        doc["stat"] = "Reset Success.";
+        String r;
+        serializeJson(doc, r);
+        sendToMQTT(outtopic, r);
+        callback = &reset;
+      }
+  /*-------Action command for reconfigring WiFi---------------*/
+  /*-------Action command for fetching WiFi SSID--------------*/
+      if(comp(action,"SSID"))
+      {
+        StaticJsonDocument<200> doc;
+        doc["SSID"] = Wifi_ssid;
+        doc["RSSI"] = String(WiFi.RSSI());
+        String r;
+        serializeJson(doc, r);
+        sendToMQTT(outtopic, r);
+      }
+  /*-------Action command for fetching WiFi SSID--------------*/
+  /*-------Action command for setting Sensor Frequency--------------*/
+      if(comp(action,"FREQ"))
+      {
+        delayMS = root["f"];
+        conf.pingTime = delayMS;      //Saving the delay time in config
+        write_config(conf);
+        TickerForsendSensorData.detach();
+        TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
+      }
+  /*-------Action command for setting Sensor Frequency--------------*/
+  /*-------Action command for getting Sensor Frequency--------------*/
+      if(comp(action,"GETFREQ"))
+      {
+        StaticJsonDocument<200> doc;
+        doc["FREQ"] = delayMS;
+        String r;
+        serializeJson(doc, r);
+        sendToMQTT(outtopic, r);
+      }
+  /*-------Action command for getting Sensor Frequency--------*/
+  /*-------Action command for fetching ESP Chip ID------------*/
+      if(comp(action,"ESPID"))
+      {
+        StaticJsonDocument<200> doc;
+        doc["CHIPID"] = chipid;
+        String r;
+        serializeJson(doc, r);
+        sendToMQTT(outtopic, r);
+      }
+  /*-------Action command for fetching ESP Chip ID------------*/
 
-/*-------Action command for resetting ESP-------------------*/
-    if(comp(action,"RESET"))
-    {
-      StaticJsonDocument<200> doc;
-      doc["action"] = "ResetStatus";
-      doc["stat"] = "Resetting Device...";
-      String r;
-      serializeJson(doc, r);
-      sendToMQTT(outtopic, r);
-      ESP.reset();
-    }
-/*-------Action command for resetting ESP-------------------*/
+  /*-------Action command for resetting ESP-------------------*/
+      if(comp(action,"RESET"))
+      {
+        StaticJsonDocument<200> doc;
+        doc["action"] = "ResetStatus";
+        doc["stat"] = "Resetting Device...";
+        String r;
+        serializeJson(doc, r);
+        sendToMQTT(outtopic, r);
+        ESP.reset();
+      }
+  /*-------Action command for resetting ESP-------------------*/
 
-/*-------Action command for controlling Relays--------------*/
-    else if(comp(action,"RELAY"))
-    {
-      int no = root["no"];
-      bool value = root["value"];
-      String by = root["by"];
-      relay_action(no, value, by);
+  /*-------Action command for controlling Relays--------------*/
+      else if(comp(action,"RELAY"))
+      {
+        int no = root["no"];
+        bool value = root["value"];
+        String by = root["by"];
+        relay_action(no, value, by);
+      }
+  /*-------Action command for controlling Relays--------------*/
+  /*-------Action command for getting Relays status-----------*/
+      else if(comp(action,"STATUS"))
+      {
+        send_status();
+      }
+  /*-------Action command for getting Relays status-----------*/
+  /*-------Action command for getting getting device version--*/
+      else if(comp(action,"GET_DEVICE_VERSION"))
+      {
+        StaticJsonDocument<200> doc;
+        doc["action"] = "Device Version";
+        doc["value"] = DEVICE_V;
+        String r;
+        serializeJson(doc, r);
+        sendToMQTT(outtopic, r);
+      }
+  /*-------Action command for getting getting device version--*/
+  /*-----Action command for getting getting firmware version--*/
+      else if(comp(action,"GET_VERSION"))
+      {
+        StaticJsonDocument<200> doc;
+        doc["action"] = "Firmware Version";
+        doc["value"] = FIRMWARE_V;
+        String r;
+        serializeJson(doc, r);
+        sendToMQTT(outtopic, r);
+      }
+  /*-----Action command for getting getting firmware version--*/
+  /*-------Action command for updating firmware---------------*/
+      else if(comp(action,"UPDATE"))
+      {
+        const char * c = root["url"];
+        updateAddress = c;
+        callback = &updateESP;
+      }
+  /*-------Action command for updating firmware---------------*/
     }
-/*-------Action command for controlling Relays--------------*/
-/*-------Action command for getting Relays status-----------*/
-    else if(comp(action,"STATUS"))
-    {
-      send_status();
-    }
-/*-------Action command for getting Relays status-----------*/
-/*-------Action command for getting getting device version--*/
-    else if(comp(action,"GET_DEVICE_VERSION"))
-    {
-      StaticJsonDocument<200> doc;
-      doc["action"] = "Device Version";
-      doc["value"] = DEVICE_V;
-      String r;
-      serializeJson(doc, r);
-      sendToMQTT(outtopic, r);
-    }
-/*-------Action command for getting getting device version--*/
-/*-----Action command for getting getting firmware version--*/
-    else if(comp(action,"GET_VERSION"))
-    {
-      StaticJsonDocument<200> doc;
-      doc["action"] = "Firmware Version";
-      doc["value"] = FIRMWARE_V;
-      String r;
-      serializeJson(doc, r);
-      sendToMQTT(outtopic, r);
-    }
-/*-----Action command for getting getting firmware version--*/
-/*-------Action command for updating firmware---------------*/
-    else if(comp(action,"UPDATE"))
-    {
-      const char * c = root["url"];
-      updateAddress = c;
-      callback = &updateESP;
-    }
-/*-------Action command for updating firmware---------------*/
   }
 }
 /*-------Meathod called on reciving message from MQTT-------*/
@@ -225,5 +230,24 @@ void connectToMqtt()
   else
   {
     mqtt.connect();
+  }
+}
+
+void subscribe_mqtt_input()
+{
+  String mqtt_data = read_mqtt_config();
+  StaticJsonDocument<1000> doc;
+  DeserializationError error = deserializeJson(doc, mqtt_data);
+  if(error)
+    return;
+  for( const auto& kv : doc["input"].as<JsonObject>() ) 
+  {
+    String topic = kv.value()["topic"];
+    if(!comp(topic.c_str(), "null"))
+    {
+      if(debugging)
+        Serial.println(topic);
+      mqtt.subscribe(topic.c_str(), 2);
+    }
   }
 }

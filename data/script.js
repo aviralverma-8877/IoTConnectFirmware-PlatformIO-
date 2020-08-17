@@ -3,8 +3,16 @@ function init_socket()
 {
     Socket = new WebSocket('ws://'+window.location.hostname+":81/");
     Socket.onmessage = function(event){
-        json = JSON.parse(event.data);
-        update_table_data(json);
+        console.log("Text : "+event.data);
+        try
+        {
+            json = JSON.parse(event.data);
+            update_table_data(json);
+        }
+        catch(err)
+        {
+            console.log("Error : "+err);
+        }
     }
     Socket.onopen = function(event){
         console.log("Connected to web sockets...")
@@ -55,7 +63,7 @@ function httpGet(relay, value, action, options = {})
         return xmlHttp.responseText;
     }
     catch(err){
-        return {"done":0}
+        return JSON.stringify({"done":false,"error":err});
     }
 }
 function print_table()
@@ -80,10 +88,10 @@ function print_table()
     init_socket();
     data = httpGet(0, 0, 'get_status');
     json = JSON.parse(data);
-    console.log(json);
     if(!json.init_setup)
     {
-        start_init_setup()
+        document.getElementById("cover").onclick = "";
+        start_init_setup();
     }
     update_table_data(json);
 }
@@ -336,6 +344,8 @@ function save_config()
     {
         var config = {
             "init_setup_done":true,
+            "login_username":"admin",
+            "login_password":"admin",
             "device_cofig":{
                 "shift_out_reg" : {
                     "avail" : true,
@@ -343,7 +353,10 @@ function save_config()
                     "clockPin" : 14,
                     "latchPin" : 12
                 },
-                "status_led" : 13,
+                "status_led" : {
+                    "led_pin":13,
+                    "status":true
+                },
                 "reset_btn" : 4,
                 "relay" : {
                     "count" : 0,
@@ -366,7 +379,7 @@ function save_config()
             config.device_cofig.shift_out_reg.serialDataPin = 16;
             config.device_cofig.shift_out_reg.clockPin = 14;
             config.device_cofig.shift_out_reg.latchPin = 12;
-            config.device_cofig.status_led = 13;
+            config.device_cofig.status_led.led_pin = 13;
             config.device_cofig.reset_btn = 4;
             config.device_cofig.relay.count = 0;
             config.device_cofig.dht.INSTALLED = false;
@@ -378,7 +391,7 @@ function save_config()
             config.device_cofig.shift_out_reg.serialDataPin = 16;
             config.device_cofig.shift_out_reg.clockPin = 14;
             config.device_cofig.shift_out_reg.latchPin = 12;
-            config.device_cofig.status_led = 13;
+            config.device_cofig.status_led.led_pin = 13;
             config.device_cofig.reset_btn = 4;
             config.device_cofig.relay.count = 0;
             config.device_cofig.dht.INSTALLED = true;
@@ -390,7 +403,7 @@ function save_config()
         if(document.getElementById("device_type").value == "Sonoff Basics")
         {
             config.device_cofig.shift_out_reg.avail = false;
-            config.device_cofig.status_led = 13;
+            config.device_cofig.status_led.led_pin = 13;
             config.device_cofig.reset_btn = 0;
             config.device_cofig.relay.count = 1;
             config.device_cofig.relay.GPIO = [12]
@@ -410,7 +423,7 @@ function save_config()
             {
                 config.device_cofig.shift_out_reg.avail = false;
             }
-            config.device_cofig.status_led = document.getElementById("status_led").value;
+            config.device_cofig.status_led.led_pin = document.getElementById("status_led").value;
             config.device_cofig.reset_btn = document.getElementById("rst_pin").value;
             config.device_cofig.relay.count = 0;
             for(i=1; i<=5; i++)
@@ -438,7 +451,8 @@ function save_config()
                 config.device_cofig.light.GPIO = "A0"
             }
         }
-        result = JSON.parse(httpGet(0,0,"update_device_config", config))
+        data = httpGet(0,0,"update_device_config", config);
+        result = JSON.parse(data);
         if(result.done)
         {
             alert("Device config saved successfully. Rebooting....");

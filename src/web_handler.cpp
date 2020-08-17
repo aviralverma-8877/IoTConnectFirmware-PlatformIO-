@@ -107,7 +107,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
   if(request->hasParam("options"))
   {
     String device_config = request->arg("options");
-    StaticJsonDocument<500> doc;
+    StaticJsonDocument<600> doc;
     DeserializationError error = deserializeJson(doc, device_config);
     if (error) 
     {
@@ -118,12 +118,14 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
       request->send(200, "application/json", return_msg);
       return;
     }
-    write_device_config(doc);
-    generate_mqtt_topics();
     StaticJsonDocument<200> return_doc;
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);
     request->send(200, "application/json", return_msg);
+    TickerForTimeOut.attach(1,[doc]{
+      write_device_config(doc);
+      generate_mqtt_topics();
+    });
   }
   else
   {

@@ -23,7 +23,7 @@ void write_config(configuration config)
   jsonBuffer["http_username"] = config.http_username;
   jsonBuffer["http_password"] = config.http_password;
   String r;
-  serializeJson(jsonBuffer, r);
+  serializeJsonPretty(jsonBuffer, r);
   configFile.print(r); 
 }
 

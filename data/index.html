@@ -21,6 +21,7 @@
                 <button class='style_btn' onclick="httpGet(0,0,'device','{\'action\':\'reboot\'}')">Reboot</button>
                 <button class='style_btn' onclick="location.href = ('/update')">Update</button>
                 <br />
+                <button class='style_btn' onclick="start_init_setup()">Re-Configure Device</button>
             </div>
             <div>
                 <input type="checkbox" id="on_board_led" onchange="httpGet(0,0,'device','{\'action\':\'toggle_onb\',\'status\':'+this.checked+'}')" /> <span style="font-family: 'Fjalla One'">Enable/Disable On Board LED</span>

@@ -7,7 +7,10 @@
             "clockPin" : 14,
             "latchPin" : 12
         },
-        "status_led" : 13,
+        "status_led" : {
+            "led_pin":13,
+            "status":true
+        },
         "reset_btn" : 4,
         "relay" : {
             "count" : 0,
