@@ -138,6 +138,7 @@ function update_table_data(json)
         }
         element = document.getElementById('WiFi_Status');
         element.innerHTML = cont;
+        document.getElementById("firmware_version").innerHTML = json["firmware_version"]
     }
 }
 function update_wifi(ssid, pass)
@@ -346,7 +347,7 @@ function save_config()
             "init_setup_done":true,
             "login_username":"admin",
             "login_password":"admin",
-            "device_cofig":{
+            "device_config":{
                 "shift_out_reg" : {
                     "avail" : true,
                     "serialDataPin" : 16,
@@ -375,80 +376,80 @@ function save_config()
         }
         if(document.getElementById("device_type").value == "IoT Connect Board Rev 1")
         {
-            config.device_cofig.shift_out_reg.avail = true;
-            config.device_cofig.shift_out_reg.serialDataPin = 16;
-            config.device_cofig.shift_out_reg.clockPin = 14;
-            config.device_cofig.shift_out_reg.latchPin = 12;
-            config.device_cofig.status_led.led_pin = 13;
-            config.device_cofig.reset_btn = 4;
-            config.device_cofig.relay.count = 0;
-            config.device_cofig.dht.INSTALLED = false;
-            config.device_cofig.light.INSTALLED = false;
+            config.device_config.shift_out_reg.avail = true;
+            config.device_config.shift_out_reg.serialDataPin = 16;
+            config.device_config.shift_out_reg.clockPin = 14;
+            config.device_config.shift_out_reg.latchPin = 12;
+            config.device_config.status_led.led_pin = 13;
+            config.device_config.reset_btn = 4;
+            config.device_config.relay.count = 0;
+            config.device_config.dht.INSTALLED = false;
+            config.device_config.light.INSTALLED = false;
         }
         if(document.getElementById("device_type").value == "IoT Connect Board Rev 2")
         {
-            config.device_cofig.shift_out_reg.avail = true;
-            config.device_cofig.shift_out_reg.serialDataPin = 16;
-            config.device_cofig.shift_out_reg.clockPin = 14;
-            config.device_cofig.shift_out_reg.latchPin = 12;
-            config.device_cofig.status_led.led_pin = 13;
-            config.device_cofig.reset_btn = 4;
-            config.device_cofig.relay.count = 0;
-            config.device_cofig.dht.INSTALLED = true;
-            config.device_cofig.dht.TYPE = "dht11"
-            config.device_cofig.dht.GPIO = 2
-            config.device_cofig.light.INSTALLED = true;
-            config.device_cofig.light.GPIO = "A0"
+            config.device_config.shift_out_reg.avail = true;
+            config.device_config.shift_out_reg.serialDataPin = 16;
+            config.device_config.shift_out_reg.clockPin = 14;
+            config.device_config.shift_out_reg.latchPin = 12;
+            config.device_config.status_led.led_pin = 13;
+            config.device_config.reset_btn = 4;
+            config.device_config.relay.count = 0;
+            config.device_config.dht.INSTALLED = true;
+            config.device_config.dht.TYPE = "dht11"
+            config.device_config.dht.GPIO = 2
+            config.device_config.light.INSTALLED = true;
+            config.device_config.light.GPIO = "A0"
         }
         if(document.getElementById("device_type").value == "Sonoff Basics")
         {
-            config.device_cofig.shift_out_reg.avail = false;
-            config.device_cofig.status_led.led_pin = 13;
-            config.device_cofig.reset_btn = 0;
-            config.device_cofig.relay.count = 1;
-            config.device_cofig.relay.GPIO = [12]
-            config.device_cofig.dht.INSTALLED = false;
-            config.device_cofig.light.INSTALLED = false;
+            config.device_config.shift_out_reg.avail = false;
+            config.device_config.status_led.led_pin = 13;
+            config.device_config.reset_btn = 0;
+            config.device_config.relay.count = 1;
+            config.device_config.relay.GPIO = [12]
+            config.device_config.dht.INSTALLED = false;
+            config.device_config.light.INSTALLED = false;
         }
         if(document.getElementById("device_type").value == "Custom Board")
         {
             if(document.getElementById("sr_avail").checked)
             {
-                config.device_cofig.shift_out_reg.avail = true;
-                config.device_cofig.shift_out_reg.serialDataPin = document.getElementById("sr_dpin").value;
-                config.device_cofig.shift_out_reg.clockPin = document.getElementById("sr_cpin").value;
-                config.device_cofig.shift_out_reg.latchPin = document.getElementById("sr_lpin").value;
+                config.device_config.shift_out_reg.avail = true;
+                config.device_config.shift_out_reg.serialDataPin = document.getElementById("sr_dpin").value;
+                config.device_config.shift_out_reg.clockPin = document.getElementById("sr_cpin").value;
+                config.device_config.shift_out_reg.latchPin = document.getElementById("sr_lpin").value;
             }
             else
             {
-                config.device_cofig.shift_out_reg.avail = false;
+                config.device_config.shift_out_reg.avail = false;
             }
-            config.device_cofig.status_led.led_pin = document.getElementById("status_led").value;
-            config.device_cofig.reset_btn = document.getElementById("rst_pin").value;
-            config.device_cofig.relay.count = 0;
+            config.device_config.status_led.led_pin = document.getElementById("status_led").value;
+            config.device_config.reset_btn = document.getElementById("rst_pin").value;
+            config.device_config.relay.count = 0;
             for(i=1; i<=5; i++)
             {
                 if(document.getElementById("rly_"+i).value != "N/A")
                 {
-                    config.device_cofig.relay.count++;
-                    config.device_cofig.relay.GPIO.push(document.getElementById("rly_"+i).value);
+                    config.device_config.relay.count++;
+                    config.device_config.relay.GPIO.push(document.getElementById("rly_"+i).value);
                 }
             }
             if(document.getElementById("dht_sens_avail").checked)
             {
-                config.device_cofig.dht.INSTALLED = true;
-                config.device_cofig.dht.GPIO = document.getElementById("sen_pin").value;
+                config.device_config.dht.INSTALLED = true;
+                config.device_config.dht.GPIO = document.getElementById("sen_pin").value;
             }
             else{
-                config.device_cofig.dht.INSTALLED = false;
+                config.device_config.dht.INSTALLED = false;
             }
             if(document.getElementById("ldr_sens_avail").checked)
             {
-                config.device_cofig.light.INSTALLED = true;
+                config.device_config.light.INSTALLED = true;
             }
             else{
-                config.device_cofig.light.INSTALLED = false;
-                config.device_cofig.light.GPIO = "A0"
+                config.device_config.light.INSTALLED = false;
+                config.device_config.light.GPIO = "A0"
             }
         }
         data = httpGet(0,0,"update_device_config", config);

@@ -305,7 +305,7 @@ void generate_mqtt_topics()
     return;
   StaticJsonDocument<1000> topic_doc;
   int relay_count = 0;
-  bool has_shift_reg = doc["device_cofig"]["shift_out_reg"]["avail"];
+  bool has_shift_reg = doc["device_config"]["shift_out_reg"]["avail"];
   topic_doc["input"]["COMMAND"] = chipid+"/COMMAND";
   if(has_shift_reg)
   {
@@ -318,24 +318,24 @@ void generate_mqtt_topics()
       topic_doc["input"][key]["status"] = false;
     }
   }
-  int relay_gpio_count = doc["device_cofig"]["relay"]["count"];
+  int relay_gpio_count = doc["device_config"]["relay"]["count"];
   if(relay_gpio_count > 0)
   {
     for(int i=0; i<relay_gpio_count; i++)
     {
       String key = "relay_"+String(relay_count);
       relay_count++;
-      int pin  = doc["device_cofig"]["relay"]["GPIO"][i];
+      int pin  = doc["device_config"]["relay"]["GPIO"][i];
       String value = chipid+"/gpio_relay/pin_"+pin;
       topic_doc["input"][key]["topic"] = value;
       topic_doc["input"][key]["status"] = false;
     }
   }
-  bool has_dht_sensor = doc["device_cofig"]["dht"]["INSTALLED"];
+  bool has_dht_sensor = doc["device_config"]["dht"]["INSTALLED"];
   if(has_dht_sensor)
   {
     String key = "dht";
-    int pin  = doc["device_cofig"]["dht"]["GPIO"];
+    int pin  = doc["device_config"]["dht"]["GPIO"];
     String value = chipid+"/dht/pin_"+pin;
     topic_doc["output"][key] = value;
   }
@@ -344,11 +344,11 @@ void generate_mqtt_topics()
   topic_doc["output"]["NORT"] = chipid+"/NORT";
   topic_doc["output"]["ESPRAW"] = chipid+"/ESPRAW";
   
-  bool has_light_sensor = doc["device_cofig"]["light"]["INSTALLED"];
+  bool has_light_sensor = doc["device_config"]["light"]["INSTALLED"];
   if(has_dht_sensor)
   {
     String key = "light";
-    String pin  = doc["device_cofig"]["light"]["GPIO"];
+    String pin  = doc["device_config"]["light"]["GPIO"];
     String value = chipid+"/light/pin_"+pin;
     topic_doc["output"][key] = value;
   }

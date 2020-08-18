@@ -86,6 +86,7 @@ void handleWebStatus(AsyncWebServerRequest *request)
   return_doc["wifi_ssid"] = Wifi_ssid;
   return_doc["wifi_rssi"] = WiFi.RSSI();
   return_doc["onb_led"] = conf.led_enabled;
+  return_doc["firmware_version"] = FIRMWARE_V;
   String device_config = read_device_config();
   StaticJsonDocument<500> doc;
   DeserializationError error = deserializeJson(doc, device_config);

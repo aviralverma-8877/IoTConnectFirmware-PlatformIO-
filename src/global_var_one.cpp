@@ -12,18 +12,13 @@
     #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>
     #include "structures.h"
-    #ifndef DHTPIN
-        #define DHTPIN 2                          //DHT single wire interface pin
-    #endif
-    #ifndef DHTTYPE
-        #define DHTTYPE DHT11                     //Type of DHT sensor.
-    #endif
+    #include "device_handler.h"
     AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
-
-    DHT_Unified dht(DHTPIN, DHTTYPE);         //Initializing DHT sensor. 
-
-
+    DHT_Unified dht(2, DHT11);         //Initializing DHT sensor. 
     ShiftRegister74HC595<1> sr (16, 14, 12);  //Setting up shift register.
+    uint8_t LDR_PIN = 0;
+    byte indicator_led = 13;
+    byte reset_btn = 4;
     sensor_t sensor;                          //DTH sensor
     sensors_event_t event;                    //Creating event variable for DHT sensor.
     /*----------------------------------------------------------*/
@@ -68,5 +63,62 @@
     Ticker TickerForUARTUpdater;
     Ticker TickerForTimeOut;
     /*--------------Tickers for Async Meathods------------------*/
-
+    void configure_gpio()
+    {
+        String config = read_device_config();
+        StaticJsonDocument<500> doc;
+        DeserializationError error = deserializeJson(doc, config);
+        if(error)
+        {
+            return;
+        }
+        bool shift_reg_avail = doc["device_config"]["shift_out_reg"]["avail"];
+        if(shift_reg_avail)
+        {
+            byte clock_pin = doc["device_config"]["shift_out_reg"]["clockPin"];
+            byte data_pin = doc["device_config"]["shift_out_reg"]["serialDataPin"];
+            byte latch_pin = doc["device_config"]["shift_out_reg"]["latchPin"];
+            ShiftRegister74HC595<1> shift_reg(data_pin,clock_pin,latch_pin);
+            sr = shift_reg;
+        }
+        byte relay_count = doc["device_config"]["relay"]["count"];
+        if(relay_count > 0)
+        {
+            JsonArray array = doc["device_config"]["relay"]["GPIO"].as<JsonArray>();
+            for(JsonVariant v : array) {
+                byte pin = v.as<int>();
+                pinMode(pin, OUTPUT);
+            }
+        }
+        byte status_led = doc["device_config"]["status_led"]["led_pin"];
+        pinMode(status_led, OUTPUT);
+        indicator_led = status_led;
+        byte reset_pin = doc["device_config"]["reset_btn"];
+        pinMode(reset_pin, INPUT);
+        reset_btn = reset_pin;
+        bool hasDHT = doc["device_config"]["dht"]["INSTALLED"];
+        if(hasDHT)
+        {
+            byte dht_pin = doc["device_config"]["dht"]["GPIO"];
+            const char* DHTSensorType = doc["device_config"]["dht"]["TYPE"];
+            byte DHTType;
+            if(comp(DHTSensorType, "DHT11"))
+            {
+                DHTType = DHT11;
+            }
+            if(comp(DHTSensorType,"DHT22"))
+            {
+                DHTType = DHT22;
+            }
+            DHT_Unified dht_var(dht_pin, DHTType);         //Initializing DHT sensor. 
+            dht = dht_var;
+        }
+        bool hasLight = doc["device_config"]["light"]["INSTALLED"];
+        if(hasLight)
+        {
+            const char* lumin_pin = doc["device_config"]["light"]["INSTALLED"];
+            if(comp(lumin_pin, "A0"))
+                LDR_PIN = 0;
+        }
+    }
 #endif

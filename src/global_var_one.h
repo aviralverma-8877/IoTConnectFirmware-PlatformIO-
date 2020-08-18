@@ -26,24 +26,9 @@
     #ifndef MQTT_PASS
         #define MQTT_PASS "iot-12345"
     #endif
-    #ifndef LDR_PIN
-        #define LDR_PIN A0                        //LDR Pin address
-    #endif
-    #ifndef reset_btn
-        #define reset_btn 4                       //Reset Button pin
-    #endif
-    #ifndef indicator_led
-        #define indicator_led 13                  //LED Pin
-    #endif
-    #ifndef DHTPIN
-        #define DHTPIN 2                          //DHT single wire interface pin
-    #endif
-    #ifndef DHTTYPE
-        #define DHTTYPE DHT11                     //Type of DHT sensor.
-    #endif
     //Configuring Device
     #ifndef FIRMWARE_V
-    #define FIRMWARE_V "2.1.1"                //Current firmware version. (Displayed on Device Portal)
+    #define FIRMWARE_V "2.1.2"                //Current firmware version. (Displayed on Device Portal)
     #endif
     #ifndef DEVICE_V
         #define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
@@ -53,12 +38,11 @@
 
 
     extern configuration conf;
-
     extern AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
-
-    extern  DHT_Unified dht;         //Initializing DHT sensor. 
-
-
+    extern DHT_Unified dht;         //Initializing DHT sensor. 
+    extern uint8_t LDR_PIN;
+    extern byte indicator_led;
+    extern byte reset_btn;
     extern ShiftRegister74HC595<1> sr;  //Setting up shift register.
     extern sensor_t sensor;                          //DTH sensor
     extern sensors_event_t event;                    //Creating event variable for DHT sensor.
@@ -103,4 +87,5 @@
     extern Ticker TickerForUARTUpdater;
     extern Ticker TickerForTimeOut;
     /*--------------Tickers for Async Meathods------------------*/
+     void configure_gpio();
 #endif

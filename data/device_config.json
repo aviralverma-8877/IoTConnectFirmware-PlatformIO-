@@ -1,6 +1,6 @@
 {
     "init_setup_done":false,
-    "device_cofig":{
+    "device_config":{
         "shift_out_reg" : {
             "avail" : true,
             "serialDataPin" : 16,

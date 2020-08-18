@@ -23,9 +23,7 @@ void setup()
     write_config(newConfig);
   }
 /*--------Setting up the GPIOs-------------------------------*/
-  pinMode(reset_btn,INPUT);
-  pinMode(indicator_led,OUTPUT);
-  pinMode(LDR_PIN,INPUT);
+  configure_gpio();
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   TickerForcheckReset.attach_ms(10, checkReset);
 /*--------Reading data from SPIFFS for last relay status ----*/
