@@ -7,8 +7,6 @@
 void relay_action(int no, bool value, String by)
 {
   sr.set(no, value);
-//sending status
-  send_status();  
 //sending nortification
   StaticJsonDocument<200> doc;
   if(by != "")
@@ -22,11 +20,16 @@ void relay_action(int no, bool value, String by)
   serializeJson(doc, r);
   sendToMQTT(norttopic, r);
 //saving to config
-  for(int t=0; t<8; t++)
-  {
-    conf.pinValues[t] = sr.get(t);
-  }
-  write_config(conf);
+  TickerForTimeOut.once_ms(10,[](){  
+    for(int t=0; t<8; t++)
+    {
+      conf.pinValues[t] = sr.get(t);
+    }
+    write_config(conf);
+    TickerForTimeOut.once_ms(10,[]{
+      send_status();
+    });
+  });
 }
 
 /*-------Meathod to update ESP------------------------------*/

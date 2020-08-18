@@ -15,7 +15,9 @@ void onMqttConnect(bool sessionPresent) {
   serialDisplay("MQTT","MQTT is Connected");
   first_connect = true;
   mqtt.subscribe(intopic.c_str(), 2);
-  subscribe_mqtt_input();
+  if (SPIFFS.exists("/mqtt_topics.json")) {
+    subscribe_mqtt_input();
+  }
   TickerForPinging.attach_ms(10000, pinging);
   if(strcmp(DEVICE_V, "v2") == 0)
     TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
@@ -54,9 +56,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   {
     p += payload[i];
   }
-  TickerForTimeOut.once_ms(100,[topic,p](){
-    send_data_to_webSocket(String(topic)+" : "+ p);
-  });
   if(comp(topic, intopic.c_str()))
   {
     StaticJsonDocument<200> root;
@@ -182,6 +181,11 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   }
   else
   {
+
+    TickerForTimeOut.once_ms(100,[topic,p](){
+      send_data_to_webSocket(String(topic)+" : "+ p);
+    });
+
     String mqtt_data = read_mqtt_config();
     StaticJsonDocument<1000> doc;
     StaticJsonDocument<200> msg;
@@ -242,7 +246,9 @@ void send_status()
   serializeJson(doc, r);
   sendToMQTT(outtopic, r);
   sendToMQTT(espstatus, r);
-  send_data_to_webSocket(r);
+  TickerForTimeOut.once_ms(100,[r](){
+      send_data_to_webSocket(r);
+  });
   send_status_uart();
 }
 /*----Meathod for sending relay status----------------------*/
