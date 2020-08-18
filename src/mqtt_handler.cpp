@@ -223,7 +223,7 @@ void sendToMQTT(String topic, String msg)
 /*----Meathod for sending relay status----------------------*/
 void send_status()
 {
-  StaticJsonDocument<500> doc;
+  StaticJsonDocument<600> doc;
   doc["d"] = chipid;
   doc["action"] = "s";
   doc["uname"] = conf.http_username;
@@ -231,6 +231,7 @@ void send_status()
   doc["wifi_ssid"] = Wifi_ssid;
   doc["wifi_rssi"] = WiFi.RSSI();
   doc["onb_led"] = conf.led_enabled;
+  doc["firmware_version"] = FIRMWARE_V;
   if(strcmp(DEVICE_V, "v2") == 0)
   {
     doc["t"] = temp;
