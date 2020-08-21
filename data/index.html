@@ -78,6 +78,58 @@
                 <table class="table_border" style="font-family: 'Fjalla One';">
                     <tr>
                         <th>
+                            MQTT Broker :
+                        </th>
+                        <td>
+                            <select onchange="check_broker(this.value)" id="mqtt_broker">
+                                <option value="IoT Connect">
+                                    IoT Connect
+                                </option>
+                                <option value="Custom">
+                                    Custom
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                <table class="table_border" id="mqtt_detail_table">
+                    <tr>
+                        <td>
+                            Host:
+                        </td>
+                        <td>
+                            <input type="text" id="mqtt_host" placeholder="MQTT Server URL" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Port:
+                        </td>
+                        <td>
+                            <input type="number" id="mqtt_port" value="1883" placeholder="MQTT Server PORT" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Username:
+                        </td>
+                        <td>
+                            <input type="text" id="mqtt_uname" placeholder="MQTT Username" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Password:
+                        </td>
+                        <td>
+                            <input type="password" id="mqtt_pass" placeholder="MQTT Password" />
+                        </td>
+                    </tr>                    
+                </table>
+                <hr />
+                <table class="table_border" style="font-family: 'Fjalla One';">
+                    <tr>
+                        <th>
                             Device Type :
                         </th>
                         <td>

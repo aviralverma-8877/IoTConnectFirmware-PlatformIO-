@@ -120,8 +120,10 @@ void feedbackLED()
   
 }
 /*-------feedbackLED----------------------------------------*/
-
-
+void manage_dns_request()
+{
+  dnsServer.processNextRequest();
+}
 
 
 /*----Meathod for reconfiguring WiFi settings---------------*/
@@ -298,7 +300,7 @@ String read_device_config()
 
 void generate_mqtt_topics()
 {
-  StaticJsonDocument<500> doc;
+  StaticJsonDocument<1000> doc;
   String device_config = read_device_config();
   DeserializationError error = deserializeJson(doc, device_config);
   if(error)
@@ -314,8 +316,8 @@ void generate_mqtt_topics()
       String key = "relay_"+String(relay_count);
       relay_count++;
       String value = chipid+"/shift_out_reg/pin_"+i;
-      topic_doc["input"][key]["topic"] = value;
-      topic_doc["input"][key]["status"] = false;
+      topic_doc["input"]["relay"][key]["topic"] = value;
+      topic_doc["input"]["relay"][key]["status"] = false;
     }
   }
   int relay_gpio_count = doc["device_config"]["relay"]["count"];
@@ -327,8 +329,8 @@ void generate_mqtt_topics()
       relay_count++;
       int pin  = doc["device_config"]["relay"]["GPIO"][i];
       String value = chipid+"/gpio_relay/pin_"+pin;
-      topic_doc["input"][key]["topic"] = value;
-      topic_doc["input"][key]["status"] = false;
+      topic_doc["input"]["relay"][key]["topic"] = value;
+      topic_doc["input"]["relay"][key]["status"] = false;
     }
   }
   bool has_dht_sensor = doc["device_config"]["dht"]["INSTALLED"];

@@ -117,3 +117,6 @@ body{
   #custom_board_configs{
     display: none;
   }
+  #mqtt_detail_table{
+    display: none;
+  }

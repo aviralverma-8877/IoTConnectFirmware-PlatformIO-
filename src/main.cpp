@@ -1,6 +1,7 @@
 //Including Libraries
 #include <Arduino.h>
 #include <ESP8266mDNS.h>        // Include the mDNS library
+#include <ESPAsyncWiFiManager.h>
 #include "global_var_two.h"
 #include "global_var_one.h"
 #include "structures.h"
@@ -22,74 +23,77 @@ void setup()
     configuration newConfig;
     write_config(newConfig);
   }
-/*--------Setting up the GPIOs-------------------------------*/
-  configure_gpio();
-  TickerForFeedbackLED.attach(0.6, feedbackLED);
-  TickerForcheckReset.attach_ms(10, checkReset);
-/*--------Reading data from SPIFFS for last relay status ----*/
-  for(int t=0; t<8; t++)
-  {
-    sr.set(t,conf.pinValues[t]);           //Overwriting saved values on default values.
-    delay(100);
-  }
-/*--------Reading data from SPIFFS for last relay status ----*/
 
-/*--------Setting up the GPIOs-------------------------------*/  
- AsyncWiFiManager wifiManager(&webServer,&dnsServer);
- if(debugging)
- {
-  wifiManager.setDebugOutput(true); //Set WiFi manager debug output.
- }
- else
- {
-   wifiManager.setDebugOutput(false); //Set WiFi manager debug output.
- }
-/*-------Start WiFi Manager---------------------------------*/
-  if(conf.setupFlag)
+  /*--------Setting up the GPIOs-------------------------------*/  
+  AsyncWiFiManager wifiManager(&webServer,&dnsServer);
+  if(debugging)
   {
-    conf.setupFlag = false;
-    write_config(conf);
-    TickerForFeedbackLED.attach(0.2, feedbackLED);
-    wifiManager.resetSettings();
-    wifiManager.setBreakAfterConfig(true);
-    wifiManager.startConfigPortal("IOT Connect");
+    wifiManager.setDebugOutput(true); //Set WiFi manager debug output.
   }
-/*-------Start WiFi Manager---------------------------------*/
+  else
+  {
+    wifiManager.setDebugOutput(false); //Set WiFi manager debug output.
+  }
+  wifiManager.autoConnect("IoT Connect");
   callback = &blank;
-  if(strcmp(DEVICE_V, "v2") == 0)
+/*--------Setting up the GPIOs-------------------------------*/
+  if(SPIFFS.exists("/device_config.json"))
   {
-    delayMS = conf.pingTime;
-    dht.begin();          //Initalizing DHT sensor.
-  }
+    configure_gpio();
 /*-------Fetch IP Address-----------------------------------*/
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    if(debugging)
-      Serial.print(".");
-    checkReset();
-  }
+    TickerForFeedbackLED.attach(0.6, feedbackLED);
+    TickerForcheckReset.attach_ms(10, checkReset);
+/*-------Fetch IP Address-----------------------------------*/
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      if(debugging)
+        Serial.print(".");
+      checkReset();
+    }
 
-  fetchIP();  
-/*-------Fetch IP Address-----------------------------------*/
+    fetchIP();  
+/*--------Reading data from SPIFFS for last relay status ----*/
+    for(int t=0; t<8; t++)
+    {
+      sr.set(t,conf.pinValues[t]);           //Overwriting saved values on default values.
+      delay(100);
+    }
+/*--------Reading data from SPIFFS for last relay status ----*/
+/*-------Start WiFi Manager---------------------------------*/
+    if(strcmp(DEVICE_V, "v2") == 0)
+    {
+      delayMS = conf.pingTime;
+      dht.begin();          //Initalizing DHT sensor.
+    }
 /*-------Setting up MQTT------------------------------------*/
-  mqtt.onConnect(onMqttConnect);
-  mqtt.onDisconnect(onMqttDisconnect);
-  mqtt.onSubscribe(onMqttSubscribe);
-  mqtt.onUnsubscribe(onMqttUnsubscribe);
-  mqtt.onMessage(onMqttMessage);
-//  mqtt.onPublish(onMqttPublish);
-  mqtt.setCredentials(MQTT_UNAME, MQTT_PASS);
-  mqtt.setServer(MQTT_HOST, MQTT_PORT);
+    mqtt.onConnect(onMqttConnect);
+    mqtt.onDisconnect(onMqttDisconnect);
+    mqtt.onSubscribe(onMqttSubscribe);
+    mqtt.onUnsubscribe(onMqttUnsubscribe);
+    mqtt.onMessage(onMqttMessage);
+  //  mqtt.onPublish(onMqttPublish);
+    connect_to_mqtt();
 /*-------Setting up MQTT------------------------------------*/
 /*-------Setting up the trikers-----------------------------*/
-  TickerForconnectToMqtt.attach_ms(10000, connectToMqtt);
-  TickerForfetchIP.attach(30, fetchIP);
-  if(!debugging)
-  {
-    TickerForSerialListner.attach_ms(10, SerialListner);
-    send_status_uart();
-  }
+    TickerForconnectToMqtt.attach_ms(10000, connectToMqtt);
+    TickerForfetchIP.attach(30, fetchIP);
+    if(!debugging)
+    {
+      TickerForSerialListner.attach_ms(10, SerialListner);
+      send_status_uart();
+    }
 /*-------Setting up the trikers-----------------------------*/    
+}
+else
+{
+  const byte DNS_PORT = 53;
+  IPAddress apIP(192, 168, 4, 1);
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+  WiFi.softAP("IoT Connect");
+  dnsServer.start(DNS_PORT, "*", apIP);
+}
+
 /*-------HOST Name Setup------------------------------------*/
  WiFi.hostname("iot-connect-"+chipid);
  MDNS.begin("iot-connect-"+chipid);

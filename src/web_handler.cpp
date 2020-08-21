@@ -87,6 +87,7 @@ void handleWebStatus(AsyncWebServerRequest *request)
   return_doc["wifi_rssi"] = WiFi.RSSI();
   return_doc["onb_led"] = conf.led_enabled;
   return_doc["firmware_version"] = FIRMWARE_V;
+  return_doc["mqtt_status"] = MQTTStatus;
   String device_config = read_device_config();
   StaticJsonDocument<500> doc;
   DeserializationError error = deserializeJson(doc, device_config);
@@ -108,7 +109,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
   if(request->hasParam("options"))
   {
     String device_config = request->arg("options");
-    StaticJsonDocument<600> doc;
+    StaticJsonDocument<1000> doc;
     DeserializationError error = deserializeJson(doc, device_config);
     if (error) 
     {
@@ -123,6 +124,15 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);
     request->send(200, "application/json", return_msg);
+    String service = doc["mqtt"]["service"];
+    if(comp(service.c_str(),"IoT Connect"))
+    {
+      doc["mqtt"]["host"] = MQTT_HOST;
+      doc["mqtt"]["port"] = MQTT_PORT;
+      doc["mqtt"]["uname"] = MQTT_UNAME;
+      doc["mqtt"]["pass"] = MQTT_PASS;
+      doc["mqtt"]["auth"] = true;
+    }
     TickerForTimeOut.once(1,[doc]{
       write_device_config(doc);
       generate_mqtt_topics();
@@ -231,13 +241,32 @@ void web_set_wifi(AsyncWebServerRequest *request)
 void firmware_web_updater()
 {
   webServer.on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/html", "\
+    request->send(200, "text/html", "<script>\
+    function httpGet(action, options = {})\
+    {\
+        if(action == \"device\")\
+        {\
+            theUrl = '/control?device='+options;\
+        }\
+        try\
+        {\
+            var xmlHttp = new XMLHttpRequest();\
+            xmlHttp.open( \"GET\", theUrl, false );\
+            xmlHttp.send( null );\
+            return xmlHttp.responseText;\
+        }\
+        catch(err){\
+            return JSON.stringify({\"done\":false,\"error\":err});\
+        }\
+    }\
+    </script>\
     <form method='POST' action='/update_flash' enctype='multipart/form-data'>\
       <input type='file' placeholder='firmware.bin' name='update'><input type='submit' value='Update'> firmware.bin\
     </form></ br>\
     <form method='POST' action='/update_spiffs' enctype='multipart/form-data'>\
       <input type='file' placeholder='spiffs.bin' name='update'><input type='submit' value='Update'> spiffs.bin\
-    </form>");
+    </form><br />\
+    <button onclick=\"if(confirm('Are you sure you want to reset this device?')){httpGet('device','{\\'action\\':\\'reset\\'}')}\">Reset</button>");
   });
 
   webServer.on("/update_flash", HTTP_POST, [](AsyncWebServerRequest *request){

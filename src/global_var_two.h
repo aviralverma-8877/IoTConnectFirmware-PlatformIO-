@@ -6,4 +6,5 @@
     extern String debugtopic;      //MQTT Topic for sending debug data.
     extern String outtopic;          //MQTT Topic for sending data from ESP.
     extern String intopic;            //MQTT Topic for reciving data to ESP.
+    extern bool MQTTStatus;
 #endif

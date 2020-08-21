@@ -7,7 +7,14 @@ function init_socket()
         try
         {
             json = JSON.parse(event.data);
-            update_table_data(json);
+            if(json.action == "alert")
+            {
+                alert(json.msg)
+            }
+            else
+            {
+                update_table_data(json);
+            }
         }
         catch(err)
         {
@@ -127,8 +134,13 @@ function update_table_data(json)
         var cont = "";
         wifi_ssid = json['wifi_ssid'];
         wifi_type = json['type'];
+        mqtt_status = json["mqtt_status"];
         cont = "Connected to <b>"+wifi_ssid+"</b>";
-        cont += " | Device Type <b>"+wifi_type+"</b>";
+        cont += "<br />Device Type <b>"+wifi_type+"</b>";
+        if(mqtt_status)
+            cont += "<br />MQTT Status : <b>Connected</b>";
+        else
+            cont += "<br />MQTT Status : <b>Not Connected</b>";
         if(json['temp'] != undefined)
         {
             temp = json['temp'];
@@ -271,6 +283,18 @@ function check_board(board_type)
     }
 }
 
+function check_broker(board_type)
+{
+    if(board_type == "Custom")
+    {
+        document.getElementById("mqtt_detail_table").style.display = "block";
+    }
+    else
+    {
+        document.getElementById("mqtt_detail_table").style.display = "none";
+    }
+}
+
 function check_config()
 {
     if(document.getElementById("device_type").value == "Custom Board")
@@ -347,6 +371,14 @@ function save_config()
             "init_setup_done":true,
             "login_username":"admin",
             "login_password":"admin",
+            "mqtt":{
+                "service":"",
+                "host":"",
+                "port":1883,
+                "uname":"",
+                "pass":"",
+                "auth":false
+            },
             "device_config":{
                 "shift_out_reg" : {
                     "avail" : true,
@@ -373,6 +405,47 @@ function save_config()
                     "INSTALLED":false
                 }
             }
+        }
+        if(document.getElementById("mqtt_broker").value == "Custom")
+        {
+            service = "Custom"
+            host = document.getElementById("mqtt_host").value;
+            port = document.getElementById("mqtt_host").value;
+            uname = document.getElementById("mqtt_host").value;
+            pass = document.getElementById("mqtt_host").value;
+            if(host != "")
+            {    
+                if(port != "" && port > 0)
+                {
+                    if(uname == "")
+                        auth = false
+                    else{
+                        auth = true
+                        if(pass == "")
+                        {
+                            alert("Please provide MQTT login password.")
+                            return;
+                        }
+                    }
+                    config.mqtt.service = service;
+                    config.mqtt.host = host;
+                    config.mqtt.port = port;
+                    config.mqtt.uname = uname;
+                    config.mqtt.pass = pass;
+                }
+                else
+                {
+                    alert("Please provide valid MQTT port number.")
+                }
+            }
+            else
+            {
+                alert("Please provide valid MQTT hostname.")
+            }
+        }
+        else{
+            service = "IoT Connect";
+            config.mqtt.service = service;
         }
         if(document.getElementById("device_type").value == "IoT Connect Board Rev 1")
         {

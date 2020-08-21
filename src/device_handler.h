@@ -15,7 +15,8 @@
     void fetchIP();
     void read_config();
     void send_status_uart();
-    String read_mqtt_config();
+    String read_mqtt_config();    
+    void manage_dns_request();
     void generate_mqtt_topics();
     String read_device_config();
 #endif

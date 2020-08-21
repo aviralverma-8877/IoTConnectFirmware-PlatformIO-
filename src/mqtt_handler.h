@@ -14,3 +14,4 @@ void sendToMQTT(String topic, String msg);
 void send_status();
 void connectToMqtt();
 void subscribe_mqtt_input();
+void connect_to_mqtt();

@@ -3,7 +3,6 @@
     #include <Arduino.h>
     #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>
-    #include <ESPAsyncWiFiManager.h>          //Async WiFi Manager
 
     void handleWebControl(AsyncWebServerRequest *request);
     void handleWebStatus(AsyncWebServerRequest *request);

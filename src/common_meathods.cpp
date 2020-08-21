@@ -27,8 +27,9 @@ void write_config(configuration config)
   configFile.print(r); 
 }
 
-void write_device_config(StaticJsonDocument<500> jsonBuffer)
+void write_device_config(StaticJsonDocument<1000> jsonBuffer)
 {
+
   File configFile = SPIFFS.open("/device_config.json", "w");
   String r;
   serializeJsonPretty(jsonBuffer, r);

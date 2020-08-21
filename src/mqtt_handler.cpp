@@ -13,6 +13,8 @@
 /*-------Meathod called when connected to MQTT--------------*/
 void onMqttConnect(bool sessionPresent) {
   serialDisplay("MQTT","MQTT is Connected");
+  MQTTStatus = true;
+  send_status();
   first_connect = true;
   mqtt.subscribe(intopic.c_str(), 2);
   if (SPIFFS.exists("/mqtt_topics.json")) {
@@ -38,6 +40,8 @@ void onMqttUnsubscribe(uint16_t packetId) {
 
 /*-------Meathod called when disconnected from MQTT Topic---*/
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
+  MQTTStatus = false;
+  send_status();
   serialDisplay("MQTT","MQTT is disconnected.");
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   if (WiFi.status() != WL_CONNECTED) {
@@ -232,6 +236,7 @@ void send_status()
   doc["wifi_rssi"] = WiFi.RSSI();
   doc["onb_led"] = conf.led_enabled;
   doc["firmware_version"] = FIRMWARE_V;
+  doc["mqtt_status"] = MQTTStatus;
   if(strcmp(DEVICE_V, "v2") == 0)
   {
     doc["t"] = temp;
@@ -245,12 +250,12 @@ void send_status()
   }
   String r;
   serializeJson(doc, r);
-  sendToMQTT(outtopic, r);
-  sendToMQTT(espstatus, r);
+  send_data_to_webSocket(r);
   TickerForTimeOut.once_ms(100,[r](){
-      send_data_to_webSocket(r);
+    sendToMQTT(outtopic, r);
+    sendToMQTT(espstatus, r);
+    send_status_uart();
   });
-  send_status_uart();
 }
 /*----Meathod for sending relay status----------------------*/
 /*----Meathod called on sending/publishing message on MQTT--*/
@@ -287,4 +292,24 @@ void subscribe_mqtt_input()
       mqtt.subscribe(topic.c_str(), 2);
     }
   }
+}
+
+void connect_to_mqtt()
+{
+  StaticJsonDocument<1000> doc;
+  String device_config = read_device_config();
+  DeserializationError error = deserializeJson(doc, device_config);
+  if(error)
+    return;
+  const char* host = doc["mqtt"]["host"];
+  uint16_t port = doc["mqtt"]["port"];
+  bool auth = doc["mqtt"]["auth"];
+  if(auth)
+  {
+    const char* uname = doc["mqtt"]["uname"];
+    const char* pass = doc["mqtt"]["pass"];
+    mqtt.setCredentials(uname, pass);
+  }
+  mqtt.setServer(host, port);
+  connectToMqtt();
 }
