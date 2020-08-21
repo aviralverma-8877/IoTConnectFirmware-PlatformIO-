@@ -19,4 +19,5 @@
     void manage_dns_request();
     void generate_mqtt_topics();
     String read_device_config();
+    void perform_action(String r);
 #endif

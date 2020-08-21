@@ -8,5 +8,5 @@
     void blank();
     String IpAddress2String(const IPAddress& ipAddress);
     void write_device_config(StaticJsonDocument<1000> jsonBuffer);
-    void write_mqtt_topics(StaticJsonDocument<1000> jsonBuffer);
+    void write_mqtt_topics(String r);
 #endif

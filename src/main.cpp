@@ -134,6 +134,7 @@ else
     else{
       request->redirect("/update");
     }
+    index.close();
   });
   webServer.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
   webServer.onNotFound([](AsyncWebServerRequest *request){

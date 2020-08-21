@@ -247,6 +247,7 @@ void read_config()
       std::unique_ptr<char[]> buf(new char[size]);
 
       configFile.readBytes(buf.get(), size);
+      configFile.close();
       StaticJsonDocument<500> jsonBuffer;
       DeserializationError error = deserializeJson(jsonBuffer, buf.get());
       if(error)
@@ -278,6 +279,7 @@ String read_mqtt_config()
       std::unique_ptr<char[]> buf(new char[size]);
 
       configFile.readBytes(buf.get(), size);
+      configFile.close();
       return buf.get();
     }
   }
@@ -293,6 +295,7 @@ String read_device_config()
       std::unique_ptr<char[]> buf(new char[size]);
 
       configFile.readBytes(buf.get(), size);
+      configFile.close();
       return buf.get();
     }
   }
@@ -316,8 +319,10 @@ void generate_mqtt_topics()
       String key = "relay_"+String(relay_count);
       relay_count++;
       String value = chipid+"/shift_out_reg/pin_"+i;
+      topic_doc["input"]["relay"][key]["comp"] = "sr";
       topic_doc["input"]["relay"][key]["topic"] = value;
       topic_doc["input"]["relay"][key]["status"] = false;
+      topic_doc["input"]["relay"][key]["pin"] = i;
     }
   }
   int relay_gpio_count = doc["device_config"]["relay"]["count"];
@@ -329,8 +334,10 @@ void generate_mqtt_topics()
       relay_count++;
       int pin  = doc["device_config"]["relay"]["GPIO"][i];
       String value = chipid+"/gpio_relay/pin_"+pin;
+      topic_doc["input"]["relay"][key]["comp"] = "gpio";
       topic_doc["input"]["relay"][key]["topic"] = value;
       topic_doc["input"]["relay"][key]["status"] = false;
+      topic_doc["input"]["relay"][key]["pin"] = pin;
     }
   }
   bool has_dht_sensor = doc["device_config"]["dht"]["INSTALLED"];
@@ -358,4 +365,30 @@ void generate_mqtt_topics()
   String r;
   serializeJsonPretty(topic_doc, r);
   topicFile.print(r);
+  topicFile.close();
+}
+
+void perform_action(String r)
+{
+  StaticJsonDocument<1500> doc;
+  DeserializationError error = deserializeJson(doc, r);
+  if(error)
+    return;
+  for( const auto& kv : doc["input"]["relay"].as<JsonObject>() ) 
+  {
+    String com = kv.value()["comp"];
+    if(comp(com.c_str(), "sr"))
+    {
+      int pin = kv.value()["pin"];
+      bool value = kv.value()["status"];
+      sr.set(pin, value);
+    }
+    if(comp(com.c_str(), "gpio"))
+    {
+      int pin = kv.value()["pin"];
+      bool value = kv.value()["status"];
+      digitalWrite(pin, value);
+    }
+  }
+  send_status();
 }

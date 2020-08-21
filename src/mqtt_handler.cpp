@@ -54,13 +54,14 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
 /*-------Meathod called when disconnected from MQTT Topic---*/
 
 /*-------Meathod called on reciving message from MQTT-------*/
-void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) 
+{
   String p = "";
   for(int i=index; (unsigned)i<len;i++)
   {
     p += payload[i];
   }
-  if(comp(topic, intopic.c_str()))
+  if(strcmp(topic, intopic.c_str())==0)
   {
     StaticJsonDocument<200> root;
     serialDisplay("MQTT",p);
@@ -185,13 +186,9 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   }
   else
   {
-
-    TickerForTimeOut.once_ms(100,[topic,p](){
-      send_data_to_webSocket(String(topic)+" : "+ p);
-    });
-
+    
     String mqtt_data = read_mqtt_config();
-    StaticJsonDocument<1000> doc;
+    StaticJsonDocument<1500> doc;
     StaticJsonDocument<200> msg;
     DeserializationError error_1 = deserializeJson(doc, mqtt_data);
     if(error_1)
@@ -201,20 +198,23 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       return;
     if(!msg.containsKey("action"))
       return;
-    for( const auto& kv : doc["input"].as<JsonObject>() ) 
+    for( const auto& kv : doc["input"]["relay"].as<JsonObject>() ) 
     {
-      String config_topic = kv.value()["topic"];
-      if(!comp(config_topic.c_str(), "null"))
+
+      String config_topic = kv.value()["topic"];      
+      if(comp(topic, config_topic.c_str()))
       {
-        if(comp(topic, config_topic.c_str()))
-        {
-          bool action = msg["action"];
-          const char *key = kv.key().c_str();
-          doc["input"][key]["status"] = action;
-        }
+        bool action = msg["action"];
+        const char *key = kv.key().c_str();
+        doc["input"]["relay"][key]["status"] = action;
       }
     }
-    write_mqtt_topics(doc);
+    mqtt_data = "";
+    serializeJsonPretty(doc, mqtt_data);
+    write_mqtt_topics(mqtt_data);
+    TickerForTimeOut.attach_ms(10,[mqtt_data](){
+      perform_action(mqtt_data);
+    });
   }
 }
 /*-------Meathod called on reciving message from MQTT-------*/
@@ -278,19 +278,18 @@ void connectToMqtt()
 void subscribe_mqtt_input()
 {
   String mqtt_data = read_mqtt_config();
-  StaticJsonDocument<1000> doc;
+  StaticJsonDocument<1500> doc;
   DeserializationError error = deserializeJson(doc, mqtt_data);
   if(error)
     return;
-  for( const auto& kv : doc["input"].as<JsonObject>() ) 
+  String command = doc["input"]["COMMAND"];
+  mqtt.subscribe(command.c_str(), 2);
+  for( const auto& kv : doc["input"]["relay"].as<JsonObject>() ) 
   {
     String topic = kv.value()["topic"];
-    if(!comp(topic.c_str(), "null"))
-    {
-      if(debugging)
-        Serial.println(topic);
-      mqtt.subscribe(topic.c_str(), 2);
-    }
+    if(debugging)
+      Serial.println(topic);
+    mqtt.subscribe(topic.c_str(), 2);
   }
 }
 

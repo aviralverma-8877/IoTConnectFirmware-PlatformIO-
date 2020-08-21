@@ -25,6 +25,7 @@ void write_config(configuration config)
   String r;
   serializeJsonPretty(jsonBuffer, r);
   configFile.print(r); 
+  configFile.close();
 }
 
 void write_device_config(StaticJsonDocument<1000> jsonBuffer)
@@ -34,17 +35,17 @@ void write_device_config(StaticJsonDocument<1000> jsonBuffer)
   String r;
   serializeJsonPretty(jsonBuffer, r);
   configFile.print(r); 
+  configFile.close();
   TickerForTimeOut.once(1,[](){
     ESP.reset();
   });
 }
 
-void write_mqtt_topics(StaticJsonDocument<1000> jsonBuffer)
+void write_mqtt_topics(String r)
 {
   File configFile = SPIFFS.open("/mqtt_topics.json", "w");
-  String r;
-  serializeJsonPretty(jsonBuffer, r);
   configFile.print(r); 
+  configFile.close();
 }
 
 
