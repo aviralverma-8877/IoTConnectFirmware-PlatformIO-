@@ -11,9 +11,10 @@ function init_socket()
             {
                 alert(json.msg)
             }
-            else
+            else if(json.action == "status")
             {
-                update_table_data(json);
+                if(json.value != null)
+                    update_table_data(json);
             }
         }
         catch(err)
@@ -23,6 +24,7 @@ function init_socket()
     }
     Socket.onopen = function(event){
         console.log("Connected to web sockets...")
+        httpGet(0, 0, 'get_status');
     }
     Socket.onclose = function(event){
         console.log("Connection to websockets closed....")
@@ -36,7 +38,7 @@ function httpGet(relay, value, action, options = {})
 {
     if(action == "toggle_relay")
     {
-        theUrl = '/control?command={"relay":'+relay+',"action":'+value+'}';
+        theUrl = '/control?command={"relay":\"'+relay+'\","action":'+value+'}';
     }
     if(action == "device")
     {
@@ -73,62 +75,19 @@ function httpGet(relay, value, action, options = {})
         return JSON.stringify({"done":false,"error":err});
     }
 }
-function print_table()
+function set_ui()
 {
-    var table = document.getElementById("relay_table");
-    var content = "";
-    for(var i = 0; i<8; i++)
-    {
-        content = content + "<tr>\
-        <th style='font:Fjalla One'>\
-            Relay "+(i+1)+" : <span id='status-"+i+"'></span>\
-        </th>\
-        <th>\
-            <label class=\"switch\">\
-                <input type=\"checkbox\" id=\"checkbox-"+i+"\" onchange=\"toggle_relay(this,"+i+")\">\
-                <span class=\"slider round\"></span>\
-            </label>\
-        </th>\
-        </tr>";
-    }
-    table.innerHTML = content;
-    init_socket();
     data = httpGet(0, 0, 'get_status');
     json = JSON.parse(data);
+    console.log(json);
+    init_socket();
     if(!json.init_setup)
     {
         document.getElementById("cover").onclick = "";
         start_init_setup();
     }
-    update_table_data(json);
-}
-function toggle_relay(element, relay_no)
-{
-    if(element.checked) 
-        httpGet(relay_no,1,"toggle_relay"); 
-    else 
-        httpGet(relay_no,0,"toggle_relay");
-}
-function update_table_data(json)
-{
     if(json != null)
     {
-        for(var i=0; i<json['v'].length; i++)
-        {
-            var element = document.getElementById('status-'+i);
-            if(json['v'][i] == 0)
-            {
-                document.getElementById('status-'+i).style.color = "red";
-                document.getElementById('checkbox-'+i).checked = false;
-                element.innerHTML = 'OFF';
-            }
-            if(json['v'][i] == 1)
-            {
-                document.getElementById('status-'+i).style.color = "green";
-                document.getElementById('checkbox-'+i).checked = true;
-                element.innerHTML = 'ON';
-            }
-        }
         onb_status = json['onb_led'];
         document.getElementById("on_board_led").checked = onb_status
         var cont = "";
@@ -151,6 +110,70 @@ function update_table_data(json)
         element = document.getElementById('WiFi_Status');
         element.innerHTML = cont;
         document.getElementById("firmware_version").innerHTML = json["firmware_version"]
+    }    
+}
+function toggle_relay(element, relay)
+{
+    if(element.checked) 
+        httpGet(relay,1,"toggle_relay"); 
+    else 
+        httpGet(relay,0,"toggle_relay");
+}
+table_printed = false;
+function print_table(relay_count, on_change_val, name)
+{
+    var table = document.getElementById("relay_table");
+    var content = "";
+    content = "<tr>\
+    <th style='font:Fjalla One'>\
+        "+name+" : <span id='status-"+relay_count+"'></span>\
+    </th>\
+    <th>\
+        <label class=\"switch\">\
+            <input type=\"checkbox\" id=\"checkbox-"+relay_count+"\" onchange=\""+on_change_val+"\">\
+            <span class=\"slider round\"></span>\
+        </label>\
+    </th>\
+    </tr>";
+    table.innerHTML += content;
+}
+function update_table_data(json)
+{
+    relays = json.value;
+    if(!table_printed)
+    {
+        var i = 1;
+        for (var element in relays) 
+        {
+            if (relays.hasOwnProperty(element)) 
+            {
+                on_change_val = "toggle_relay(this, '"+element+"')"
+                pin = relays[element].comp+"-"+relays[element].pin;
+                print_table(pin, on_change_val, "Relay "+i);
+                i++;
+            }
+        }
+        table_printed = true;
+    }
+    for (var ele in relays) 
+    {
+        if (relays.hasOwnProperty(ele)) 
+        {
+            pin = relays[ele].comp+"-"+relays[ele].pin;
+            var element = document.getElementById('status-'+pin);
+            if(!relays[ele].status)
+            {
+                document.getElementById('status-'+pin).style.color = "red";
+                document.getElementById('checkbox-'+pin).checked = false;
+                element.innerHTML = 'OFF';
+            }
+            else
+            {
+                document.getElementById('status-'+pin).style.color = "green";
+                document.getElementById('checkbox-'+pin).checked = true;
+                element.innerHTML = 'ON';
+            }    
+        }
     }
 }
 function update_wifi(ssid, pass)
@@ -369,8 +392,6 @@ function save_config()
     {
         var config = {
             "init_setup_done":true,
-            "login_username":"admin",
-            "login_password":"admin",
             "mqtt":{
                 "service":"",
                 "host":"",
@@ -443,8 +464,9 @@ function save_config()
                 alert("Please provide valid MQTT hostname.")
             }
         }
-        else{
-            service = "IoT Connect";
+        else
+        {
+            service = document.getElementById("mqtt_broker").value;
             config.mqtt.service = service;
         }
         if(document.getElementById("device_type").value == "IoT Connect Board Rev 1")
@@ -525,6 +547,7 @@ function save_config()
                 config.device_config.light.GPIO = "A0"
             }
         }
+        console.log(config);
         data = httpGet(0,0,"update_device_config", config);
         result = JSON.parse(data);
         if(result.done)

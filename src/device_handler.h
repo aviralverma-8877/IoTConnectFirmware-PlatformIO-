@@ -2,9 +2,9 @@
     #define device_handler
     #include<Arduino.h>
     #include<ArduinoJson.h>
-    void relay_action(int no, bool value, String by);
+    String read_mqtt_config();  
+    void relay_action(String relay, bool value, String by);
     void updateESP();
-    void SerialListner();
     void switch_wifi();
     void feedbackLED();
     void reset();
@@ -14,10 +14,10 @@
     bool comp(const char *val1,const char *val2);
     void fetchIP();
     void read_config();
-    void send_status_uart();
-    String read_mqtt_config();    
+    void send_status_uart();  
     void manage_dns_request();
     void generate_mqtt_topics();
     String read_device_config();
-    void perform_action(String r);
+    void perform_action();
+    void enable_ap();
 #endif

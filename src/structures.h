@@ -3,7 +3,6 @@
   #include <Arduino.h>
 
   struct configuration{
-    uint8 pinValues[8];  //Default relay values.
     bool setupFlag;
     bool updateFlag;
     bool led_enabled;

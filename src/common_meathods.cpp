@@ -11,11 +11,6 @@ void write_config(configuration config)
 {
   File configFile = SPIFFS.open("/config.json", "w");
   StaticJsonDocument<500> jsonBuffer;
-  JsonArray relay_status = jsonBuffer.createNestedArray("relay_status");
-  for(int t=0; t<8; t++)
-  {
-    relay_status.add(config.pinValues[t]);
-  }
   jsonBuffer["setupFlag"] = config.setupFlag;
   jsonBuffer["updateFlag"] = config.updateFlag;
   jsonBuffer["led_enabled"] = config.led_enabled;

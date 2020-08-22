@@ -18,7 +18,14 @@ void onMqttConnect(bool sessionPresent) {
   first_connect = true;
   mqtt.subscribe(intopic.c_str(), 2);
   if (SPIFFS.exists("/mqtt_topics.json")) {
-    subscribe_mqtt_input();
+    StaticJsonDocument<1000> doc;
+    String device_config = read_device_config();
+    DeserializationError error = deserializeJson(doc, device_config);
+    if(error)
+      return;
+    String service = doc["mqtt"]["service"];
+    if(service != "N/A")
+      subscribe_mqtt_input();
   }
   TickerForPinging.attach_ms(10000, pinging);
   if(strcmp(DEVICE_V, "v2") == 0)
@@ -138,13 +145,13 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   /*-------Action command for resetting ESP-------------------*/
 
   /*-------Action command for controlling Relays--------------*/
-      else if(comp(action,"RELAY"))
-      {
-        int no = root["no"];
-        bool value = root["value"];
-        String by = root["by"];
-        relay_action(no, value, by);
-      }
+      // else if(comp(action,"RELAY"))
+      // {
+      //   int no = root["no"];
+      //   bool value = root["value"];
+      //   String by = root["by"];
+      //   relay_action(no, value, by);
+      // }
   /*-------Action command for controlling Relays--------------*/
   /*-------Action command for getting Relays status-----------*/
       else if(comp(action,"STATUS"))
@@ -186,7 +193,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   }
   else
   {
-    
     String mqtt_data = read_mqtt_config();
     StaticJsonDocument<1500> doc;
     StaticJsonDocument<200> msg;
@@ -212,8 +218,8 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     mqtt_data = "";
     serializeJsonPretty(doc, mqtt_data);
     write_mqtt_topics(mqtt_data);
-    TickerForTimeOut.attach_ms(10,[mqtt_data](){
-      perform_action(mqtt_data);
+    TickerForTimeOut.attach_ms(10,[](){
+      perform_action();
     });
   }
 }
@@ -225,9 +231,26 @@ void sendToMQTT(String topic, String msg)
 }
 /*----Meathod for sending MQTT Data-------------------------*/
 /*----Meathod for sending relay status----------------------*/
+void send_mqtt_status()
+{
+  DynamicJsonDocument return_doc(1500);
+  DynamicJsonDocument doc(1500);
+  String mqtt_config = read_mqtt_config();
+  DeserializationError error = deserializeJson(doc, mqtt_config);
+  return_doc["action"] = "status";
+  return_doc["value"] = doc["input"]["relay"];
+  String r = "";
+  serializeJson(return_doc, r);
+  send_data_to_webSocket(r);
+}
 void send_status()
 {
-  StaticJsonDocument<600> doc;
+  String mqtt_data = read_mqtt_config();
+  DynamicJsonDocument doc(1500);
+  DeserializationError error = deserializeJson(doc, mqtt_data);
+  if(error)
+    return;
+  doc["COMMAND"].clear();
   doc["d"] = chipid;
   doc["action"] = "s";
   doc["uname"] = conf.http_username;
@@ -243,19 +266,14 @@ void send_status()
     doc["h"] = humid;
     doc["l"] = light;
   }
-  JsonArray data = doc.createNestedArray("v");
-  for(int t=0; t<8; t++)
-  {
-    data.add(sr.get(t));
-  }
   String r;
   serializeJson(doc, r);
   send_data_to_webSocket(r);
-  TickerForTimeOut.once_ms(100,[r](){
-    sendToMQTT(outtopic, r);
-    sendToMQTT(espstatus, r);
-    send_status_uart();
-  });
+  // TickerForTimeOut.once_ms(100,[r](){
+  //   sendToMQTT(outtopic, r);
+  //   sendToMQTT(espstatus, r);
+  //   send_status_uart();
+  // });
 }
 /*----Meathod for sending relay status----------------------*/
 /*----Meathod called on sending/publishing message on MQTT--*/

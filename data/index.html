@@ -10,7 +10,7 @@
         <link href="style.css" rel="stylesheet">
         <script type="application/javascript" src="script.js"></script>
     </head>
-    <body onload="print_table()">
+    <body onload="set_ui()">
         <h1 style="font-family: 'Fjalla One'">IoT Connect : Solutions for smart homes.</h1>
         <h5>Firmware Version : <b><span id="firmware_version"></span></b></h5>
         <hr />
@@ -54,7 +54,7 @@
                             <input type="password" id="pass_input" placeholder="WiFi Password" style="margin:1px"/>
                         </td>
                         <td>
-                            <button class='style_btn' onclick="if(confirm('Make sure that you have proivided the correct WiFi details,\nIncorrect details will reset the device and start an access point to re-configure after 30 sec.')) update_wifi(ssid_input.value, pass_input.value)">Update Wifi</button>
+                            <button class='style_btn' onclick="if(confirm('Make sure that you have proivided the correct WiFi details,\nIncorrect details will host an Access Point to configure WiFi after 30 sec.')) update_wifi(ssid_input.value, pass_input.value)">Update Wifi</button>
                             <button class='style_btn' onclick="scan_wifi()">Scan</button>                               
                         </td>
                     </tr>
@@ -87,6 +87,9 @@
                                 </option>
                                 <option value="Custom">
                                     Custom
+                                </option>
+                                <option value="N/A">
+                                    N/A
                                 </option>
                             </select>
                         </td>

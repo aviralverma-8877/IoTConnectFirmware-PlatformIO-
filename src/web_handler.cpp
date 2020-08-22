@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-#include <ESPAsyncWiFiManager.h>          //Async WiFi Manager
 #include <Ticker.h>                       //Ticker for running multithread
 #include <ArduinoJson.h>                  //Encoading and Decoding JSON
 #include <ESP8266HTTPClient.h>            //HTTP Client library.
@@ -35,9 +34,13 @@ void handleWebControl(AsyncWebServerRequest *request)
       request->send(200, "application/json", return_msg);
       return;
     }
-    int relay = doc["relay"];
-    bool action = doc["action"];
-    relay_action(relay, action, "");
+
+    TickerForTimeOut.once_ms(10,[doc](){
+      String relay = doc["relay"];
+      bool action = doc["action"];
+      relay_action(relay, action, "");
+    });
+
     doc["done"] = 1;
     serializeJson(doc, message);
   }
@@ -75,12 +78,8 @@ void handleWebControl(AsyncWebServerRequest *request)
 void handleWebStatus(AsyncWebServerRequest *request)
 {
   String return_msg = "";
-  StaticJsonDocument<500> return_doc;
+  DynamicJsonDocument return_doc(1500);
   JsonArray relay_status = return_doc.createNestedArray("v");
-  for(int t=0; t<8; t++)
-  {
-    relay_status.add(sr.get(t));
-  }
   return_doc["uname"] = conf.http_username;
   return_doc["type"] = DEVICE_V;
   return_doc["wifi_ssid"] = Wifi_ssid;
@@ -88,19 +87,19 @@ void handleWebStatus(AsyncWebServerRequest *request)
   return_doc["onb_led"] = conf.led_enabled;
   return_doc["firmware_version"] = FIRMWARE_V;
   return_doc["mqtt_status"] = MQTTStatus;
+
   String device_config = read_device_config();
-  StaticJsonDocument<500> doc;
+  DynamicJsonDocument doc(1000);
   DeserializationError error = deserializeJson(doc, device_config);
   bool init_setup = doc["init_setup_done"];
   return_doc["init_setup"] = init_setup;
-  if(strcmp(DEVICE_V, "v2") == 0)
-  {
-    return_doc["t"] = temp;
-    return_doc["h"] = humid;
-    return_doc["l"] = light;
-  }
+  doc.clear();
+
   serializeJson(return_doc, return_msg);
-  request->send(200, "application/json", return_msg); 
+  request->send(200, "application/json", return_msg);
+  TickerForTimeOut.once_ms(10,[](){
+    send_mqtt_status();
+  });
 }
 void handleDeviceConfig(AsyncWebServerRequest *request)
 {
@@ -221,11 +220,20 @@ void web_set_wifi(AsyncWebServerRequest *request)
     TickerForTimeOut.once(15,[](){
       if(WiFi.status() != WL_CONNECTED)
       {
-        callback = &reset;
+        enable_ap();
       }
       else
       {
-        callback = &fetchIP; 
+        String device_config = read_device_config();
+        StaticJsonDocument<1000> doc;
+        DeserializationError error = deserializeJson(doc, device_config);
+        if(error)
+        {
+          callback = &reset;
+        }
+        doc["wifi_setup_done"] = true;
+        write_device_config(doc);
+        ESP.reset();
       }
     });
   }
@@ -323,14 +331,6 @@ void firmware_web_updater()
               window.location.href = \"/\"\
             },10000);\
       </script>");
-      read_config();
-      /*--------Reading data from SPIFFS for last relay status ----*/
-      for(int t=0; t<8; t++)
-      {
-        sr.set(t,conf.pinValues[t]);           //Overwriting saved values on default values.
-        delay(100);
-      }
-      /*--------Reading data from SPIFFS for last relay status ----*/
     }
   },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
     if(!index){

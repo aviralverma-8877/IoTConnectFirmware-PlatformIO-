@@ -34,7 +34,7 @@
     DNSServer dnsServer;                      //Global variables
     AsyncWebServer webServer(80);             //Global variables
     /*----------------------------------------------------------*/
-    configuration conf = {{ 0,0,0,0,0,0,0,0 },false,false,true,2000,"admin","admin"};
+    configuration conf = {false,false,true,2000,"admin","admin"};
     String IpAddress = "";                    //Global variables
     String LocalIP = "";                      //Global variables
     bool mqtt_setup = false;                  //Global variables

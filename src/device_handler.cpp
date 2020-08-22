@@ -1,35 +1,44 @@
 #include <Arduino.h>
+#include <ESP8266mDNS.h> 
 #include "mqtt_handler.h"
 #include "global_var_one.h"
 #include "global_var_two.h"
 #include "common_meathods.h"
+#include "web_sockets_handler.h"
 
-void relay_action(int no, bool value, String by)
+String read_mqtt_config();
+void perform_action();
+
+void relay_action(String relay, bool value, String by)
 {
-  sr.set(no, value);
-//sending nortification
-  StaticJsonDocument<200> doc;
-  if(by != "")
-  {
-    doc["by"] = by;
-    doc["no"] = no;
-    doc["CHIPID"] = chipid;
-    doc["input"] = value;
-  }
-  String r = "";
-  serializeJson(doc, r);
-  sendToMQTT(norttopic, r);
-//saving to config
-  TickerForTimeOut.once_ms(10,[](){  
-    for(int t=0; t<8; t++)
-    {
-      conf.pinValues[t] = sr.get(t);
-    }
-    write_config(conf);
-    TickerForTimeOut.once_ms(10,[]{
-      send_status();
-    });
+  String mqtt_data = read_mqtt_config();
+  DynamicJsonDocument doc(1500);
+  DeserializationError error = deserializeJson(doc, mqtt_data);
+  if(error)
+    return;
+  doc["input"]["relay"][relay]["status"] = value;
+  mqtt_data = "";
+  serializeJsonPretty(doc, mqtt_data);
+  doc.clear();
+
+  write_mqtt_topics(mqtt_data);
+  TickerForTimeOut.attach_ms(10,[](){
+    perform_action();
   });
+//sending nortification
+  // if(by != "")
+  // {
+  //   doc["by"] = by;
+  //   doc["no"] = pin;
+  //   doc["CHIPID"] = chipid;
+  //   doc["input"] = value;
+  // }
+  // String r = "";
+  // serializeJson(doc, r);
+  //sendToMQTT(norttopic, r);
+  //TickerForTimeOut.once_ms(10,[]{
+  //  send_status();
+  //});
 }
 
 /*-------Meathod to update ESP------------------------------*/
@@ -68,40 +77,10 @@ void updateESP()
   callback = &blank;
 }
 /*-------Meathod to update ESP------------------------------*/
-/*-------Serial Listener Setup-----------------------------------*/
-void SerialListner()
-{
-  String message = "";
-  StaticJsonDocument<200> doc;
-  if(Serial.available())
-  {
-    char n;
-    while(Serial.available())
-    {
-      n = Serial.read();
-      message += n;
-    }
-    message.trim();
-    DeserializationError error = deserializeJson(doc, message);
-    if(error)
-    {
-      return;
-    }
-    String action = doc["a"];
-    int relay = doc["n"];
-    bool val = doc["v"];
-    if(action == "R")
-    {
-      relay_action(relay, val, "");
-    }
-  }
-
-}
-/*-------Serial Listener Setup-----------------------------------*/
-
 void switch_wifi()
 {
   WiFi.disconnect();
+  WiFi.mode(WIFI_STA);
   WiFi.begin(wifi_ssid,wifi_pass);
   callback = &blank;
 }
@@ -134,7 +113,7 @@ void reset()
     delay(1000);
   }
   SPIFFS.format();
-  configuration newConf = {{ 0,0,0,0,0,0,0,0 },false,false,true,2000,"admin","admin"};
+  configuration newConf = {false,false,true,2000,"admin","admin"};
   newConf.setupFlag = true;
   write_config(newConf);
   ESP.reset();
@@ -260,11 +239,6 @@ void read_config()
       String http_password = jsonBuffer["http_password"];
       conf.http_username = http_username;
       conf.http_password = http_password;
-      for(int t=0; t<8; t++)
-      {
-        bool pinVal = jsonBuffer["relay_status"][t]; 
-        conf.pinValues[t] = pinVal;
-      }
     }
   }
 }
@@ -368,9 +342,10 @@ void generate_mqtt_topics()
   topicFile.close();
 }
 
-void perform_action(String r)
+void perform_action()
 {
-  StaticJsonDocument<1500> doc;
+  String r = read_mqtt_config();
+  DynamicJsonDocument doc(1500);
   DeserializationError error = deserializeJson(doc, r);
   if(error)
     return;
@@ -390,5 +365,17 @@ void perform_action(String r)
       digitalWrite(pin, value);
     }
   }
-  send_status();
+  TickerForTimeOut.once_ms(10,[](){
+    send_mqtt_status();
+  });
+}
+
+void enable_ap()
+{
+  const byte DNS_PORT = 53;
+  IPAddress apIP(192, 168, 4, 1);
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+  WiFi.softAP("IoT Connect");
+  dnsServer.start(DNS_PORT, "*", apIP);
 }
