@@ -98,7 +98,6 @@ function set_ui()
         wifi_status = json["wifi_status"];
         if(wifi_status)
             cont = "Connected to <b>"+wifi_ssid+"</b>";
-        cont += "<br />Device Type <b>"+wifi_type+"</b>";
         if(mqtt_status)
             cont += "<br />MQTT Status : <b>Connected</b>";
         else
