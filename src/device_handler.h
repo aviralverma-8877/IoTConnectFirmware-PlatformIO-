@@ -20,4 +20,5 @@
     String read_device_config();
     void perform_action();
     void enable_ap();
+    void disable_ap();
 #endif

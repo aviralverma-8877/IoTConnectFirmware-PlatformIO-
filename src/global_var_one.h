@@ -69,13 +69,6 @@
     extern String wifi_ssid;
     extern String wifi_pass;
     /*----------------------------------------------------------*/
-    /*--------------MQTT Configration---------------------------*/
-    extern String norttopic;                //MQTT Topic for sending nortifications.
-    extern String sensortopic;         //MQTT Topic for sending sensor data.
-    extern String espstatus;           //MQTT Topic for sending relay status data.
-    extern String espraw;                 //MQTT Topic for sending device attendence.
-    /*--------------MQTT Configration---------------------------*/
-
     /*--------------Tickers for Async Meathods------------------*/
     extern Ticker TickerForPinging;
     extern Ticker TickerForsendSensorData;

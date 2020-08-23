@@ -6,39 +6,42 @@
 #include "common_meathods.h"
 #include "web_sockets_handler.h"
 
+String read_device_config();
 String read_mqtt_config();
 void perform_action();
 
 void relay_action(String relay, bool value, String by)
 {
   String mqtt_data = read_mqtt_config();
-  DynamicJsonDocument doc(1500);
+  DynamicJsonDocument doc(2000);
   DeserializationError error = deserializeJson(doc, mqtt_data);
   if(error)
     return;
-  doc["input"]["relay"][relay]["status"] = value;
+  doc["relay"][relay]["status"] = value;
   mqtt_data = "";
   serializeJsonPretty(doc, mqtt_data);
   doc.clear();
 
   write_mqtt_topics(mqtt_data);
-  TickerForTimeOut.attach_ms(10,[](){
-    perform_action();
-  });
 //sending nortification
-  // if(by != "")
-  // {
-  //   doc["by"] = by;
-  //   doc["no"] = pin;
-  //   doc["CHIPID"] = chipid;
-  //   doc["input"] = value;
-  // }
-  // String r = "";
-  // serializeJson(doc, r);
-  //sendToMQTT(norttopic, r);
-  //TickerForTimeOut.once_ms(10,[]{
-  //  send_status();
-  //});
+  if(by != "")
+  {
+    doc["by"] = by;
+  }
+
+  doc["relay"] = relay;
+  doc["esp_chip_id"] = chipid;
+  doc["value"] = value;
+
+  String r = "";
+  serializeJson(doc, r);
+  sendToMQTT(norttopic, r);
+  TickerForTimeOut.once_ms(10,[]{
+    perform_action();
+    TickerForTimeOut.once_ms(10,[]{
+     send_status();
+    });
+  });
 }
 
 /*-------Meathod to update ESP------------------------------*/
@@ -152,14 +155,38 @@ void pinging()
 /*-----Meathod for sending sensor data----------------------*/
 void sendSensorData()
 {
-  StaticJsonDocument<200> doc;
+  DynamicJsonDocument doc(2000);
+  String device_config = read_device_config();
+  DeserializationError error = deserializeJson(doc, device_config);
+  if(error)
+    return;
+  
+  bool has_dht = doc["dht"]["INSTALLED"];
+  bool has_light = doc["light"]["INSTALLED"];
+  doc.clear();
+  String mqtt_topics = read_mqtt_config();
+  error = deserializeJson(doc, mqtt_topics);
+  if(error)
+  {
+    return;
+  }
+  if(has_dht)
+  {
+    int t = temp;
+    int h = humid;
+  }
+  if(has_light)
+  {
+    int l = light;
+  }
+  doc.clear();
   doc["d"] = chipid;
   doc["t"] = temp;
   doc["h"] = humid;
   doc["l"] = light;
   String s;
   serializeJson(doc, s);
-  sendToMQTT(sensortopic, s);
+  sendToMQTT(espsensor, s);
 }
 /*-----Meathod for sending sensor data----------------------*/
 /*-----Meathod for checking reset button--------------------*/
@@ -277,26 +304,26 @@ String read_device_config()
 
 void generate_mqtt_topics()
 {
-  StaticJsonDocument<1000> doc;
+  DynamicJsonDocument doc(1000);
   String device_config = read_device_config();
   DeserializationError error = deserializeJson(doc, device_config);
   if(error)
     return;
-  StaticJsonDocument<1000> topic_doc;
-  int relay_count = 0;
+  DynamicJsonDocument topic_doc(1500);
+  int relay_count = 1;
   bool has_shift_reg = doc["device_config"]["shift_out_reg"]["avail"];
-  topic_doc["input"]["COMMAND"] = chipid+"/COMMAND";
+  topic_doc["COMMAND"] = chipid+"/COMMAND";
   if(has_shift_reg)
   {
     for(int i=0; i<8; i++)
     {
-      String key = "relay_"+String(relay_count);
-      relay_count++;
+      String key = "Relay "+String(relay_count);
       String value = chipid+"/shift_out_reg/pin_"+i;
-      topic_doc["input"]["relay"][key]["comp"] = "sr";
-      topic_doc["input"]["relay"][key]["topic"] = value;
-      topic_doc["input"]["relay"][key]["status"] = false;
-      topic_doc["input"]["relay"][key]["pin"] = i;
+      topic_doc["relay"][key]["comp"] = "shift_reg";
+      topic_doc["relay"][key]["topic"] = value;
+      topic_doc["relay"][key]["status"] = false;
+      topic_doc["relay"][key]["pin"] = i;
+      relay_count++;
     }
   }
   int relay_gpio_count = doc["device_config"]["relay"]["count"];
@@ -304,55 +331,36 @@ void generate_mqtt_topics()
   {
     for(int i=0; i<relay_gpio_count; i++)
     {
-      String key = "relay_"+String(relay_count);
-      relay_count++;
+      String key = "Relay-"+String(relay_count);
       int pin  = doc["device_config"]["relay"]["GPIO"][i];
       String value = chipid+"/gpio_relay/pin_"+pin;
-      topic_doc["input"]["relay"][key]["comp"] = "gpio";
-      topic_doc["input"]["relay"][key]["topic"] = value;
-      topic_doc["input"]["relay"][key]["status"] = false;
-      topic_doc["input"]["relay"][key]["pin"] = pin;
+      topic_doc["relay"][key]["comp"] = "gpio";
+      topic_doc["relay"][key]["topic"] = value;
+      topic_doc["relay"][key]["status"] = false;
+      topic_doc["relay"][key]["pin"] = pin;
+      relay_count++;
     }
   }
-  bool has_dht_sensor = doc["device_config"]["dht"]["INSTALLED"];
-  if(has_dht_sensor)
-  {
-    String key = "dht";
-    int pin  = doc["device_config"]["dht"]["GPIO"];
-    String value = chipid+"/dht/pin_"+pin;
-    topic_doc["output"][key] = value;
-  }
-
-  topic_doc["output"]["ESPSTATUS"] = chipid+"/ESPSTATUS";
-  topic_doc["output"]["NORT"] = chipid+"/NORT";
-  topic_doc["output"]["ESPRAW"] = chipid+"/ESPRAW";
   
-  bool has_light_sensor = doc["device_config"]["light"]["INSTALLED"];
-  if(has_dht_sensor)
-  {
-    String key = "light";
-    String pin  = doc["device_config"]["light"]["GPIO"];
-    String value = chipid+"/light/pin_"+pin;
-    topic_doc["output"][key] = value;
-  }
   File topicFile = SPIFFS.open("/mqtt_topics.json", "w");
   String r;
   serializeJsonPretty(topic_doc, r);
   topicFile.print(r);
   topicFile.close();
+  ESP.reset();
 }
 
 void perform_action()
 {
   String r = read_mqtt_config();
-  DynamicJsonDocument doc(1500);
+  DynamicJsonDocument doc(2000);
   DeserializationError error = deserializeJson(doc, r);
   if(error)
     return;
-  for( const auto& kv : doc["input"]["relay"].as<JsonObject>() ) 
+  for( const auto& kv : doc["relay"].as<JsonObject>() ) 
   {
     String com = kv.value()["comp"];
-    if(comp(com.c_str(), "sr"))
+    if(comp(com.c_str(), "shift_reg"))
     {
       int pin = kv.value()["pin"];
       bool value = kv.value()["status"];
@@ -366,7 +374,7 @@ void perform_action()
     }
   }
   TickerForTimeOut.once_ms(10,[](){
-    send_mqtt_status();
+    send_status();
   });
 }
 
@@ -378,4 +386,9 @@ void enable_ap()
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP("IoT Connect");
   dnsServer.start(DNS_PORT, "*", apIP);
+}
+
+void disable_ap()
+{
+  WiFi.mode(WIFI_STA);
 }

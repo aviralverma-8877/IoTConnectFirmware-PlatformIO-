@@ -16,7 +16,6 @@ void onMqttConnect(bool sessionPresent) {
   MQTTStatus = true;
   send_status();
   first_connect = true;
-  mqtt.subscribe(intopic.c_str(), 2);
   if (SPIFFS.exists("/mqtt_topics.json")) {
     StaticJsonDocument<1000> doc;
     String device_config = read_device_config();
@@ -52,10 +51,12 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
   serialDisplay("MQTT","MQTT is disconnected.");
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   if (WiFi.status() != WL_CONNECTED) {
+    enable_ap();
     if(debugging)
       Serial.print(".");
   }
   else
+    disable_ap();
     connectToMqtt();
 }
 /*-------Meathod called when disconnected from MQTT Topic---*/
@@ -68,6 +69,12 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   {
     p += payload[i];
   }
+  String mqtt_data = read_mqtt_config();
+  DynamicJsonDocument doc(2000);
+  DeserializationError error_1 = deserializeJson(doc, mqtt_data);
+  if(error_1)
+    return;
+  String intopic = doc["COMMAND"];
   if(strcmp(topic, intopic.c_str())==0)
   {
     StaticJsonDocument<200> root;
@@ -145,13 +152,13 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   /*-------Action command for resetting ESP-------------------*/
 
   /*-------Action command for controlling Relays--------------*/
-      // else if(comp(action,"RELAY"))
-      // {
-      //   int no = root["no"];
-      //   bool value = root["value"];
-      //   String by = root["by"];
-      //   relay_action(no, value, by);
-      // }
+      else if(comp(action,"RELAY"))
+      {
+        String no = root["no"];
+        bool value = root["value"];
+        String by = root["by"];
+        relay_action(no, value, by);
+      }
   /*-------Action command for controlling Relays--------------*/
   /*-------Action command for getting Relays status-----------*/
       else if(comp(action,"STATUS"))
@@ -193,18 +200,13 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   }
   else
   {
-    String mqtt_data = read_mqtt_config();
-    StaticJsonDocument<1500> doc;
     StaticJsonDocument<200> msg;
-    DeserializationError error_1 = deserializeJson(doc, mqtt_data);
-    if(error_1)
-      return;
     DeserializationError error_2 = deserializeJson(msg, p);
     if(error_2)
       return;
     if(!msg.containsKey("action"))
       return;
-    for( const auto& kv : doc["input"]["relay"].as<JsonObject>() ) 
+    for( const auto& kv : doc["relay"].as<JsonObject>() ) 
     {
 
       String config_topic = kv.value()["topic"];      
@@ -212,13 +214,13 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       {
         bool action = msg["action"];
         const char *key = kv.key().c_str();
-        doc["input"]["relay"][key]["status"] = action;
+        doc["relay"][key]["status"] = action;
       }
     }
     mqtt_data = "";
     serializeJsonPretty(doc, mqtt_data);
     write_mqtt_topics(mqtt_data);
-    TickerForTimeOut.attach_ms(10,[](){
+    TickerForTimeOut.once_ms(10,[](){
       perform_action();
     });
   }
@@ -231,49 +233,22 @@ void sendToMQTT(String topic, String msg)
 }
 /*----Meathod for sending MQTT Data-------------------------*/
 /*----Meathod for sending relay status----------------------*/
-void send_mqtt_status()
-{
-  DynamicJsonDocument return_doc(1500);
-  DynamicJsonDocument doc(1500);
-  String mqtt_config = read_mqtt_config();
-  DeserializationError error = deserializeJson(doc, mqtt_config);
-  return_doc["action"] = "status";
-  return_doc["value"] = doc["input"]["relay"];
-  String r = "";
-  serializeJson(return_doc, r);
-  send_data_to_webSocket(r);
-}
 void send_status()
 {
   String mqtt_data = read_mqtt_config();
-  DynamicJsonDocument doc(1500);
+  DynamicJsonDocument doc(2000);
   DeserializationError error = deserializeJson(doc, mqtt_data);
   if(error)
     return;
-  doc["COMMAND"].clear();
-  doc["d"] = chipid;
-  doc["action"] = "s";
-  doc["uname"] = conf.http_username;
-  doc["type"] = DEVICE_V;
-  doc["wifi_ssid"] = Wifi_ssid;
-  doc["wifi_rssi"] = WiFi.RSSI();
-  doc["onb_led"] = conf.led_enabled;
-  doc["firmware_version"] = FIRMWARE_V;
-  doc["mqtt_status"] = MQTTStatus;
-  if(strcmp(DEVICE_V, "v2") == 0)
-  {
-    doc["t"] = temp;
-    doc["h"] = humid;
-    doc["l"] = light;
-  }
+  doc["esp_clip_id"] = chipid;
+  doc["action"] = "status";
   String r;
   serializeJson(doc, r);
   send_data_to_webSocket(r);
-  // TickerForTimeOut.once_ms(100,[r](){
-  //   sendToMQTT(outtopic, r);
-  //   sendToMQTT(espstatus, r);
-  //   send_status_uart();
-  // });
+  TickerForTimeOut.once_ms(100,[r](){
+    sendToMQTT(espstatus, r);
+    send_status_uart();
+  });
 }
 /*----Meathod for sending relay status----------------------*/
 /*----Meathod called on sending/publishing message on MQTT--*/
@@ -296,13 +271,13 @@ void connectToMqtt()
 void subscribe_mqtt_input()
 {
   String mqtt_data = read_mqtt_config();
-  StaticJsonDocument<1500> doc;
+  DynamicJsonDocument doc(2000);
   DeserializationError error = deserializeJson(doc, mqtt_data);
   if(error)
     return;
-  String command = doc["input"]["COMMAND"];
+  String command = doc["COMMAND"];
   mqtt.subscribe(command.c_str(), 2);
-  for( const auto& kv : doc["input"]["relay"].as<JsonObject>() ) 
+  for( const auto& kv : doc["relay"].as<JsonObject>() ) 
   {
     String topic = kv.value()["topic"];
     if(debugging)

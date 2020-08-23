@@ -46,12 +46,6 @@
     String wifi_ssid = "";
     String wifi_pass = "";
     /*----------------------------------------------------------*/
-    /*--------------MQTT Configration---------------------------*/
-    String norttopic = "NORT";                //MQTT Topic for sending nortifications.
-    String sensortopic = "ESPSENSOR";         //MQTT Topic for sending sensor data.
-    String espstatus = "ESPSTATUS";           //MQTT Topic for sending relay status data.
-    String espraw = "ESPRAW";                 //MQTT Topic for sending device attendence.
-    /*--------------MQTT Configration---------------------------*/
     /*--------------Tickers for Async Meathods------------------*/
     Ticker TickerForPinging;
     Ticker TickerForsendSensorData;

@@ -40,20 +40,25 @@ void setup()
     {
       WiFi.mode(WIFI_STA);
       configure_gpio();
-      TickerForTimeOut.attach_ms(10,[](){
+      TickerForTimeOut.once_ms(10,[](){
         perform_action();
       });
 /*-------Fetch IP Address-----------------------------------*/
       TickerForFeedbackLED.attach(0.6, feedbackLED);
       TickerForcheckReset.attach_ms(10, checkReset);
 /*-------Fetch IP Address-----------------------------------*/
+      int retry = 0;
       while (WiFi.status() != WL_CONNECTED) {
         delay(500);
+        if(retry > 10)
+          enable_ap();
         if(debugging)
           Serial.print(".");
         checkReset();
+        retry++;
       }
-
+      disable_ap();
+      WiFiStatus = true;
       fetchIP();  
 /*-------Start WiFi Manager---------------------------------*/
       if(strcmp(DEVICE_V, "v2") == 0)

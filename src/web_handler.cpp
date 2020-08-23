@@ -70,7 +70,7 @@ void handleWebControl(AsyncWebServerRequest *request)
       bool status = doc["status"];
       conf.led_enabled = status;
       write_config(conf);
-      send_status();
+      // send_status();
     }
   }
   request->send(200, "application/json", message);
@@ -87,7 +87,7 @@ void handleWebStatus(AsyncWebServerRequest *request)
   return_doc["onb_led"] = conf.led_enabled;
   return_doc["firmware_version"] = FIRMWARE_V;
   return_doc["mqtt_status"] = MQTTStatus;
-
+  return_doc["wifi_status"] = WiFiStatus;
   String device_config = read_device_config();
   DynamicJsonDocument doc(1000);
   DeserializationError error = deserializeJson(doc, device_config);
@@ -98,7 +98,7 @@ void handleWebStatus(AsyncWebServerRequest *request)
   serializeJson(return_doc, return_msg);
   request->send(200, "application/json", return_msg);
   TickerForTimeOut.once_ms(10,[](){
-    send_mqtt_status();
+    send_status();
   });
 }
 void handleDeviceConfig(AsyncWebServerRequest *request)
@@ -132,9 +132,11 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
       doc["mqtt"]["pass"] = MQTT_PASS;
       doc["mqtt"]["auth"] = true;
     }
-    TickerForTimeOut.once(1,[doc]{
+    TickerForTimeOut.once_ms(10,[doc]{
       write_device_config(doc);
-      generate_mqtt_topics();
+      TickerForTimeOut.once_ms(10,[doc]{
+        generate_mqtt_topics();
+      });
     });
   }
   else

@@ -1,4 +1,5 @@
 var Socket;
+var wifi_status=false;
 function init_socket()
 {
     Socket = new WebSocket('ws://'+window.location.hostname+":81/");
@@ -13,7 +14,7 @@ function init_socket()
             }
             else if(json.action == "status")
             {
-                if(json.value != null)
+                if(json.relay != null)
                     update_table_data(json);
             }
         }
@@ -94,19 +95,14 @@ function set_ui()
         wifi_ssid = json['wifi_ssid'];
         wifi_type = json['type'];
         mqtt_status = json["mqtt_status"];
-        cont = "Connected to <b>"+wifi_ssid+"</b>";
+        wifi_status = json["wifi_status"];
+        if(wifi_status)
+            cont = "Connected to <b>"+wifi_ssid+"</b>";
         cont += "<br />Device Type <b>"+wifi_type+"</b>";
         if(mqtt_status)
             cont += "<br />MQTT Status : <b>Connected</b>";
         else
             cont += "<br />MQTT Status : <b>Not Connected</b>";
-        if(json['temp'] != undefined)
-        {
-            temp = json['temp'];
-            humid = json['humid'];
-            lumin = json['lumin'];
-            cont = cont + " | Temperature : "+temp+" C | Humidity : "+humid+" % | Lumin : "+lumin+" % "
-        }
         element = document.getElementById('WiFi_Status');
         element.innerHTML = cont;
         document.getElementById("firmware_version").innerHTML = json["firmware_version"]
@@ -139,7 +135,7 @@ function print_table(relay_count, on_change_val, name)
 }
 function update_table_data(json)
 {
-    relays = json.value;
+    relays = json.relay;
     if(!table_printed)
     {
         var i = 1;
@@ -392,6 +388,7 @@ function save_config()
     {
         var config = {
             "init_setup_done":true,
+            "wifi_setup_done":wifi_status,
             "mqtt":{
                 "service":"",
                 "host":"",
