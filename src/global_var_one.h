@@ -30,13 +30,10 @@
     #ifndef FIRMWARE_V
     #define FIRMWARE_V "2.1.2"                //Current firmware version. (Displayed on Device Portal)
     #endif
-    #ifndef DEVICE_V
-        #define DEVICE_V   "v1"                   //Device type version (V1 - Without Sensor)
-                                                                //(V2 - With Sensor)
-                                            //Should not modify the vesions, as website device portal is set accordingly.
-    #endif
 
-
+    extern bool hasSensor; 
+    extern bool hasDHTSensor;
+    extern bool hasLightSensor;
     extern configuration conf;
     extern AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
     extern DHT_Unified dht;         //Initializing DHT sensor. 

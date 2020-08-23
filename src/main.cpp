@@ -17,6 +17,7 @@ void setup()
   webSocket.begin();
   if (SPIFFS.exists("/config.json")) {
     read_config();
+    delayMS = conf.pingTime;
   }
   else{
     configuration newConfig;
@@ -43,10 +44,8 @@ void setup()
       TickerForTimeOut.once_ms(10,[](){
         perform_action();
       });
-/*-------Fetch IP Address-----------------------------------*/
       TickerForFeedbackLED.attach(0.6, feedbackLED);
       TickerForcheckReset.attach_ms(10, checkReset);
-/*-------Fetch IP Address-----------------------------------*/
       int retry = 0;
       while (WiFi.status() != WL_CONNECTED) {
         delay(500);
@@ -60,13 +59,6 @@ void setup()
       disable_ap();
       WiFiStatus = true;
       fetchIP();  
-/*-------Start WiFi Manager---------------------------------*/
-      if(strcmp(DEVICE_V, "v2") == 0)
-      {
-        delayMS = conf.pingTime;
-        dht.begin();          //Initalizing DHT sensor.
-      }
-/*-------Setting up MQTT------------------------------------*/
       mqtt.onConnect(onMqttConnect);
       mqtt.onDisconnect(onMqttDisconnect);
       mqtt.onSubscribe(onMqttSubscribe);
@@ -74,7 +66,6 @@ void setup()
       mqtt.onMessage(onMqttMessage);
     //  mqtt.onPublish(onMqttPublish);
       connect_to_mqtt();
-/*-------Setting up MQTT------------------------------------*/
 /*-------Setting up the trikers-----------------------------*/
       TickerForconnectToMqtt.attach_ms(10000, connectToMqtt);
       TickerForfetchIP.attach(30, fetchIP);
@@ -164,17 +155,21 @@ void loop()
   MDNS.update();
   webSocket.loop();
   callback();
-  if(strcmp(DEVICE_V, "v2") == 0)
+  if(hasSensor)
   {
     if(millis()%2000 == 0)
     {
-      dht.temperature().getEvent(&event);
-      if (!isnan(event.temperature))
-        temp = event.temperature-8;
-      dht.humidity().getEvent(&event);
-      if (!isnan(event.relative_humidity))
-        humid = event.relative_humidity;
-      light = map(analogRead(LDR_PIN), 0, 255, 0, 100);
+      if(hasDHTSensor)
+      {
+        dht.temperature().getEvent(&event);
+        if (!isnan(event.temperature))
+          temp = event.temperature-8;
+        dht.humidity().getEvent(&event);
+        if (!isnan(event.relative_humidity))
+          humid = event.relative_humidity;
+      }
+      if(hasLightSensor)
+        light = map(analogRead(LDR_PIN), 0, 255, 0, 100);
     }
   }
 }

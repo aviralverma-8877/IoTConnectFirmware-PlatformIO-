@@ -21,6 +21,9 @@
     byte reset_btn = 4;
     sensor_t sensor;                          //DTH sensor
     sensors_event_t event;                    //Creating event variable for DHT sensor.
+    bool hasSensor = false;
+    bool hasDHTSensor = false;
+    bool hasLightSensor = false;
     /*----------------------------------------------------------*/
     /*----------------------------------------------------------*/
     String payload;                           //Global variables
@@ -60,7 +63,7 @@
     void configure_gpio()
     {
         String config = read_device_config();
-        StaticJsonDocument<500> doc;
+        DynamicJsonDocument doc(1000);
         DeserializationError error = deserializeJson(doc, config);
         if(error)
         {
@@ -93,6 +96,8 @@
         bool hasDHT = doc["device_config"]["dht"]["INSTALLED"];
         if(hasDHT)
         {
+            hasSensor = true;
+            hasDHTSensor = true;
             byte dht_pin = doc["device_config"]["dht"]["GPIO"];
             const char* DHTSensorType = doc["device_config"]["dht"]["TYPE"];
             byte DHTType;
@@ -110,6 +115,8 @@
         bool hasLight = doc["device_config"]["light"]["INSTALLED"];
         if(hasLight)
         {
+            hasSensor = true;
+            hasLightSensor = true;
             const char* lumin_pin = doc["device_config"]["light"]["INSTALLED"];
             if(comp(lumin_pin, "A0"))
                 LDR_PIN = 0;

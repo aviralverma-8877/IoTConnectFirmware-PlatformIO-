@@ -141,7 +141,7 @@ void pinging()
 {
   StaticJsonDocument<200> doc;
   doc["d"] = chipid;
-  if(strcmp(DEVICE_V, "v2") == 0)
+  if(hasSensor)
     doc["s"] = true;
   else
     doc["s"] = false;
@@ -373,9 +373,7 @@ void perform_action()
       digitalWrite(pin, value);
     }
   }
-  TickerForTimeOut.once_ms(10,[](){
-    send_status();
-  });
+  send_status();
 }
 
 void enable_ap()

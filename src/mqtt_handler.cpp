@@ -27,7 +27,7 @@ void onMqttConnect(bool sessionPresent) {
       subscribe_mqtt_input();
   }
   TickerForPinging.attach_ms(10000, pinging);
-  if(strcmp(DEVICE_V, "v2") == 0)
+  if(hasSensor)
     TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
 }
 /*-------Meathod called when connected to MQTT--------------*/
@@ -166,17 +166,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         send_status();
       }
   /*-------Action command for getting Relays status-----------*/
-  /*-------Action command for getting getting device version--*/
-      else if(comp(action,"GET_DEVICE_VERSION"))
-      {
-        StaticJsonDocument<200> doc;
-        doc["action"] = "Device Version";
-        doc["value"] = DEVICE_V;
-        String r;
-        serializeJson(doc, r);
-        sendToMQTT(outtopic, r);
-      }
-  /*-------Action command for getting getting device version--*/
   /*-----Action command for getting getting firmware version--*/
       else if(comp(action,"GET_VERSION"))
       {
@@ -245,10 +234,8 @@ void send_status()
   String r;
   serializeJson(doc, r);
   send_data_to_webSocket(r);
-  TickerForTimeOut.once_ms(100,[r](){
-    sendToMQTT(espstatus, r);
-    send_status_uart();
-  });
+  sendToMQTT(espstatus, r);
+//  send_status_uart();
 }
 /*----Meathod for sending relay status----------------------*/
 /*----Meathod called on sending/publishing message on MQTT--*/

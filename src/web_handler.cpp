@@ -81,7 +81,6 @@ void handleWebStatus(AsyncWebServerRequest *request)
   DynamicJsonDocument return_doc(1500);
   JsonArray relay_status = return_doc.createNestedArray("v");
   return_doc["uname"] = conf.http_username;
-  return_doc["type"] = DEVICE_V;
   return_doc["wifi_ssid"] = Wifi_ssid;
   return_doc["wifi_rssi"] = WiFi.RSSI();
   return_doc["onb_led"] = conf.led_enabled;
@@ -97,9 +96,7 @@ void handleWebStatus(AsyncWebServerRequest *request)
 
   serializeJson(return_doc, return_msg);
   request->send(200, "application/json", return_msg);
-  TickerForTimeOut.once_ms(10,[](){
-    send_status();
-  });
+  send_status();
 }
 void handleDeviceConfig(AsyncWebServerRequest *request)
 {
