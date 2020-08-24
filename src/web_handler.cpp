@@ -85,9 +85,14 @@ void handleWebStatus(AsyncWebServerRequest *request)
   return_doc["firmware_version"] = FIRMWARE_V;
   return_doc["mqtt_status"] = MQTTStatus;
   return_doc["wifi_status"] = WiFiStatus;
+  return_doc["chip_id"] = chipid;
   String device_config = read_device_config();
-  DynamicJsonDocument doc(1000);
-  DeserializationError error = deserializeJson(doc, device_config);
+  StaticJsonDocument<100> filter;
+  filter["init_setup_done"] = true;
+  DynamicJsonDocument doc(100);
+  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+  if(error)
+  {}
   bool init_setup = doc["init_setup_done"];
   return_doc["init_setup"] = init_setup;
   doc.clear();

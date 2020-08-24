@@ -1,5 +1,6 @@
 var Socket;
 var wifi_status=false;
+var chipid = "";
 function init_socket()
 {
     Socket = new WebSocket('ws://'+window.location.hostname+":81/");
@@ -80,7 +81,8 @@ function set_ui()
 {
     data = httpGet(0, 0, 'get_status');
     json = JSON.parse(data);
-    console.log(json);
+    if(json.chip_id != undefined)
+        chipid = json.chip_id;
     init_socket();
     if(!json.init_setup)
     {
@@ -140,7 +142,7 @@ function update_table_data(json)
         relays.forEach(function(element) 
         {
             on_change_val = "toggle_relay(this, '"+element.name+"')"
-            pin = ele.comp + "-" + ele.pin;
+            pin = element.comp + "-" + element.pin;
             print_table(pin, on_change_val, element.name);
         });
         table_printed = true;
@@ -169,7 +171,7 @@ function update_wifi(ssid, pass)
         response = httpGet(0,0,"set_wifi",{"ssid":ssid,"pass":pass});
         setTimeout(()=>
         {
-            location.reload();
+            window.location.replace("http://iot-connect-"+chipid+".local/");
         },20000);
     });
 }
@@ -232,7 +234,7 @@ function update_login(login_uname_input, login_pass_input, login_confirm_pass_in
         alert('Password and confirm password not matching.');
 }
 
-var avail_GPIO = [0,2,4,5,12,13,14,15,16]
+var avail_GPIO = [0,1,2,3,4,5,12,13,14,15,16]
 var ele_list = [
     "sr_dpin",
     "sr_cpin",
@@ -419,9 +421,9 @@ function save_config()
         {
             service = "Custom"
             host = document.getElementById("mqtt_host").value;
-            port = document.getElementById("mqtt_host").value;
-            uname = document.getElementById("mqtt_host").value;
-            pass = document.getElementById("mqtt_host").value;
+            port = document.getElementById("mqtt_port").value;
+            uname = document.getElementById("mqtt_uname").value;
+            pass = document.getElementById("mqtt_pass").value;
             if(host != "")
             {    
                 if(port != "" && port > 0)
