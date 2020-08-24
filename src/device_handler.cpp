@@ -164,17 +164,14 @@ void pinging()
 /*-----Meathod for sending sensor data----------------------*/
 void sendSensorData()
 {
-  Serial.println("Step 1");
   DynamicJsonDocument doc(500);
   StaticJsonDocument<200> filter;
   filter["device_config"]["dht"]["INSTALLED"] = true;
   filter["device_config"]["light"]["INSTALLED"] = true;
-  Serial.println("Step 2");
   String device_config = read_device_config();
   DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
   if(error)
     return;
-  Serial.println("Step 3");
   bool has_dht = doc["device_config"]["dht"]["INSTALLED"];
   bool has_light = doc["device_config"]["light"]["INSTALLED"];
   doc.clear();
@@ -194,14 +191,12 @@ void sendSensorData()
   }
   if(has_light)
   {
-    Serial.println("Step 5");
     light = map(analogRead(LDR_PIN), 0, 255, 0, 100);
     doc["l"] = light;
   }
 
   String s;
   serializeJson(doc, s);
-  Serial.println(s);
   sendToMQTT(espsensor, s);
 }
 /*-----Meathod for sending sensor data----------------------*/
@@ -248,11 +243,11 @@ void fetchIP()
       IpAddress = "";
       const char* s = doc["ip"];
       IpAddress = s;
-      Wifi_ssid = WiFi.SSID();
-      LocalIP = IpAddress2String(WiFi.localIP());
-      serialDisplay("SSID",Wifi_ssid);
-      serialDisplay("IP Address",IpAddress);
     }
+    Wifi_ssid = WiFi.SSID();
+    LocalIP = IpAddress2String(WiFi.localIP());
+    serialDisplay("SSID",Wifi_ssid);
+    serialDisplay("IP Address",IpAddress);
   }
   callback = &blank;
 }

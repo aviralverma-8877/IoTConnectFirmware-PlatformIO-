@@ -92,7 +92,6 @@
         pinMode(reset_pin, INPUT);
         reset_btn = reset_pin;
         bool hasDHT = doc["device_config"]["dht"]["INSTALLED"];
-        Serial.println("DHT: "+String(hasDHT));
         if(hasDHT)
         {
             hasSensor = true;
@@ -102,7 +101,6 @@
             DHTType = DHTSensorType;
         }
         bool hasLight = doc["device_config"]["light"]["INSTALLED"];
-        Serial.println("Light: "+String(hasLight));
         if(hasLight)
         {
             hasSensor = true;

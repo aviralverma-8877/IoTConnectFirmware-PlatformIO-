@@ -18,12 +18,14 @@ void onMqttConnect(bool sessionPresent) {
   first_connect = true;
   if (SPIFFS.exists("/mqtt_topics.json")) {
     StaticJsonDocument<1000> doc;
+    StaticJsonDocument<100> filter;
+    filter["mqtt"]["service"] = true;
     String device_config = read_device_config();
-    DeserializationError error = deserializeJson(doc, device_config);
+    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
     if(error)
       return;
     String service = doc["mqtt"]["service"];
-    if(service != "N/A")
+    if(!comp(service.c_str(), "N/A"))
       subscribe_mqtt_input();
     TickerForPinging.attach_ms(10000, pinging);
     if(hasSensor)
@@ -35,6 +37,7 @@ void onMqttConnect(bool sessionPresent) {
 /*-------Meathod called when subscribed to MQTT Topic-------*/
 void onMqttSubscribe(uint16_t packetId, uint8_t qos) {
   serialDisplay("MQTT","Subscribed to MQTT");
+  
   TickerForFeedbackLED.detach();
   digitalWrite(indicator_led, LOW);     // set pin to the opposite state
 }
@@ -70,12 +73,15 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   {
     p += payload[i];
   }
-  String mqtt_data = read_mqtt_config();
-  DynamicJsonDocument doc(2000);
-  DeserializationError error_1 = deserializeJson(doc, mqtt_data);
+  String device_config = read_device_config();
+  DynamicJsonDocument device_doc(100);
+  DynamicJsonDocument device_filter(100);
+  device_filter["mqtt"]["prefix"] = true;
+  DeserializationError error_1 = deserializeJson(device_doc, device_config, DeserializationOption::Filter(device_filter));
   if(error_1)
     return;
-  if(strcmp(topic, intopic.c_str())==0)
+  String prefix = device_doc["mqtt"]["prefix"];
+  if(strcmp(topic, (prefix+intopic).c_str())==0)
   {
     StaticJsonDocument<200> root;
     serialDisplay("MQTT",p);
@@ -189,21 +195,24 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   }
   else
   {
+    String mqtt_data = read_mqtt_config();
+    DynamicJsonDocument doc(1500);
+    DeserializationError error_1 = deserializeJson(doc, mqtt_data);
+    if(error_1)
+      return;
     StaticJsonDocument<200> msg;
     DeserializationError error_2 = deserializeJson(msg, p);
     if(error_2)
       return;
     if(!msg.containsKey("action"))
       return;
-    for( const auto& kv : doc["relay"].as<JsonObject>() ) 
+    for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
     {
-
-      String config_topic = kv.value()["topic"];      
-      if(comp(topic, config_topic.c_str()))
+      String config_topic = kv["topic"];      
+      if(comp(topic, (prefix+config_topic).c_str()))
       {
         bool action = msg["action"];
-        const char *key = kv.key().c_str();
-        doc["relay"][key]["status"] = action;
+        kv["status"] = action;
       }
     }
     mqtt_data = "";
@@ -218,7 +227,17 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*----Meathod for sending MQTT Data-------------------------*/
 void sendToMQTT(String topic, String msg)
 {
-  mqtt.publish(topic.c_str(), 2, false, msg.c_str(), msg.length());
+  DynamicJsonDocument doc(500);
+  StaticJsonDocument<200> filter;
+  filter["mqtt"] = true;
+  String device_config = read_device_config();
+  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+  if(error)
+  {
+    return;
+  }
+  String prefix = doc["mqtt"]["prefix"];
+  mqtt.publish((prefix+topic).c_str(), 2, false, msg.c_str(), msg.length());
 }
 /*----Meathod for sending MQTT Data-------------------------*/
 /*----Meathod for sending relay status----------------------*/
@@ -262,31 +281,45 @@ void connectToMqtt()
 
 void subscribe_mqtt_input()
 {
-  String mqtt_data = read_mqtt_config();
-  DynamicJsonDocument doc(2000);
-  DeserializationError error = deserializeJson(doc, mqtt_data);
+  DynamicJsonDocument doc(1500);
+  StaticJsonDocument<200> filter;
+  filter["mqtt"] = true;
+  String device_config = read_device_config();
+  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
   if(error)
-    return;
-  String command = doc["COMMAND"];
-  mqtt.subscribe(command.c_str(), 2);
-  for( const auto& kv : doc["relay"].as<JsonObject>() ) 
   {
-    String topic = kv.value()["topic"];
-    if(debugging)
-      Serial.println(topic);
-    mqtt.subscribe(topic.c_str(), 2);
+    return;
+  }
+
+  String prefix = doc["mqtt"]["prefix"];
+  mqtt.subscribe((prefix+intopic).c_str(), 2);
+  doc.clear();
+  filter.clear();
+  filter["relay"][0]["topic"] = true;
+  String mqtt_data = read_mqtt_config();  
+  error = deserializeJson(doc, mqtt_data, DeserializationOption::Filter(filter));
+  if(error)
+  {
+    return;
+  }
+  for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
+  {
+    String topic = kv["topic"];
+    mqtt.subscribe((prefix+topic).c_str(), 2);
   }
 }
 
 void connect_to_mqtt()
 {
-  StaticJsonDocument<200> doc;
-  StaticJsonDocument<200> filter;
+  StaticJsonDocument<500> doc;
+  StaticJsonDocument<100> filter;
   filter["mqtt"] = true;
   String device_config = read_device_config();
   DeserializationError error = deserializeJson(doc, device_config,DeserializationOption::Filter(filter));
   if(error)
+  {
     return;
+  }
   const char* host = doc["mqtt"]["host"];
   uint16_t port = doc["mqtt"]["port"];
   bool auth = doc["mqtt"]["auth"];
@@ -297,5 +330,5 @@ void connect_to_mqtt()
     mqtt.setCredentials(uname, pass);
   }
   mqtt.setServer(host, port);
-  connectToMqtt();
+  mqtt.connect();
 }

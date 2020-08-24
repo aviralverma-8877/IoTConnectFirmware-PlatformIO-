@@ -84,7 +84,8 @@ void handleWebStatus(AsyncWebServerRequest *request)
   return_doc["onb_led"] = conf.led_enabled;
   return_doc["firmware_version"] = FIRMWARE_V;
   return_doc["mqtt_status"] = MQTTStatus;
-  return_doc["wifi_status"] = WiFiStatus;
+  bool WiFi_status = (WiFi.status() == WL_CONNECTED);
+  return_doc["wifi_status"] = WiFi_status;
   return_doc["chip_id"] = chipid;
   String device_config = read_device_config();
   StaticJsonDocument<100> filter;

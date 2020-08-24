@@ -24,55 +24,34 @@ void setup()
     write_config(newConfig);
   }
 
-/*--------Setting up the GPIOs-------------------------------*/  
   callback = &blank;
-/*--------Setting up the GPIOs-------------------------------*/
-  if(SPIFFS.exists("/device_config.json"))
+  WiFi.mode(WIFI_STA);
+  for(int t=0; t<10; t++)
   {
-    String device_config = read_device_config();
-    StaticJsonDocument<1000> doc;
-    DeserializationError error = deserializeJson(doc, device_config);
-    if(error)
-    {}
-    bool wifi_setup_done = doc["wifi_setup_done"];
-    if(wifi_setup_done)
-    {
-      WiFi.mode(WIFI_STA);
-      configure_gpio();
-      TickerForTimeOut.once_ms(10,[](){
-        perform_action();
-      });
-      TickerForFeedbackLED.attach(0.6, feedbackLED);
-      TickerForcheckReset.attach_ms(10, checkReset);
-      int retry = 0;
-      while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        if(retry > 10)
-          enable_ap();
-        if(debugging)
-          Serial.print(".");
-        checkReset();
-        retry++;
-      }
-      disable_ap();
-      WiFiStatus = true;
-      fetchIP();  
-      mqtt.onConnect(onMqttConnect);
-      mqtt.onDisconnect(onMqttDisconnect);
-      mqtt.onSubscribe(onMqttSubscribe);
-      mqtt.onUnsubscribe(onMqttUnsubscribe);
-      mqtt.onMessage(onMqttMessage);
-    //  mqtt.onPublish(onMqttPublish);
-      connect_to_mqtt();
+    if (WiFi.status() == WL_CONNECTED)
+      break;
+    delay(1000);
+  }
+  if(WiFi.status() == WL_CONNECTED)
+  {
+    configure_gpio();
+    TickerForTimeOut.once_ms(10,[](){
+      perform_action();
+    });
+    TickerForFeedbackLED.attach(0.6, feedbackLED);
+    TickerForcheckReset.attach_ms(10, checkReset);
+    fetchIP();  
+    mqtt.onConnect(onMqttConnect);
+    mqtt.onDisconnect(onMqttDisconnect);
+    mqtt.onSubscribe(onMqttSubscribe);
+    mqtt.onUnsubscribe(onMqttUnsubscribe);
+    mqtt.onMessage(onMqttMessage);
+  //  mqtt.onPublish(onMqttPublish);
+    connect_to_mqtt();
 /*-------Setting up the trikers-----------------------------*/
-      TickerForconnectToMqtt.attach_ms(10000, connectToMqtt);
-      TickerForfetchIP.attach(30, fetchIP);
+    TickerForconnectToMqtt.attach_ms(10000, connectToMqtt);
+    TickerForfetchIP.attach(30, fetchIP);
 /*-------Setting up the trikers-----------------------------*/    
-    }
-    else
-    {
-      enable_ap();
-    }
   }
   else
   {

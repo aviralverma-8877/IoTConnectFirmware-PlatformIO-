@@ -424,6 +424,7 @@ function save_config()
             port = document.getElementById("mqtt_port").value;
             uname = document.getElementById("mqtt_uname").value;
             pass = document.getElementById("mqtt_pass").value;
+            prefix = document.getElementById("mqtt_prefix").value;
             if(host != "")
             {    
                 if(port != "" && port > 0)
@@ -443,6 +444,7 @@ function save_config()
                     config.mqtt.port = port;
                     config.mqtt.uname = uname;
                     config.mqtt.pass = pass;
+                    config.mqtt.prefix = prefix;
                 }
                 else
                 {
