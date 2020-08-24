@@ -163,35 +163,30 @@ void pinging()
 /*-----Meathod for sending sensor data----------------------*/
 void sendSensorData()
 {
-  DynamicJsonDocument doc(2000);
+  DynamicJsonDocument doc(100);
+  StaticJsonDocument<100> filter;
+  filter["dht"]["INSTALLED"] = true;
+  filter["light"]["INSTALLED"] = true;
   String device_config = read_device_config();
-  DeserializationError error = deserializeJson(doc, device_config);
+  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
   if(error)
     return;
   
   bool has_dht = doc["dht"]["INSTALLED"];
   bool has_light = doc["light"]["INSTALLED"];
   doc.clear();
-  String mqtt_topics = read_mqtt_config();
-  error = deserializeJson(doc, mqtt_topics);
-  if(error)
-  {
-    return;
-  }
+  doc["d"] = chipid;
   if(has_dht)
   {
-    int t = temp;
-    int h = humid;
+    doc["t"] = temp;
+    doc["h"] = humid;
+
   }
   if(has_light)
   {
-    int l = light;
+    doc["l"] = light;
   }
-  doc.clear();
-  doc["d"] = chipid;
-  doc["t"] = temp;
-  doc["h"] = humid;
-  doc["l"] = light;
+
   String s;
   serializeJson(doc, s);
   sendToMQTT(espsensor, s);
