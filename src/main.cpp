@@ -33,9 +33,7 @@ void setup()
     StaticJsonDocument<1000> doc;
     DeserializationError error = deserializeJson(doc, device_config);
     if(error)
-    {
-      enable_ap();
-    }
+    {}
     bool wifi_setup_done = doc["wifi_setup_done"];
     if(wifi_setup_done)
     {

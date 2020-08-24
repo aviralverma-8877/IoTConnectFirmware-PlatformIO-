@@ -7,4 +7,5 @@ String debugtopic = chipid+"/debug";      //MQTT Topic for sending debug data.
 String outtopic = chipid+"/out";          //MQTT Topic for sending data from ESP.
 bool MQTTStatus = false;
 bool WiFiStatus = false;
+String intopic = chipid+"/COMMAND";
 /*--------------MQTT Configration---------------------------*/

@@ -74,7 +74,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   DeserializationError error_1 = deserializeJson(doc, mqtt_data);
   if(error_1)
     return;
-  String intopic = doc["COMMAND"];
   if(strcmp(topic, intopic.c_str())==0)
   {
     StaticJsonDocument<200> root;
@@ -225,8 +224,13 @@ void sendToMQTT(String topic, String msg)
 void send_status()
 {
   String mqtt_data = read_mqtt_config();
-  DynamicJsonDocument doc(2000);
-  DeserializationError error = deserializeJson(doc, mqtt_data);
+  DynamicJsonDocument doc(1000);
+  StaticJsonDocument<200> filter;
+  filter["relay"][0]["name"] = true;
+  filter["relay"][0]["status"] = true;
+  filter["relay"][0]["pin"] = true;
+  filter["relay"][0]["comp"] = true;
+  DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
   if(error)
     return;
   doc["esp_clip_id"] = chipid;

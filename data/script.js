@@ -137,39 +137,31 @@ function update_table_data(json)
     relays = json.relay;
     if(!table_printed)
     {
-        var i = 1;
-        for (var element in relays) 
+        relays.forEach(function(element) 
         {
-            if (relays.hasOwnProperty(element)) 
-            {
-                on_change_val = "toggle_relay(this, '"+element+"')"
-                pin = relays[element].comp+"-"+relays[element].pin;
-                print_table(pin, on_change_val, "Relay "+i);
-                i++;
-            }
-        }
+            on_change_val = "toggle_relay(this, '"+element.name+"')"
+            pin = ele.comp + "-" + ele.pin;
+            print_table(pin, on_change_val, element.name);
+        });
         table_printed = true;
     }
-    for (var ele in relays) 
+    relays.forEach(function(ele) 
     {
-        if (relays.hasOwnProperty(ele)) 
+        pin = ele.comp + "-" + ele.pin;
+        var element = document.getElementById('status-'+pin);
+        if(!ele.status)
         {
-            pin = relays[ele].comp+"-"+relays[ele].pin;
-            var element = document.getElementById('status-'+pin);
-            if(!relays[ele].status)
-            {
-                document.getElementById('status-'+pin).style.color = "red";
-                document.getElementById('checkbox-'+pin).checked = false;
-                element.innerHTML = 'OFF';
-            }
-            else
-            {
-                document.getElementById('status-'+pin).style.color = "green";
-                document.getElementById('checkbox-'+pin).checked = true;
-                element.innerHTML = 'ON';
-            }    
+            document.getElementById('status-'+pin).style.color = "red";
+            document.getElementById('checkbox-'+pin).checked = false;
+            element.innerHTML = 'OFF';
         }
-    }
+        else
+        {
+            document.getElementById('status-'+pin).style.color = "green";
+            document.getElementById('checkbox-'+pin).checked = true;
+            element.innerHTML = 'ON';
+        }    
+    });
 }
 function update_wifi(ssid, pass)
 {

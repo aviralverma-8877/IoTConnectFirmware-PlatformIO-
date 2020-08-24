@@ -9,20 +9,31 @@
 String read_device_config();
 String read_mqtt_config();
 void perform_action();
+bool comp(const char *val1,const char *val2);
 
 void relay_action(String relay, bool value, String by)
 {
   String mqtt_data = read_mqtt_config();
-  DynamicJsonDocument doc(2000);
+  DynamicJsonDocument doc(1500);
   DeserializationError error = deserializeJson(doc, mqtt_data);
   if(error)
+  {
     return;
-  doc["relay"][relay]["status"] = value;
+  }
+  JsonArray array = doc["relay"].as<JsonArray>();
+  for (JsonObject ele : array) {
+    String name = ele["name"];
+    if(comp(name.c_str(), relay.c_str()))
+    {
+      ele["status"] = value;
+      break;
+    }
+  }
   mqtt_data = "";
   serializeJsonPretty(doc, mqtt_data);
   doc.clear();
-
   write_mqtt_topics(mqtt_data);
+
 //sending nortification
   if(by != "")
   {
@@ -35,12 +46,9 @@ void relay_action(String relay, bool value, String by)
 
   String r = "";
   serializeJson(doc, r);
-  sendToMQTT(norttopic, r);
-  TickerForTimeOut.once_ms(10,[]{
+  TickerForTimeOut.once_ms(100,[r](){
+    sendToMQTT(norttopic, r);
     perform_action();
-    TickerForTimeOut.once_ms(10,[]{
-     send_status();
-    });
   });
 }
 
@@ -309,20 +317,26 @@ void generate_mqtt_topics()
   DeserializationError error = deserializeJson(doc, device_config);
   if(error)
     return;
-  DynamicJsonDocument topic_doc(1500);
+
   int relay_count = 1;
   bool has_shift_reg = doc["device_config"]["shift_out_reg"]["avail"];
-  topic_doc["COMMAND"] = chipid+"/COMMAND";
+
+  DynamicJsonDocument topic_doc(1500);
+  JsonArray relay = topic_doc.createNestedArray("relay");
+  
   if(has_shift_reg)
   {
     for(int i=0; i<8; i++)
     {
+      DynamicJsonDocument relay_object(200);
       String key = "Relay "+String(relay_count);
       String value = chipid+"/shift_out_reg/pin_"+i;
-      topic_doc["relay"][key]["comp"] = "shift_reg";
-      topic_doc["relay"][key]["topic"] = value;
-      topic_doc["relay"][key]["status"] = false;
-      topic_doc["relay"][key]["pin"] = i;
+      relay_object["name"] = key;
+      relay_object["comp"] = "shift_reg";
+      relay_object["topic"] = value;
+      relay_object["status"] = false;
+      relay_object["pin"] = i;
+      relay.add(relay_object);
       relay_count++;
     }
   }
@@ -331,17 +345,19 @@ void generate_mqtt_topics()
   {
     for(int i=0; i<relay_gpio_count; i++)
     {
-      String key = "Relay-"+String(relay_count);
+      DynamicJsonDocument relay_object(200);
+      String key = "Relay "+String(relay_count);
       int pin  = doc["device_config"]["relay"]["GPIO"][i];
       String value = chipid+"/gpio_relay/pin_"+pin;
-      topic_doc["relay"][key]["comp"] = "gpio";
-      topic_doc["relay"][key]["topic"] = value;
-      topic_doc["relay"][key]["status"] = false;
-      topic_doc["relay"][key]["pin"] = pin;
+      relay_object["name"] = key;
+      relay_object["comp"] = "gpio";
+      relay_object["topic"] = value;
+      relay_object["status"] = false;
+      relay_object["pin"] = pin;
+      relay.add(relay_object);
       relay_count++;
     }
   }
-  
   File topicFile = SPIFFS.open("/mqtt_topics.json", "w");
   String r;
   serializeJsonPretty(topic_doc, r);
@@ -352,24 +368,31 @@ void generate_mqtt_topics()
 
 void perform_action()
 {
-  String r = read_mqtt_config();
-  DynamicJsonDocument doc(2000);
-  DeserializationError error = deserializeJson(doc, r);
+  String mqtt_data = read_mqtt_config();
+  DynamicJsonDocument doc(1000);
+  StaticJsonDocument<200> filter;
+  filter["relay"][0]["name"] = true;
+  filter["relay"][0]["status"] = true;
+  filter["relay"][0]["pin"] = true;
+  filter["relay"][0]["comp"] = true;
+  DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
   if(error)
     return;
-  for( const auto& kv : doc["relay"].as<JsonObject>() ) 
+  JsonArray array = doc["relay"];
+  for( int t=0; t< array.size(); t++) 
   {
-    String com = kv.value()["comp"];
+    DynamicJsonDocument ele = array[t];
+    String com = ele["comp"];
     if(comp(com.c_str(), "shift_reg"))
     {
-      int pin = kv.value()["pin"];
-      bool value = kv.value()["status"];
+      int pin = ele["pin"];
+      bool value = ele["status"];
       sr.set(pin, value);
     }
     if(comp(com.c_str(), "gpio"))
     {
-      int pin = kv.value()["pin"];
-      bool value = kv.value()["status"];
+      int pin = ele["pin"];
+      bool value = ele["status"];
       digitalWrite(pin, value);
     }
   }
@@ -379,7 +402,7 @@ void perform_action()
 void enable_ap()
 {
   const byte DNS_PORT = 53;
-  IPAddress apIP(192, 168, 4, 1);
+  IPAddress apIP(192, 168, 4, 1);\
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP("IoT Connect");

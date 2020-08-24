@@ -23,4 +23,5 @@
     extern String intopic;            //MQTT Topic for reciving data to ESP.
     extern bool MQTTStatus;
     extern bool WiFiStatus;
+    extern String intopic;
 #endif
