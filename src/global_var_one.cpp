@@ -5,22 +5,21 @@
     #include <Ticker.h>                       //Ticker for running multithread
     #include <ArduinoJson.h>                  //Encoading and Decoding JSON
     #include <ESP8266httpUpdate.h>            //ESP Update Library.
-    #include <DHT.h>                          //For DHT Temperature and Humidity Sensor
-    #include <DHT_U.h>                        //For DHT Temperature and Humidity Sensor
     #include <ShiftRegister74HC595.h>         //For controlling Relays from 74HC595 shift register
     #include <DNSServer.h>                    //For redirecting the user on connecting to device WiFi
     #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>
     #include "structures.h"
     #include "device_handler.h"
-    AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
-    DHT_Unified dht(2, DHT11);         //Initializing DHT sensor. 
+    #include "DHTesp.h"
+    
+    AsyncMqttClient mqtt;                     //Variable to initiate MQTT. 
     ShiftRegister74HC595<1> sr (16, 14, 12);  //Setting up shift register.
     uint8_t LDR_PIN = 0;
+    uint8_t dht_pin;
+    String DHTType;
     byte indicator_led = 13;
     byte reset_btn = 4;
-    sensor_t sensor;                          //DTH sensor
-    sensors_event_t event;                    //Creating event variable for DHT sensor.
     bool hasSensor = false;
     bool hasDHTSensor = false;
     bool hasLightSensor = false;
@@ -31,7 +30,6 @@
     String Wifi_ssid;                         //Global variables
     uint8_t i;                                //Global variables
     HTTPClient http;                          //Global variables
-    int temp, humid, light;                   //Global variables
     uint32_t delayMS;                         //Global variables
     String updateAddress;                     //Update address
     DNSServer dnsServer;                      //Global variables
@@ -94,30 +92,22 @@
         pinMode(reset_pin, INPUT);
         reset_btn = reset_pin;
         bool hasDHT = doc["device_config"]["dht"]["INSTALLED"];
+        Serial.println("DHT: "+String(hasDHT));
         if(hasDHT)
         {
             hasSensor = true;
             hasDHTSensor = true;
-            byte dht_pin = doc["device_config"]["dht"]["GPIO"];
+            dht_pin = doc["device_config"]["dht"]["GPIO"];
             const char* DHTSensorType = doc["device_config"]["dht"]["TYPE"];
-            byte DHTType;
-            if(comp(DHTSensorType, "DHT11"))
-            {
-                DHTType = DHT11;
-            }
-            if(comp(DHTSensorType,"DHT22"))
-            {
-                DHTType = DHT22;
-            }
-            DHT_Unified dht_var(dht_pin, DHTType);         //Initializing DHT sensor. 
-            dht = dht_var;
+            DHTType = DHTSensorType;
         }
         bool hasLight = doc["device_config"]["light"]["INSTALLED"];
+        Serial.println("Light: "+String(hasLight));
         if(hasLight)
         {
             hasSensor = true;
             hasLightSensor = true;
-            const char* lumin_pin = doc["device_config"]["light"]["INSTALLED"];
+            const char* lumin_pin = doc["device_config"]["light"]["GPIO"];
             if(comp(lumin_pin, "A0"))
                 LDR_PIN = 0;
         }

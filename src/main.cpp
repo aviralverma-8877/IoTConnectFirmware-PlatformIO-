@@ -67,11 +67,6 @@ void setup()
 /*-------Setting up the trikers-----------------------------*/
       TickerForconnectToMqtt.attach_ms(10000, connectToMqtt);
       TickerForfetchIP.attach(30, fetchIP);
-      // if(!debugging)
-      // {
-      //   TickerForSerialListner.attach_ms(10, SerialListner);
-      //   send_status_uart();
-      // }
 /*-------Setting up the trikers-----------------------------*/    
     }
     else
@@ -153,21 +148,4 @@ void loop()
   MDNS.update();
   webSocket.loop();
   callback();
-  if(hasSensor)
-  {
-    if(millis()%2000 == 0)
-    {
-      if(hasDHTSensor)
-      {
-        dht.temperature().getEvent(&event);
-        if (!isnan(event.temperature))
-          temp = event.temperature-8;
-        dht.humidity().getEvent(&event);
-        if (!isnan(event.relative_humidity))
-          humid = event.relative_humidity;
-      }
-      if(hasLightSensor)
-        light = map(analogRead(LDR_PIN), 0, 255, 0, 100);
-    }
-  }
 }

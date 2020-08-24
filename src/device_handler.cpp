@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266mDNS.h> 
+#include "DHTesp.h"
 #include "mqtt_handler.h"
 #include "global_var_one.h"
 #include "global_var_two.h"
@@ -163,32 +164,44 @@ void pinging()
 /*-----Meathod for sending sensor data----------------------*/
 void sendSensorData()
 {
-  DynamicJsonDocument doc(100);
-  StaticJsonDocument<100> filter;
-  filter["dht"]["INSTALLED"] = true;
-  filter["light"]["INSTALLED"] = true;
+  Serial.println("Step 1");
+  DynamicJsonDocument doc(500);
+  StaticJsonDocument<200> filter;
+  filter["device_config"]["dht"]["INSTALLED"] = true;
+  filter["device_config"]["light"]["INSTALLED"] = true;
+  Serial.println("Step 2");
   String device_config = read_device_config();
   DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
   if(error)
     return;
-  
-  bool has_dht = doc["dht"]["INSTALLED"];
-  bool has_light = doc["light"]["INSTALLED"];
+  Serial.println("Step 3");
+  bool has_dht = doc["device_config"]["dht"]["INSTALLED"];
+  bool has_light = doc["device_config"]["light"]["INSTALLED"];
   doc.clear();
   doc["d"] = chipid;
+  int temp, humid, light;
   if(has_dht)
   {
-    doc["t"] = temp;
-    doc["h"] = humid;
-
+    DHTesp dht;
+    if(comp(DHTType.c_str(), "DHT11"))
+      dht.setup(dht_pin, DHTesp::DHT11);
+    else if(comp(DHTType.c_str(), "DHT22"))
+      dht.setup(dht_pin, DHTesp::DHT22);
+    float humidity = dht.getHumidity();
+    float temperature = dht.getTemperature();
+    doc["t"] = temperature;
+    doc["h"] = humidity;
   }
   if(has_light)
   {
+    Serial.println("Step 5");
+    light = map(analogRead(LDR_PIN), 0, 255, 0, 100);
     doc["l"] = light;
   }
 
   String s;
   serializeJson(doc, s);
+  Serial.println(s);
   sendToMQTT(espsensor, s);
 }
 /*-----Meathod for sending sensor data----------------------*/
@@ -239,7 +252,6 @@ void fetchIP()
       LocalIP = IpAddress2String(WiFi.localIP());
       serialDisplay("SSID",Wifi_ssid);
       serialDisplay("IP Address",IpAddress);
-      send_status();
     }
   }
   callback = &blank;

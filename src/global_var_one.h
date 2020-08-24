@@ -5,8 +5,6 @@
     #include <Ticker.h>                       //Ticker for running multithread
     #include <ArduinoJson.h>                  //Encoading and Decoding JSON
     #include <ESP8266httpUpdate.h>            //ESP Update Library.
-    #include <DHT.h>                          //For DHT Temperature and Humidity Sensor
-    #include <DHT_U.h>                        //For DHT Temperature and Humidity Sensor
     #include <ShiftRegister74HC595.h>         //For controlling Relays from 74HC595 shift register
     #include <DNSServer.h>                    //For redirecting the user on connecting to device WiFi
     #include <ESPAsyncTCP.h>
@@ -36,13 +34,12 @@
     extern bool hasLightSensor;
     extern configuration conf;
     extern AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
-    extern DHT_Unified dht;         //Initializing DHT sensor. 
+    extern uint8_t dht_pin;
+    extern String DHTType;
     extern uint8_t LDR_PIN;
     extern byte indicator_led;
     extern byte reset_btn;
     extern ShiftRegister74HC595<1> sr;  //Setting up shift register.
-    extern sensor_t sensor;                          //DTH sensor
-    extern sensors_event_t event;                    //Creating event variable for DHT sensor.
     /*----------------------------------------------------------*/
     /*----------------------------------------------------------*/
     extern String payload;                           //Global variables
@@ -57,7 +54,6 @@
     extern uint8_t attempts;                     //Global variables
     extern uint8_t i;                                //Global variables
     extern HTTPClient http;                          //Global variables
-    extern int temp, humid, light;                   //Global variables
     extern uint32_t delayMS;                         //Global variables
     extern String updateAddress;                     //Update address
     extern DNSServer dnsServer;                      //Global variables

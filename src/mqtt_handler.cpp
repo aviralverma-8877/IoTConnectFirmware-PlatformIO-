@@ -25,10 +25,11 @@ void onMqttConnect(bool sessionPresent) {
     String service = doc["mqtt"]["service"];
     if(service != "N/A")
       subscribe_mqtt_input();
+    TickerForPinging.attach_ms(10000, pinging);
+    if(hasSensor)
+      TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
+
   }
-  TickerForPinging.attach_ms(10000, pinging);
-  if(hasSensor)
-    TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
 }
 /*-------Meathod called when connected to MQTT--------------*/
 /*-------Meathod called when subscribed to MQTT Topic-------*/
@@ -239,7 +240,7 @@ void send_status()
   serializeJson(doc, r);
   send_data_to_webSocket(r);
   sendToMQTT(espstatus, r);
-//  send_status_uart();
+  
 }
 /*----Meathod for sending relay status----------------------*/
 /*----Meathod called on sending/publishing message on MQTT--*/
@@ -279,9 +280,11 @@ void subscribe_mqtt_input()
 
 void connect_to_mqtt()
 {
-  StaticJsonDocument<1000> doc;
+  StaticJsonDocument<200> doc;
+  StaticJsonDocument<200> filter;
+  filter["mqtt"] = true;
   String device_config = read_device_config();
-  DeserializationError error = deserializeJson(doc, device_config);
+  DeserializationError error = deserializeJson(doc, device_config,DeserializationOption::Filter(filter));
   if(error)
     return;
   const char* host = doc["mqtt"]["host"];
