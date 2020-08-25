@@ -128,7 +128,7 @@ void reset()
   serialDisplay("Writing","Writing Config");
   write_config(newConf);
   serialDisplay("Writing","Writing Completes");
-  ESP.restart();
+  ESP.reset();
 
 }
 /*----Meathod for reconfiguring WiFi settings---------------*/
@@ -149,6 +149,7 @@ void send_status_uart()
 /*---Meathod for pinging MQTT Server for active connection--*/
 void pinging()
 {
+  serialDisplay("Ping","Pinged now");
   StaticJsonDocument<200> doc;
   doc["d"] = chipid;
   if(hasSensor)
@@ -371,7 +372,7 @@ void generate_mqtt_topics()
   serializeJsonPretty(topic_doc, r);
   topicFile.print(r);
   topicFile.close();
-  ESP.restart();
+  ESP.reset();
 }
 
 void perform_action()

@@ -48,7 +48,6 @@
     extern String data;                              //Global variables
     extern String Wifi_ssid;                         //Global variables
     extern String WiFi_gateway;
-    extern bool mqtt_setup;                  //Global variables
     extern byte loopCount;                       //Global variables
     extern uint8_t attempts;                     //Global variables
     extern uint8_t i;                                //Global variables

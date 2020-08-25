@@ -147,7 +147,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         String r;
         serializeJson(doc, r);
         sendToMQTT(outtopic, r);
-        ESP.restart();
+        ESP.reset();
       }
   /*-------Action command for resetting ESP-------------------*/
 
@@ -202,7 +202,8 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       return;
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
     {
-      String config_topic = kv["topic"];      
+      String config_topic = kv["topic"];
+      serialDisplay("MQTT Topics",(prefix+config_topic));
       if(comp(topic, (prefix+config_topic).c_str()))
       {
         bool action = msg["action"];
@@ -221,11 +222,11 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*----Meathod for sending MQTT Data-------------------------*/
 void sendToMQTT(String topic, String msg)
 {
-  if(mqtt_setup)
+  if(MQTTStatus)
   {
     DynamicJsonDocument doc(500);
     StaticJsonDocument<200> filter;
-    filter["mqtt"] = true;
+    filter["mqtt"]["prefix"] = true;
     String device_config = read_device_config();
     DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
     if(error)
@@ -233,6 +234,7 @@ void sendToMQTT(String topic, String msg)
       return;
     }
     String prefix = doc["mqtt"]["prefix"];
+    serialDisplay("MQTT","Published to "+prefix+topic);
     mqtt.publish((prefix+topic).c_str(), 2, false, msg.c_str(), msg.length());
   }
 }
@@ -289,9 +291,10 @@ void connectToMqtt()
 
 void subscribe_mqtt_input()
 {
+  serialDisplay("MQTT","Subscribing to topics");
   DynamicJsonDocument doc(1500);
   StaticJsonDocument<200> filter;
-  filter["mqtt"] = true;
+  filter["mqtt"]["prefix"] = true;
   String device_config = read_device_config();
   DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
   if(error)
@@ -313,6 +316,7 @@ void subscribe_mqtt_input()
   for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
   {
     String topic = kv["topic"];
+    serialDisplay("MQTT Topic", prefix+topic);
     mqtt.subscribe((prefix+topic).c_str(), 2);
   }
 }

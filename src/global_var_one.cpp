@@ -39,7 +39,6 @@
     configuration conf = {false,false,true,2000,"admin","admin","","",false};
     String IpAddress = "";                    //Global variables
     String LocalIP = "";                      //Global variables
-    bool mqtt_setup = false;               //Global variables
     byte loopCount = 0;                       //Global variables
     uint8_t attempts = 0;                     //Global variables
     bool shouldReboot = false;

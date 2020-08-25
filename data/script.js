@@ -387,6 +387,7 @@ function save_config()
                 "port":1883,
                 "uname":"",
                 "pass":"",
+                "prefix":"",
                 "auth":false
             },
             "device_config":{
@@ -430,7 +431,8 @@ function save_config()
                 {
                     if(uname == "")
                         auth = false
-                    else{
+                    else
+                    {
                         auth = true
                         if(pass == "")
                         {
@@ -444,6 +446,7 @@ function save_config()
                     config.mqtt.uname = uname;
                     config.mqtt.pass = pass;
                     config.mqtt.prefix = prefix;
+                    config.mqtt.auth = auth;
                 }
                 else
                 {

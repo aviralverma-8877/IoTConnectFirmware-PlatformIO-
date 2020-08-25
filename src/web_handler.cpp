@@ -64,7 +64,7 @@ void handleWebControl(AsyncWebServerRequest *request)
     if(comp(action.c_str(),"reset"))
       reset();
     if(comp(action.c_str(),"reboot"))
-      ESP.restart();
+      ESP.reset();
     if(comp(action.c_str(),"toggle_onb"))
     {
       bool status = doc["status"];
@@ -233,7 +233,7 @@ void web_set_wifi(AsyncWebServerRequest *request)
     TickerForTimeOut.once(15,[](){
       if(WiFi.status() == WL_CONNECTED)
       {
-        ESP.restart();
+        ESP.reset();
       }
       else
       {
@@ -314,7 +314,7 @@ void firmware_web_updater()
         if(debugging)
           Serial.printf("Update Success: %uB\n", index+len);
         TickerForTimeOut.once(1,[](){
-          ESP.restart();
+          ESP.reset();
         });
       } else {
         if(debugging)
@@ -358,7 +358,7 @@ void firmware_web_updater()
         if(debugging)
           Serial.printf("Update Success: %uB\n", index+len);
         TickerForTimeOut.once(1,[](){
-          ESP.restart();
+          ESP.reset();
         });
       } else {
         if(debugging)
