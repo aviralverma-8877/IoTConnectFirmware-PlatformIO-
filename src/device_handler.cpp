@@ -37,7 +37,7 @@ void relay_action(String relay, bool value, String by)
   write_mqtt_topics(mqtt_data);
 
 //sending nortification
-  if(by != "")
+  if(!comp(by.c_str(),""))
   {
     doc["by"] = by;
   }

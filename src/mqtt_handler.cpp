@@ -113,8 +113,11 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         delayMS = root["f"];
         conf.pingTime = delayMS;      //Saving the delay time in config
         write_config(conf);
-        TickerForsendSensorData.detach();
-        TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
+        if(hasSensor)
+        {
+          TickerForsendSensorData.detach();
+          TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
+        }
       }
   /*-------Action command for setting Sensor Frequency--------------*/
   /*-------Action command for getting Sensor Frequency--------------*/
@@ -147,7 +150,9 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         String r;
         serializeJson(doc, r);
         sendToMQTT(outtopic, r);
-        ESP.reset();
+        TickerForTimeOut.once(2,[](){
+          ESP.reset();
+        });
       }
   /*-------Action command for resetting ESP-------------------*/
 
