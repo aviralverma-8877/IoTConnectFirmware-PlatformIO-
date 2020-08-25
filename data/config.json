@@ -1,1 +1,11 @@
-{"setupFlag":false,"updateFlag":false,"led_enabled":true,"pingTime":2000,"http_username":"admin","http_password":"admin"}
+{
+    "setupFlag": false,
+    "updateFlag": false,
+    "led_enabled": true,
+    "pingTime": 2000,
+    "http_username": "admin",
+    "http_password": "admin",
+    "WiFi_SSID": "",
+    "WiFi_PASS": "",
+    "wifi_setup_done":false
+  }

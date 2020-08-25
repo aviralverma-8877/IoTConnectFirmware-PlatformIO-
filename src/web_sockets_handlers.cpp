@@ -1,8 +1,5 @@
 #include <Arduino.h>
-#include <ESPAsyncWebServer.h>
-#include <WebSocketsServer.h>
-
-WebSocketsServer webSocket = WebSocketsServer(81);
+#include"global_var_two.h"
 
 void send_data_to_webSocket(String options)
 {

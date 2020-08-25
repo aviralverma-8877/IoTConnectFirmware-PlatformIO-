@@ -11,4 +11,5 @@
     void web_scan_wifi(AsyncWebServerRequest *request);
     void web_update_login(AsyncWebServerRequest *request);
     void firmware_web_updater();
+    void setup_web_server();
 #endif

@@ -381,7 +381,6 @@ function save_config()
     {
         var config = {
             "init_setup_done":true,
-            "wifi_setup_done":wifi_status,
             "mqtt":{
                 "service":"",
                 "host":"",

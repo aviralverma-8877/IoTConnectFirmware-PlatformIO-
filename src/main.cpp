@@ -14,113 +14,42 @@ void setup()
 {
   Serial.begin(115200);
   SPIFFS.begin();
-  webSocket.begin();
   if (SPIFFS.exists("/config.json")) {
     read_config();
     delayMS = conf.pingTime;
   }
   else{
-    configuration newConfig;
+    configuration newConfig = {false,false,true,2000,"admin","admin","","",false};
+    newConfig.setupFlag = true;
+    newConfig.wifi_setup_done = false;
     write_config(newConfig);
+    read_config();
   }
-
+  delay(1000);
+  setup_web_server();
   callback = &blank;
-  WiFi.mode(WIFI_STA);
-  for(int t=0; t<10; t++)
-  {
-    if (WiFi.status() == WL_CONNECTED)
-      break;
-    delay(1000);
-  }
   if(WiFi.status() == WL_CONNECTED)
   {
     configure_gpio();
     TickerForTimeOut.once_ms(10,[](){
       perform_action();
     });
+/*-------Setting up the trikers-----------------------------*/
+    TickerForconnectToMqtt.attach(10, connectToMqtt);
+    TickerForfetchIP.attach(10, fetchIP);
     TickerForFeedbackLED.attach(0.6, feedbackLED);
     TickerForcheckReset.attach_ms(10, checkReset);
-    fetchIP();  
+/*-------Setting up the trikers-----------------------------*/      
     mqtt.onConnect(onMqttConnect);
     mqtt.onDisconnect(onMqttDisconnect);
     mqtt.onSubscribe(onMqttSubscribe);
     mqtt.onUnsubscribe(onMqttUnsubscribe);
     mqtt.onMessage(onMqttMessage);
   //  mqtt.onPublish(onMqttPublish);
+    fetchIP();
     connect_to_mqtt();
-/*-------Setting up the trikers-----------------------------*/
-    TickerForconnectToMqtt.attach_ms(10000, connectToMqtt);
-    TickerForfetchIP.attach(30, fetchIP);
-/*-------Setting up the trikers-----------------------------*/    
   }
-  else
-  {
-    enable_ap();
-  }
-/*-------HOST Name Setup------------------------------------*/
-  WiFi.hostname("iot-connect-"+chipid);
-  MDNS.begin("iot-connect-"+chipid);
-/*-------HOST Name Setup------------------------------------*/
-/*-------Web Update Server----------------------------------*/
-  firmware_web_updater();
-/*-------Web Update Server----------------------------------*/
-/*-------Web Server Setup-----------------------------------*/
-  webServer.on("/control", HTTP_GET, [](AsyncWebServerRequest *request){
-    handleWebControl(request);
-  });
-
-  webServer.on("/get_status", HTTP_GET, [](AsyncWebServerRequest *request){
-    handleWebStatus(request);
-  });
-  webServer.on("/scan_wifi", HTTP_GET, [](AsyncWebServerRequest *request){
-    web_scan_wifi(request);
-  });
-  webServer.on("/set_wifi", HTTP_GET, [](AsyncWebServerRequest *request){
-    web_set_wifi(request);
-  });
-  webServer.on("/update_login", HTTP_GET, [](AsyncWebServerRequest *request){
-    web_update_login(request);
-  });
-  webServer.on("/update_device_config", HTTP_GET, [](AsyncWebServerRequest *request){
-    handleDeviceConfig(request);
-  });
-  webServer.serveStatic("/device_config.json", SPIFFS, "/device_config.json");
-  webServer.serveStatic("/config.json", SPIFFS, "/config.json");
-  webServer.serveStatic("/mqtt_topics.json", SPIFFS, "/mqtt_topics.json");
-  webServer.serveStatic("/script.js", SPIFFS, "/script.js");
-  webServer.serveStatic("/style.css", SPIFFS, "/style.css");
-  webServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    File index = SPIFFS.open("/index.html", "r");
-    if (index) {
-      if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
-      {
-        return request->requestAuthentication();
-      }
-      request->send(SPIFFS, "/index.html", "text/html");
-    }
-    else{
-      request->redirect("/update");
-    }
-    index.close();
-  });
-  webServer.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
-  webServer.onNotFound([](AsyncWebServerRequest *request){
-    if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
-    {
-      return request->requestAuthentication();
-    }
-    request->redirect("/");
-  });
-
-  webServer.begin();
-/*-------Web Server Setup-----------------------------------*/
-/*-------HOST Name Setup------------------------------------*/
-  MDNS.addService("http", "tcp", 80);
-/*-------HOST Name Setup------------------------------------*/
-  inSetup = false;
 }
-
-
 
 void loop() 
 {

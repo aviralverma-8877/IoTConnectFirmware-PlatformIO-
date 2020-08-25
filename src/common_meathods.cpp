@@ -17,6 +17,9 @@ void write_config(configuration config)
   jsonBuffer["pingTime"] = config.pingTime;
   jsonBuffer["http_username"] = config.http_username;
   jsonBuffer["http_password"] = config.http_password;
+  jsonBuffer["WiFi_SSID"] = config.WiFi_SSID;
+  jsonBuffer["WiFi_PASS"] = config.WiFi_PASS;
+  jsonBuffer["wifi_setup_done"] = config.wifi_setup_done;
   String r;
   serializeJsonPretty(jsonBuffer, r);
   configFile.print(r); 
@@ -32,7 +35,7 @@ void write_device_config(StaticJsonDocument<1000> jsonBuffer)
   configFile.print(r); 
   configFile.close();
   TickerForTimeOut.once(1,[](){
-    ESP.reset();
+    ESP.restart();
   });
 }
 
@@ -56,7 +59,6 @@ void serialDisplay(String head,String body)
     String c;
     serializeJson(doc, c);
     Serial.println(c);
-    sendToMQTT(debugtopic, c);
   }
 }
 /*-------Meathod for displaying serial data in JSON---------*/

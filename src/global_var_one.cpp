@@ -28,6 +28,7 @@
     String payload;                           //Global variables
     String data;                              //Global variables
     String Wifi_ssid;                         //Global variables
+    String WiFi_gateway;                      //Global variables
     uint8_t i;                                //Global variables
     HTTPClient http;                          //Global variables
     uint32_t delayMS;                         //Global variables
@@ -35,12 +36,10 @@
     DNSServer dnsServer;                      //Global variables
     AsyncWebServer webServer(80);             //Global variables
     /*----------------------------------------------------------*/
-    configuration conf = {false,false,true,2000,"admin","admin"};
+    configuration conf = {false,false,true,2000,"admin","admin","","",false};
     String IpAddress = "";                    //Global variables
     String LocalIP = "";                      //Global variables
-    bool mqtt_setup = false;                  //Global variables
-    bool first_connect = false;               //Global variables
-    bool inSetup = true;
+    bool mqtt_setup = false;               //Global variables
     byte loopCount = 0;                       //Global variables
     uint8_t attempts = 0;                     //Global variables
     bool shouldReboot = false;

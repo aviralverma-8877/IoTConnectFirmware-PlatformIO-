@@ -9,5 +9,8 @@
     int pingTime;
     String http_username;
     String http_password;
+    String WiFi_SSID;
+    String WiFi_PASS;
+    bool wifi_setup_done;
   };
 #endif

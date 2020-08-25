@@ -6,6 +6,7 @@
 #include "global_var_two.h"
 #include "common_meathods.h"
 #include "web_sockets_handler.h"
+#include "mqtt_handler.h"
 
 String read_device_config();
 String read_mqtt_config();
@@ -89,13 +90,6 @@ void updateESP()
   callback = &blank;
 }
 /*-------Meathod to update ESP------------------------------*/
-void switch_wifi()
-{
-  WiFi.disconnect();
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(wifi_ssid,wifi_pass);
-  callback = &blank;
-}
 /*-------feedbackLED----------------------------------------*/
 void feedbackLED()
 {
@@ -120,15 +114,22 @@ void manage_dns_request()
 /*----Meathod for reconfiguring WiFi settings---------------*/
 void reset()
 {
+  TickerForconnectToMqtt.detach();
   if (WiFi.status() == WL_CONNECTED) {
+    mqtt.onDisconnect(MqttBlank);
+    mqtt.disconnect();
     WiFi.disconnect();
-    delay(1000);
   }
+  serialDisplay("Format","Formatting SPIFFS");
   SPIFFS.format();
+  serialDisplay("Format","Formatting Completed");
   configuration newConf = {false,false,true,2000,"admin","admin"};
   newConf.setupFlag = true;
+  serialDisplay("Writing","Writing Config");
   write_config(newConf);
-  ESP.reset();
+  serialDisplay("Writing","Writing Completes");
+  ESP.restart();
+
 }
 /*----Meathod for reconfiguring WiFi settings---------------*/
 /*----Meathod for sending relay status on UART--------------*/
@@ -205,10 +206,7 @@ void checkReset()
 {
   if(digitalRead(reset_btn) == HIGH)
   {
-    if(inSetup)
       reset();
-    else
-      callback = &reset;
   }
 }
 /*-----Meathod for checking reset button--------------------*/
@@ -243,12 +241,15 @@ void fetchIP()
       IpAddress = "";
       const char* s = doc["ip"];
       IpAddress = s;
+      LocalIP = IpAddress2String(WiFi.localIP());
+      WiFi_gateway = WiFi.gatewayIP().toString();
+      serialDisplay("IP Address",IpAddress);
+      serialDisplay("LocalIP",LocalIP);
+      serialDisplay("Gateway",WiFi_gateway);
     }
-    Wifi_ssid = WiFi.SSID();
-    LocalIP = IpAddress2String(WiFi.localIP());
-    serialDisplay("SSID",Wifi_ssid);
-    serialDisplay("IP Address",IpAddress);
   }
+  Wifi_ssid = WiFi.SSID();
+  serialDisplay("SSID",Wifi_ssid);
   callback = &blank;
 }
 /*-----Meathod for fetching IP Address----------------------*/
@@ -272,10 +273,15 @@ void read_config()
       conf.pingTime = jsonBuffer["pingTime"];
       conf.setupFlag = jsonBuffer["setupFlag"];
       conf.updateFlag = jsonBuffer["updateFlag"];
-      String http_username = jsonBuffer["http_username"];
-      String http_password = jsonBuffer["http_password"];
+      conf.wifi_setup_done = jsonBuffer["wifi_setup_done"];
+      String http_username = jsonBuffer["http_username"];      
       conf.http_username = http_username;
+      String http_password = jsonBuffer["http_password"];
       conf.http_password = http_password;
+      String ssid = jsonBuffer["WiFi_SSID"];
+      conf.WiFi_SSID = ssid;
+      String pass = jsonBuffer["WiFi_PASS"];
+      conf.WiFi_PASS = pass; 
     }
   }
 }
@@ -365,7 +371,7 @@ void generate_mqtt_topics()
   serializeJsonPretty(topic_doc, r);
   topicFile.print(r);
   topicFile.close();
-  ESP.reset();
+  ESP.restart();
 }
 
 void perform_action()
@@ -404,8 +410,8 @@ void perform_action()
 void enable_ap()
 {
   const byte DNS_PORT = 53;
-  IPAddress apIP(192, 168, 4, 1);\
-  WiFi.mode(WIFI_AP_STA);
+  IPAddress apIP(192, 168, 4, 1);
+  WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP("IoT Connect");
   dnsServer.start(DNS_PORT, "*", apIP);

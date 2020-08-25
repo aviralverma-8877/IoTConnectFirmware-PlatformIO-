@@ -8,6 +8,7 @@ void onMqttConnect(bool sessionPresent);
 void onMqttSubscribe(uint16_t packetId, uint8_t qos);
 void onMqttUnsubscribe(uint16_t packetId);
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
+void MqttBlank(AsyncMqttClientDisconnectReason reason);
 void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
 void onMqttPublish(uint16_t packetId);
 void sendToMQTT(String topic, String msg);

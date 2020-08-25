@@ -14,8 +14,6 @@
 void onMqttConnect(bool sessionPresent) {
   serialDisplay("MQTT","MQTT is Connected");
   MQTTStatus = true;
-  send_status();
-  first_connect = true;
   if (SPIFFS.exists("/mqtt_topics.json")) {
     StaticJsonDocument<1000> doc;
     StaticJsonDocument<100> filter;
@@ -50,20 +48,16 @@ void onMqttUnsubscribe(uint16_t packetId) {
 
 /*-------Meathod called when disconnected from MQTT Topic---*/
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-  MQTTStatus = false;
-  send_status();
   serialDisplay("MQTT","MQTT is disconnected.");
+  MQTTStatus = false;
   TickerForFeedbackLED.attach(0.6, feedbackLED);
-  if (WiFi.status() != WL_CONNECTED) {
-    enable_ap();
-    if(debugging)
-      Serial.print(".");
-  }
-  else
-    disable_ap();
-    connectToMqtt();
+  connectToMqtt();
 }
 /*-------Meathod called when disconnected from MQTT Topic---*/
+
+void MqttBlank(AsyncMqttClientDisconnectReason reason) {
+}
+
 
 /*-------Meathod called on reciving message from MQTT-------*/
 void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) 
@@ -153,7 +147,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         String r;
         serializeJson(doc, r);
         sendToMQTT(outtopic, r);
-        ESP.reset();
+        ESP.restart();
       }
   /*-------Action command for resetting ESP-------------------*/
 
@@ -227,39 +221,53 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*----Meathod for sending MQTT Data-------------------------*/
 void sendToMQTT(String topic, String msg)
 {
-  DynamicJsonDocument doc(500);
-  StaticJsonDocument<200> filter;
-  filter["mqtt"] = true;
-  String device_config = read_device_config();
-  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
-  if(error)
+  if(mqtt_setup)
   {
-    return;
+    DynamicJsonDocument doc(500);
+    StaticJsonDocument<200> filter;
+    filter["mqtt"] = true;
+    String device_config = read_device_config();
+    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+    if(error)
+    {
+      return;
+    }
+    String prefix = doc["mqtt"]["prefix"];
+    mqtt.publish((prefix+topic).c_str(), 2, false, msg.c_str(), msg.length());
   }
-  String prefix = doc["mqtt"]["prefix"];
-  mqtt.publish((prefix+topic).c_str(), 2, false, msg.c_str(), msg.length());
 }
 /*----Meathod for sending MQTT Data-------------------------*/
 /*----Meathod for sending relay status----------------------*/
 void send_status()
 {
-  String mqtt_data = read_mqtt_config();
-  DynamicJsonDocument doc(1000);
-  StaticJsonDocument<200> filter;
-  filter["relay"][0]["name"] = true;
-  filter["relay"][0]["status"] = true;
-  filter["relay"][0]["pin"] = true;
-  filter["relay"][0]["comp"] = true;
-  DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
-  if(error)
-    return;
-  doc["esp_clip_id"] = chipid;
-  doc["action"] = "status";
-  String r;
-  serializeJson(doc, r);
-  send_data_to_webSocket(r);
-  sendToMQTT(espstatus, r);
-  
+  serialDisplay("Sending Status","START");
+  if(SPIFFS.exists("/mqtt_topics.json"))
+  {
+    String mqtt_data = read_mqtt_config();
+    DynamicJsonDocument doc(1000);
+    StaticJsonDocument<200> filter;
+    filter["relay"][0]["name"] = true;
+    filter["relay"][0]["status"] = true;
+    filter["relay"][0]["pin"] = true;
+    filter["relay"][0]["comp"] = true;
+    DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
+    if(error)
+      return;
+    doc["esp_clip_id"] = chipid;
+    doc["action"] = "status";
+    String r;
+    serializeJson(doc, r);
+    TickerForTimeOut.once_ms(100,[r](){
+      serialDisplay("Sending Status","WebSocket");
+      send_data_to_webSocket(r);
+      serialDisplay("Sending Status","WebSocket Sent");
+      TickerForTimeOut.once_ms(100,[r](){
+        serialDisplay("Sending Status","MQTT");
+        sendToMQTT(espstatus, r);
+        serialDisplay("Sending Status","MQTT Sent");
+      });
+    });
+  }
 }
 /*----Meathod for sending relay status----------------------*/
 /*----Meathod called on sending/publishing message on MQTT--*/
@@ -322,13 +330,17 @@ void connect_to_mqtt()
   }
   const char* host = doc["mqtt"]["host"];
   uint16_t port = doc["mqtt"]["port"];
+  serialDisplay("MQTT Host",String(host));
+  serialDisplay("MQTT Port",String(port));
   bool auth = doc["mqtt"]["auth"];
   if(auth)
   {
     const char* uname = doc["mqtt"]["uname"];
     const char* pass = doc["mqtt"]["pass"];
+    serialDisplay("MQTT Username",String(uname));
+    serialDisplay("MQTT Password",String(pass));
     mqtt.setCredentials(uname, pass);
   }
   mqtt.setServer(host, port);
-  mqtt.connect();
+  connectToMqtt();
 }
