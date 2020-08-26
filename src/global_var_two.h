@@ -16,7 +16,9 @@
         #define espsensor "ESP_SENSOR"           //MQTT Topic for sending sensor status data.
     #endif
     /*--------------MQTT global Configration---------------------------*/
-
+    extern bool reset_btn_status;
+    extern byte reset_btn_press_count;
+    extern unsigned long reset_btn_press_time;
     extern WebSocketsServer webSocket;
     extern String chipid;  //Fetching ESP device ID.
     extern bool debugging;                   //Turn On or Off the serial output.

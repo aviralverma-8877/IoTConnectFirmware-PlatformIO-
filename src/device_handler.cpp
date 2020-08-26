@@ -207,8 +207,38 @@ void checkReset()
 {
   if(digitalRead(reset_btn) == HIGH)
   {
-      reset();
+    if(!reset_btn_status)
+    {
+      reset_btn_status = true;
+      reset_btn_press_time = millis();
+    }
+    else
+    {
+      if(reset_btn_press_time != 0)
+      {
+        if((millis()-reset_btn_press_time)>(10*1000))
+        {
+          reset();
+        }
+      }
+    }
   }
+  if(digitalRead(reset_btn) == LOW)
+  {
+    if(reset_btn_status)
+    {
+      reset_btn_status = false;
+      reset_btn_press_count++;
+      StaticJsonDocument<200> doc;
+      doc["action"] = "reset_btn";
+      doc["espid"] = chipid;
+      doc["count"] = reset_btn_press_count;
+      String r;
+      serializeJson(doc,r);
+      sendToMQTT(norttopic,r);
+    }
+  }
+
 }
 /*-----Meathod for checking reset button--------------------*/
 /*-----Meathod for comparing string-------------------------*/

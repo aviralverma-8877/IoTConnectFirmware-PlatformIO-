@@ -71,11 +71,13 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   DynamicJsonDocument device_doc(100);
   DynamicJsonDocument device_filter(100);
   device_filter["mqtt"]["prefix"] = true;
+  device_filter["mqtt"]["suffix"] = true;
   DeserializationError error_1 = deserializeJson(device_doc, device_config, DeserializationOption::Filter(device_filter));
   if(error_1)
     return;
   String prefix = device_doc["mqtt"]["prefix"];
-  if(strcmp(topic, (prefix+intopic).c_str())==0)
+  String suffix = device_doc["mqtt"]["suffix"];
+  if(strcmp(topic, (prefix+intopic+suffix).c_str())==0)
   {
     StaticJsonDocument<200> root;
     serialDisplay("MQTT",p);
@@ -208,8 +210,8 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
     {
       String config_topic = kv["topic"];
-      serialDisplay("MQTT Topics",(prefix+config_topic));
-      if(comp(topic, (prefix+config_topic).c_str()))
+      serialDisplay("MQTT Topics",(prefix+config_topic+suffix));
+      if(comp(topic, (prefix+config_topic+suffix).c_str()))
       {
         bool action = msg["action"];
         kv["status"] = action;
@@ -232,6 +234,7 @@ void sendToMQTT(String topic, String msg)
     DynamicJsonDocument doc(500);
     StaticJsonDocument<200> filter;
     filter["mqtt"]["prefix"] = true;
+    filter["mqtt"]["suffix"] = true;
     String device_config = read_device_config();
     DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
     if(error)
@@ -239,8 +242,9 @@ void sendToMQTT(String topic, String msg)
       return;
     }
     String prefix = doc["mqtt"]["prefix"];
-    serialDisplay("MQTT","Published to "+prefix+topic);
-    mqtt.publish((prefix+topic).c_str(), 2, false, msg.c_str(), msg.length());
+    String suffix = doc["mqtt"]["suffix"];
+    serialDisplay("MQTT","Published to "+prefix+topic+suffix);
+    mqtt.publish((prefix+topic+suffix).c_str(), 2, false, msg.c_str(), msg.length());
   }
 }
 /*----Meathod for sending MQTT Data-------------------------*/
@@ -300,6 +304,7 @@ void subscribe_mqtt_input()
   DynamicJsonDocument doc(1500);
   StaticJsonDocument<200> filter;
   filter["mqtt"]["prefix"] = true;
+  filter["mqtt"]["suffix"] = true;
   String device_config = read_device_config();
   DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
   if(error)
@@ -308,7 +313,8 @@ void subscribe_mqtt_input()
   }
 
   String prefix = doc["mqtt"]["prefix"];
-  mqtt.subscribe((prefix+intopic).c_str(), 2);
+  String suffix = doc["mqtt"]["suffix"];
+  mqtt.subscribe((prefix+intopic+suffix).c_str(), 2);
   doc.clear();
   filter.clear();
   filter["relay"][0]["topic"] = true;
@@ -321,8 +327,8 @@ void subscribe_mqtt_input()
   for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
   {
     String topic = kv["topic"];
-    serialDisplay("MQTT Topic", prefix+topic);
-    mqtt.subscribe((prefix+topic).c_str(), 2);
+    serialDisplay("MQTT Topic", prefix+topic+suffix);
+    mqtt.subscribe((prefix+topic+suffix).c_str(), 2);
   }
 }
 

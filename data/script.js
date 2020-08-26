@@ -388,6 +388,7 @@ function save_config()
                 "uname":"",
                 "pass":"",
                 "prefix":"",
+                "suffix":"",
                 "auth":false
             },
             "device_config":{
@@ -425,6 +426,7 @@ function save_config()
             uname = document.getElementById("mqtt_uname").value;
             pass = document.getElementById("mqtt_pass").value;
             prefix = document.getElementById("mqtt_prefix").value;
+            suffix = document.getElementById("mqtt_suffix").value;
             if(host != "")
             {    
                 if(port != "" && port > 0)
@@ -446,6 +448,7 @@ function save_config()
                     config.mqtt.uname = uname;
                     config.mqtt.pass = pass;
                     config.mqtt.prefix = prefix;
+                    config.mqtt.suffix = suffix;
                     config.mqtt.auth = auth;
                 }
                 else
