@@ -2,9 +2,12 @@
     #define device_handler
     #include<Arduino.h>
     #include<ArduinoJson.h>
+
+    void setup_tickers();
     String read_mqtt_config();  
     void relay_action(String relay, bool value, String by);
-    void updateESP();
+    void updateESPFirmware();
+    void updateESPSpiffs();
     void switch_wifi();
     void feedbackLED();
     void reset();

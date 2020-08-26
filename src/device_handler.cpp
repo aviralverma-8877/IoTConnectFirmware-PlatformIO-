@@ -12,6 +12,17 @@ String read_device_config();
 String read_mqtt_config();
 void perform_action();
 bool comp(const char *val1,const char *val2);
+void fetchIP();
+void feedbackLED();
+void checkReset();
+
+void setup_tickers()
+{
+  TickerForconnectToMqtt.attach(10, connectToMqtt);
+  TickerForfetchIP.attach(10, fetchIP);
+  TickerForFeedbackLED.attach(0.6, feedbackLED);
+  TickerForcheckReset.attach_ms(10, checkReset);
+}
 
 void relay_action(String relay, bool value, String by)
 {
@@ -55,7 +66,7 @@ void relay_action(String relay, bool value, String by)
 }
 
 /*-------Meathod to update ESP------------------------------*/
-void updateESP()
+void updateESPFirmware()
 {
   StaticJsonDocument<200> doc;
   doc["action"] = "UpdateStatus";
@@ -65,6 +76,40 @@ void updateESP()
   sendToMQTT(outtopic, r);
   delay(100);
   t_httpUpdate_return ret = ESPhttpUpdate.update(updateAddress.c_str());
+  serialDisplay("Update Address",updateAddress);
+  String stat = "";
+  switch(ret) 
+  {
+    case HTTP_UPDATE_FAILED:
+        stat = "Failed to update.";
+        break;
+    case HTTP_UPDATE_NO_UPDATES:
+        stat = "No Update Available...";
+        break;
+    case HTTP_UPDATE_OK:
+        stat = "Update Successfull...";
+        break;
+  }
+  StaticJsonDocument<200> doc_1;
+  doc_1["action"] = "UpdateStatus";
+  doc_1["stat"] = stat;
+  r = "";
+  serializeJson(doc_1, r);
+  sendToMQTT(outtopic, r);
+  delay(100);
+  serialDisplay("Update",stat);
+  callback = &blank;
+}
+void updateESPSpiffs()
+{
+  StaticJsonDocument<200> doc;
+  doc["action"] = "UpdateStatus";
+  doc["stat"] = "Updating Device...";
+  String r;
+  serializeJson(doc, r);
+  sendToMQTT(outtopic, r);
+  delay(100);
+  t_httpUpdate_return ret = ESPhttpUpdate.updateSpiffs(updateAddress.c_str());
   serialDisplay("Update Address",updateAddress);
   String stat = "";
   switch(ret) 

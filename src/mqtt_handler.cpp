@@ -10,6 +10,14 @@
 #include "common_meathods.h"
 #include "web_sockets_handler.h"
 
+void onMqttConnect(bool sessionPresent);
+void onMqttSubscribe(uint16_t packetId, uint8_t qos);
+void onMqttUnsubscribe(uint16_t packetId);
+void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
+void MqttBlank(AsyncMqttClientDisconnectReason reason);
+void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
+void connect_to_mqtt();
+
 /*-------Meathod called when connected to MQTT--------------*/
 void onMqttConnect(bool sessionPresent) {
   serialDisplay("MQTT","MQTT is Connected");
@@ -187,9 +195,13 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   /*-------Action command for updating firmware---------------*/
       else if(comp(action,"UPDATE"))
       {
-        const char * c = root["url"];
-        updateAddress = c;
-        callback = &updateESP;
+        String type = root["type"];
+        const char* url = root["url"];
+        updateAddress = url;
+        if(comp(type.c_str(),"Firmware"))
+          callback = &updateESPFirmware;
+        else if(comp(type.c_str(),"Spiffs"))
+          callback = &updateESPSpiffs;
       }
   /*-------Action command for updating firmware---------------*/
   /*-------Get MQTT Topic list--------------------------------*/
@@ -376,4 +388,16 @@ void connect_to_mqtt()
   }
   mqtt.setServer(host, port);
   connectToMqtt();
+}
+
+void setup_mqtt()
+{
+  mqtt.onConnect(onMqttConnect);
+  mqtt.onDisconnect(onMqttDisconnect);
+  mqtt.onSubscribe(onMqttSubscribe);
+  mqtt.onUnsubscribe(onMqttUnsubscribe);
+  mqtt.onMessage(onMqttMessage);
+//  mqtt.onPublish(onMqttPublish);
+  fetchIP();
+  connect_to_mqtt();
 }

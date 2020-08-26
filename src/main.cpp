@@ -34,20 +34,8 @@ void setup()
     TickerForTimeOut.once_ms(10,[](){
       perform_action();
     });
-/*-------Setting up the trikers-----------------------------*/
-    TickerForconnectToMqtt.attach(10, connectToMqtt);
-    TickerForfetchIP.attach(10, fetchIP);
-    TickerForFeedbackLED.attach(0.6, feedbackLED);
-    TickerForcheckReset.attach_ms(10, checkReset);
-/*-------Setting up the trikers-----------------------------*/      
-    mqtt.onConnect(onMqttConnect);
-    mqtt.onDisconnect(onMqttDisconnect);
-    mqtt.onSubscribe(onMqttSubscribe);
-    mqtt.onUnsubscribe(onMqttUnsubscribe);
-    mqtt.onMessage(onMqttMessage);
-  //  mqtt.onPublish(onMqttPublish);
-    fetchIP();
-    connect_to_mqtt();
+    setup_tickers();
+    setup_mqtt();
   }
 }
 

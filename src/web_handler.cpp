@@ -253,6 +253,11 @@ void web_set_wifi(AsyncWebServerRequest *request)
 void firmware_web_updater()
 {
   webServer.on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
+    if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+    {
+      return request->requestAuthentication();
+    }
+
     request->send(200, "text/html", "<script>\
     function httpGet(action, options = {})\
     {\
