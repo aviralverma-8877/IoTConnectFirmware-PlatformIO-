@@ -9,11 +9,8 @@
     #ifndef espraw
         #define espraw "ESP_ATTENDANCE"                 //MQTT Topic for sending device attendance.
     #endif
-    #ifndef espstatus
-        #define espstatus "ESP_STATUS"           //MQTT Topic for sending relay status data.
-    #endif
-    #ifndef espsensor
-        #define espsensor "ESP_SENSOR"           //MQTT Topic for sending sensor status data.
+    #ifndef espaction
+        #define espaction "ESP_ACTION"           //MQTT Topic for sending sensor status data.
     #endif
     /*--------------MQTT global Configration---------------------------*/
     extern bool reset_btn_status;
@@ -26,4 +23,5 @@
     extern String intopic;            //MQTT Topic for reciving data to ESP.
     extern bool MQTTStatus;
     extern String intopic;
+    extern String espsensor;
 #endif

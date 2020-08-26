@@ -192,6 +192,24 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         callback = &updateESP;
       }
   /*-------Action command for updating firmware---------------*/
+  /*-------Get MQTT Topic list--------------------------------*/
+      else if(comp(action,"GET_MQTT_TOPICS"))
+      {
+        String mqtt_topics = read_mqtt_config();
+        StaticJsonDocument<100> filter;
+        filter["relay"][0]["name"] = true;
+        filter["relay"][0]["topic"] = true;
+        DynamicJsonDocument doc(1000);
+        DeserializationError error = deserializeJson(doc, mqtt_topics, DeserializationOption::Filter(filter));
+        if(error)
+        {
+          return;
+        }
+        mqtt_topics = "";
+        serializeJson(doc,mqtt_topics);
+        sendToMQTT(outtopic, mqtt_topics);
+      }
+  /*-------Get MQTT Topic list--------------------------------*/
     }
   }
   else
@@ -274,7 +292,7 @@ void send_status()
       serialDisplay("Sending Status","WebSocket Sent");
       TickerForTimeOut.once_ms(100,[r](){
         serialDisplay("Sending Status","MQTT");
-        sendToMQTT(espstatus, r);
+        sendToMQTT(outtopic, r);
         serialDisplay("Sending Status","MQTT Sent");
       });
     });

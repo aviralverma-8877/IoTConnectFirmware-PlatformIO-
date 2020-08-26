@@ -235,7 +235,7 @@ void checkReset()
       doc["count"] = reset_btn_press_count;
       String r;
       serializeJson(doc,r);
-      sendToMQTT(norttopic,r);
+      sendToMQTT(espaction,r);
     }
   }
 
