@@ -27,6 +27,9 @@
             <div>
                 <input type="checkbox" id="on_board_led" onchange="httpGet(0,0,'device','{\'action\':\'toggle_onb\',\'status\':'+this.checked+'}')" /> <span style="font-family: 'Fjalla One'">Enable/Disable On Board LED</span>
             </div>
+            <div>
+                <input type="checkbox" id="save_status" onchange="httpGet(0,0,'device','{\'action\':\'save_status\',\'status\':'+this.checked+'}')" /> <span style="font-family: 'Fjalla One'">Save last status on EEPROM</span>
+            </div>
             <hr />
             <table id="relay_table" cellspacing="15" style="border:#ccc solid thin">
             </table>
