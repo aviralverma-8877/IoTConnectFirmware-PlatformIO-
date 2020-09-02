@@ -23,7 +23,6 @@ void onMqttConnect(bool sessionPresent) {
   serialDisplay("MQTT","MQTT is Connected");
   MQTTStatus = true;
   TickerForFeedbackLED.detach();
-  digitalWrite(indicator_led, LOW);
   digitalWrite(indicator_led, LOW);     // set pin to the opposite state
   
   if (SPIFFS.exists("/mqtt_topics.json")) 

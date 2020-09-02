@@ -25,17 +25,14 @@ void setup()
     write_config(newConfig);
     read_config();
   }
-  delay(1000);
   setup_web_server();
   callback = &blank;
-  if(WiFi.status() == WL_CONNECTED)
-  {
-    configure_gpio();
-    if(conf.save_eeprom)
-      perform_action();
-    setup_mqtt();
-    setup_tickers();
-  }
+  while(WiFi.status() != WL_CONNECTED){}
+  configure_gpio();
+  if(conf.save_eeprom)
+    perform_action();
+  setup_mqtt();
+  setup_tickers();
 }
 
 void loop() 

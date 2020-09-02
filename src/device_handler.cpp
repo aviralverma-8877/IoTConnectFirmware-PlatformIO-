@@ -20,7 +20,7 @@ void read_config();
 
 void setup_tickers()
 {
-  TickerForconnectToMqtt.attach(10, connectToMqtt);
+  TickerForconnectToMqtt.attach(1, connectToMqtt);
   TickerForfetchIP.attach(10, fetchIP);
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   TickerForcheckReset.attach_ms(10, checkReset);
