@@ -31,9 +31,8 @@ void setup()
   if(WiFi.status() == WL_CONNECTED)
   {
     configure_gpio();
-    TickerForTimeOut.once_ms(10,[](){
+    if(conf.save_eeprom)
       perform_action();
-    });
     setup_tickers();
     setup_mqtt();
   }

@@ -70,6 +70,7 @@
     extern Ticker TickerForSerialListner;
     extern Ticker TickerForUARTUpdater;
     extern Ticker TickerForTimeOut;
+    extern Ticker TickerForTimeOutTwo;
     /*--------------Tickers for Async Meathods------------------*/
      void configure_gpio();
 #endif

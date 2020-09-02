@@ -16,6 +16,7 @@ bool comp(const char *val1,const char *val2);
 void fetchIP();
 void feedbackLED();
 void checkReset();
+void read_config();
 
 void setup_tickers()
 {
@@ -27,21 +28,14 @@ void setup_tickers()
 
 void relay_action(String relay, bool value, String by)
 {
-  String device_config = read_device_config();
   DynamicJsonDocument doc(1500);
-  StaticJsonDocument<100> filter;
-  filter["save_eeprom"] = true;
-  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
-  if(error)
-  {
-    return;
-  }
-  bool save_eeprom = doc["save_eeprom"];
+  read_config();
+  bool save_eeprom = conf.save_eeprom;
+  serialDisplay("SAVE EEPROM",String(save_eeprom));
   if(save_eeprom)
   {
     String mqtt_data = read_mqtt_config();
-    doc.clear();
-    error = deserializeJson(doc, mqtt_data);
+    DeserializationError error = deserializeJson(doc, mqtt_data);
     if(error)
     {
       return;
@@ -59,13 +53,11 @@ void relay_action(String relay, bool value, String by)
     serializeJsonPretty(doc, mqtt_data);
     doc.clear();
     write_mqtt_topics(mqtt_data);
-    TickerForTimeOut.once_ms(50,[](){
-      perform_action();
-    });
+    perform_action();
   }
   else
   {
-    TickerForTimeOut.once_ms(50,[](){
+    TickerForTimeOut.once_ms(50,[relay, value](){
       perform_action(relay, value);
     });
   }
@@ -82,7 +74,7 @@ void relay_action(String relay, bool value, String by)
 
   String r = "";
   serializeJson(doc, r);
-  TickerForTimeOut.once_ms(100,[r](){
+  TickerForTimeOutTwo.once_ms(100,[r](){
     sendToMQTT(norttopic, r);
   });
 }

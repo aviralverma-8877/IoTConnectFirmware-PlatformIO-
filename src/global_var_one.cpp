@@ -55,6 +55,7 @@
     Ticker TickerForSerialListner;
     Ticker TickerForUARTUpdater;
     Ticker TickerForTimeOut;
+    Ticker TickerForTimeOutTwo;
     /*--------------Tickers for Async Meathods------------------*/
     void configure_gpio()
     {

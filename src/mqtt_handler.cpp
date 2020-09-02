@@ -23,6 +23,7 @@ void onMqttConnect(bool sessionPresent) {
   serialDisplay("MQTT","MQTT is Connected");
   MQTTStatus = true;
   TickerForFeedbackLED.detach();
+  digitalWrite(indicator_led, LOW);
   digitalWrite(indicator_led, LOW);     // set pin to the opposite state
   
   if (SPIFFS.exists("/mqtt_topics.json")) 
@@ -284,18 +285,43 @@ void sendToMQTT(String topic, String msg)
 void send_status()
 {
   serialDisplay("Sending Status","START");
+  read_config();
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
     String mqtt_data = read_mqtt_config();
     DynamicJsonDocument doc(1000);
     StaticJsonDocument<200> filter;
     filter["relay"][0]["name"] = true;
-    filter["relay"][0]["status"] = true;
+    if(!conf.save_eeprom)
+      filter["relay"][0]["status"] = true;
     filter["relay"][0]["pin"] = true;
     filter["relay"][0]["comp"] = true;
     DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
     if(error)
       return;
+    if(!conf.save_eeprom)
+    {
+      for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
+      {
+        String com = kv["comp"];
+        if(comp(com.c_str(), "shift_reg"))
+        {
+          int pin = kv["pin"];
+          bool status = bool(sr.get(pin));
+          kv["status"] = status;
+          serialDisplay("Pin", String(pin));
+          serialDisplay("Status", String(status));
+        }
+        else if(comp(com.c_str(), "gpio"))
+        {
+          int pin = kv["pin"];
+          bool status = bool(digitalRead(pin));
+          kv["status"] = status;
+          serialDisplay("Pin", String(pin));
+          serialDisplay("Status", String(status));
+        }
+      }
+    }
     doc["esp_clip_id"] = chipid;
     doc["action"] = "status";
     String r;
@@ -310,7 +336,7 @@ void send_status()
         serialDisplay("Sending Status","MQTT Sent");
       });
     });
-  }
+  }  
 }
 /*----Meathod for sending relay status----------------------*/
 /*----Meathod called on sending/publishing message on MQTT--*/
