@@ -6,6 +6,7 @@
     bool setupFlag;
     bool updateFlag;
     bool led_enabled;
+    bool save_eeprom;
     int pingTime;
     String http_username;
     String http_password;

@@ -22,6 +22,7 @@
     void generate_mqtt_topics();
     String read_device_config();
     void perform_action();
+    void perform_action(String relay, bool value);
     void enable_ap();
     void disable_ap();
 #endif

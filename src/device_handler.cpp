@@ -11,6 +11,7 @@
 String read_device_config();
 String read_mqtt_config();
 void perform_action();
+void perform_action(String relay, bool value);
 bool comp(const char *val1,const char *val2);
 void fetchIP();
 void feedbackLED();
@@ -26,27 +27,49 @@ void setup_tickers()
 
 void relay_action(String relay, bool value, String by)
 {
-  String mqtt_data = read_mqtt_config();
+  String device_config = read_device_config();
   DynamicJsonDocument doc(1500);
-  DeserializationError error = deserializeJson(doc, mqtt_data);
+  StaticJsonDocument<100> filter;
+  filter["save_eeprom"] = true;
+  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
   if(error)
   {
     return;
   }
-  JsonArray array = doc["relay"].as<JsonArray>();
-  for (JsonObject ele : array) {
-    String name = ele["name"];
-    if(comp(name.c_str(), relay.c_str()))
+  bool save_eeprom = doc["save_eeprom"];
+  if(save_eeprom)
+  {
+    String mqtt_data = read_mqtt_config();
+    doc.clear();
+    error = deserializeJson(doc, mqtt_data);
+    if(error)
     {
-      ele["status"] = value;
-      break;
+      return;
     }
+    JsonArray array = doc["relay"].as<JsonArray>();
+    for (JsonObject ele : array) {
+      String name = ele["name"];
+      if(comp(name.c_str(), relay.c_str()))
+      {
+        ele["status"] = value;
+        break;
+      }
+    }
+    mqtt_data = "";
+    serializeJsonPretty(doc, mqtt_data);
+    doc.clear();
+    write_mqtt_topics(mqtt_data);
+    TickerForTimeOut.once_ms(50,[](){
+      perform_action();
+    });
   }
-  mqtt_data = "";
-  serializeJsonPretty(doc, mqtt_data);
-  doc.clear();
-  write_mqtt_topics(mqtt_data);
-
+  else
+  {
+    TickerForTimeOut.once_ms(50,[](){
+      perform_action(relay, value);
+    });
+  }
+  
 //sending nortification
   if(!comp(by.c_str(),""))
   {
@@ -61,13 +84,13 @@ void relay_action(String relay, bool value, String by)
   serializeJson(doc, r);
   TickerForTimeOut.once_ms(100,[r](){
     sendToMQTT(norttopic, r);
-    perform_action();
   });
 }
 
 /*-------Meathod to update ESP------------------------------*/
 void updateESPFirmware()
 {
+  callback = &blank;
   StaticJsonDocument<200> doc;
   doc["action"] = "UpdateStatus";
   doc["stat"] = "Updating Device...";
@@ -98,10 +121,10 @@ void updateESPFirmware()
   sendToMQTT(outtopic, r);
   delay(100);
   serialDisplay("Update",stat);
-  callback = &blank;
 }
 void updateESPSpiffs()
 {
+  callback = &blank;
   StaticJsonDocument<200> doc;
   doc["action"] = "UpdateStatus";
   doc["stat"] = "Updating Device...";
@@ -132,7 +155,6 @@ void updateESPSpiffs()
   sendToMQTT(outtopic, r);
   delay(100);
   serialDisplay("Update",stat);
-  callback = &blank;
 }
 /*-------Meathod to update ESP------------------------------*/
 /*-------feedbackLED----------------------------------------*/
@@ -168,7 +190,7 @@ void reset()
   serialDisplay("Format","Formatting SPIFFS");
   SPIFFS.format();
   serialDisplay("Format","Formatting Completed");
-  configuration newConf = {false,false,true,2000,"admin","admin"};
+  configuration newConf = {false,false,true,false,2000,"admin","admin"};
   newConf.setupFlag = true;
   serialDisplay("Writing","Writing Config");
   write_config(newConf);
@@ -478,6 +500,43 @@ void perform_action()
       int pin = ele["pin"];
       bool value = ele["status"];
       digitalWrite(pin, value);
+    }
+  }
+  send_status();
+}
+
+void perform_action(String relay, bool value)
+{
+  String mqtt_data = read_mqtt_config();
+  DynamicJsonDocument doc(1000);
+  StaticJsonDocument<200> filter;
+  filter["relay"][0]["name"] = true;
+  filter["relay"][0]["pin"] = true;
+  filter["relay"][0]["comp"] = true;
+  DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
+  if(error)
+    return;
+  JsonArray array = doc["relay"];
+  for( int t=0; t< array.size(); t++) 
+  {
+    DynamicJsonDocument ele = array[t];
+    String com = ele["comp"];
+    String name = ele["name"];
+    if(comp(com.c_str(), "shift_reg"))
+    {
+      if(comp(name.c_str(), relay.c_str()))
+      {
+        int pin = ele["pin"];
+        sr.set(pin, value);
+      }
+    }
+    if(comp(com.c_str(), "gpio"))
+    {
+      if(comp(name.c_str(), relay.c_str()))
+      {
+        int pin = ele["pin"];
+        digitalWrite(pin, value);
+      }
     }
   }
   send_status();

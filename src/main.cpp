@@ -19,7 +19,7 @@ void setup()
     delayMS = conf.pingTime;
   }
   else{
-    configuration newConfig = {false,false,true,2000,"admin","admin","","",false};
+    configuration newConfig = {false,false,true,false,2000,"admin","admin","","",false};
     newConfig.setupFlag = true;
     newConfig.wifi_setup_done = false;
     write_config(newConfig);

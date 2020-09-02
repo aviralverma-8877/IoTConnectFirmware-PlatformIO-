@@ -36,7 +36,7 @@
     DNSServer dnsServer;                      //Global variables
     AsyncWebServer webServer(80);             //Global variables
     /*----------------------------------------------------------*/
-    configuration conf = {false,false,true,2000,"admin","admin","","",false};
+    configuration conf = {false,false,true,false,2000,"admin","admin","","",false};
     String IpAddress = "";                    //Global variables
     String LocalIP = "";                      //Global variables
     byte loopCount = 0;                       //Global variables

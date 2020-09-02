@@ -22,7 +22,11 @@ void connect_to_mqtt();
 void onMqttConnect(bool sessionPresent) {
   serialDisplay("MQTT","MQTT is Connected");
   MQTTStatus = true;
-  if (SPIFFS.exists("/mqtt_topics.json")) {
+  TickerForFeedbackLED.detach();
+  digitalWrite(indicator_led, LOW);     // set pin to the opposite state
+  
+  if (SPIFFS.exists("/mqtt_topics.json")) 
+  {
     StaticJsonDocument<1000> doc;
     StaticJsonDocument<100> filter;
     filter["mqtt"]["service"] = true;
@@ -36,16 +40,12 @@ void onMqttConnect(bool sessionPresent) {
     TickerForPinging.attach_ms(10000, pinging);
     if(hasSensor)
       TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
-
   }
 }
 /*-------Meathod called when connected to MQTT--------------*/
 /*-------Meathod called when subscribed to MQTT Topic-------*/
 void onMqttSubscribe(uint16_t packetId, uint8_t qos) {
   serialDisplay("MQTT","Subscribed to MQTT");
-  
-  TickerForFeedbackLED.detach();
-  digitalWrite(indicator_led, LOW);     // set pin to the opposite state
 }
 /*-------Meathod called when subscribed to MQTT Topic-------*/
 /*-------Meathod called when unsubscribed from MQTT Topic---*/
@@ -70,6 +70,8 @@ void MqttBlank(AsyncMqttClientDisconnectReason reason) {
 /*-------Meathod called on reciving message from MQTT-------*/
 void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) 
 {
+  serialDisplay("MQTT Topic",topic);
+  serialDisplay("MQTT Message",payload);
   String p = "";
   for(int i=index; (unsigned)i<len;i++)
   {
@@ -348,7 +350,7 @@ void subscribe_mqtt_input()
   doc.clear();
   filter.clear();
   filter["relay"][0]["topic"] = true;
-  String mqtt_data = read_mqtt_config();  
+  String mqtt_data = read_mqtt_config();
   error = deserializeJson(doc, mqtt_data, DeserializationOption::Filter(filter));
   if(error)
   {
@@ -357,7 +359,7 @@ void subscribe_mqtt_input()
   for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
   {
     String topic = kv["topic"];
-    serialDisplay("MQTT Topic", prefix+topic+suffix);
+//    serialDisplay("MQTT Topic", prefix+topic+suffix);
     mqtt.subscribe((prefix+topic+suffix).c_str(), 2);
   }
 }

@@ -70,7 +70,12 @@ void handleWebControl(AsyncWebServerRequest *request)
       bool status = doc["status"];
       conf.led_enabled = status;
       write_config(conf);
-      send_status();
+    }
+    if(comp(action.c_str(),"save_status"))
+    {
+      bool status = doc["status"];
+      conf.save_eeprom = status;
+      write_config(conf);
     }
   }
   request->send(200, "application/json", message);
@@ -83,6 +88,7 @@ void handleWebStatus(AsyncWebServerRequest *request)
   return_doc["wifi_ssid"] = Wifi_ssid;
   return_doc["wifi_rssi"] = WiFi.RSSI();
   return_doc["onb_led"] = conf.led_enabled;
+  return_doc["save_eeprom"] = conf.save_eeprom;
   return_doc["firmware_version"] = FIRMWARE_V;
   return_doc["mqtt_status"] = MQTTStatus;
   bool WiFi_status = (WiFi.status() == WL_CONNECTED);

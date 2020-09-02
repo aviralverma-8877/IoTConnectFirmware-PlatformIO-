@@ -5,7 +5,7 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 bool reset_btn_status = false;
 byte reset_btn_press_count = 0;
 unsigned long reset_btn_press_time = 0;
-bool debugging = false;                   //Turn On or Off the serial output.
+bool debugging = true;                   //Turn On or Off the serial output.
 /*--------------MQTT Configration---------------------------*/
 bool MQTTStatus = false;
 String chipid = String(ESP.getChipId());  //Fetching ESP device ID.

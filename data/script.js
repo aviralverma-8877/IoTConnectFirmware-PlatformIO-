@@ -92,7 +92,9 @@ function set_ui()
     if(json != null)
     {
         onb_status = json['onb_led'];
-        document.getElementById("on_board_led").checked = onb_status
+        document.getElementById("on_board_led").checked = onb_status;
+        save_eeprom = json['save_eeprom'];
+        document.getElementById("save_status").checked = save_eeprom;
         var cont = "";
         wifi_ssid = json['wifi_ssid'];
         wifi_type = json['type'];

@@ -2,6 +2,7 @@
     "setupFlag": false,
     "updateFlag": false,
     "led_enabled": true,
+    "save_eeprom": false,
     "pingTime": 2000,
     "http_username": "admin",
     "http_password": "admin",
