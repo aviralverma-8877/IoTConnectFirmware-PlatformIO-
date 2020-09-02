@@ -33,8 +33,8 @@ void setup()
     configure_gpio();
     if(conf.save_eeprom)
       perform_action();
-    setup_tickers();
     setup_mqtt();
+    setup_tickers();
   }
 }
 

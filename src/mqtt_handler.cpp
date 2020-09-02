@@ -60,7 +60,6 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
   serialDisplay("MQTT","MQTT is disconnected.");
   MQTTStatus = false;
   TickerForFeedbackLED.attach(0.6, feedbackLED);
-  connectToMqtt();
 }
 /*-------Meathod called when disconnected from MQTT Topic---*/
 
