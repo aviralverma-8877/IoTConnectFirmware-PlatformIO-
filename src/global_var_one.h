@@ -9,6 +9,7 @@
     #include <DNSServer.h>                    //For redirecting the user on connecting to device WiFi
     #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>
+    #include <DHT.h>
     #include "structures.h"
 
     #ifndef MQTT_HOST
@@ -36,6 +37,8 @@
     extern AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
     extern uint8_t dht_pin;
     extern String DHTType;
+    extern DHT11 sensor_dht11;
+    extern DHT22 sensor_dht22;
     extern uint8_t LDR_PIN;
     extern byte indicator_led;
     extern byte reset_btn;

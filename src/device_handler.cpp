@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266mDNS.h> 
-#include "DHTesp.h"
+#include <DHT.h>
 #include "mqtt_handler.h"
 #include "global_var_one.h"
 #include "global_var_two.h"
@@ -223,6 +223,48 @@ void pinging()
 }
 /*---Meathod for pinging MQTT Server for active connection--*/
 /*-----Meathod for sending sensor data----------------------*/
+
+void ICACHE_RAM_ATTR handleData(float h, float t) {
+  DynamicJsonDocument doc(500);
+  volatile float humidity = h;
+  volatile float temperature = t;
+  doc["t"] = temperature;
+  doc["h"] = humidity;
+  String s;
+  serializeJson(doc, s);
+  sendToMQTT(espsensor, s);
+}
+
+void ICACHE_RAM_ATTR handleError(uint8_t e) {
+}
+
+void setup_sensor()
+{
+  DynamicJsonDocument doc(500);
+  StaticJsonDocument<200> filter;
+  filter["device_config"]["dht"]["INSTALLED"] = true;
+  String device_config = read_device_config();
+  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+  if(error)
+    return;
+  bool has_dht = doc["device_config"]["dht"]["INSTALLED"];
+  if(has_dht)
+  {
+    if(comp(DHTType.c_str(), "DHT11"))
+    {
+      sensor_dht11.setup(dht_pin);
+      sensor_dht11.onData(handleData);
+      sensor_dht11.onError(handleError);
+    }
+    else if(comp(DHTType.c_str(), "DHT22"))
+    {
+      sensor_dht22.setup(dht_pin);
+      sensor_dht22.onData(handleData);
+      sensor_dht22.onError(handleError);
+    }  
+  }
+}
+
 void sendSensorData()
 {
   DynamicJsonDocument doc(500);
@@ -236,26 +278,24 @@ void sendSensorData()
   bool has_dht = doc["device_config"]["dht"]["INSTALLED"];
   bool has_light = doc["device_config"]["light"]["INSTALLED"];
   doc.clear();
-  doc["d"] = chipid;
-  int temp, humid, light;
+  doc["d"] = chipid;  
   if(has_dht)
   {
-    DHTesp dht;
     if(comp(DHTType.c_str(), "DHT11"))
-      dht.setup(dht_pin, DHTesp::DHT11);
+    {
+      sensor_dht11.read();
+    }
     else if(comp(DHTType.c_str(), "DHT22"))
-      dht.setup(dht_pin, DHTesp::DHT22);
-    float humidity = dht.getHumidity();
-    float temperature = dht.getTemperature();
-    doc["t"] = temperature;
-    doc["h"] = humidity;
+    {
+      sensor_dht22.read();
+    }  
   }
+  int light;
   if(has_light)
   {
     light = map(analogRead(LDR_PIN), 0, 255, 0, 100);
     doc["l"] = light;
   }
-
   String s;
   serializeJson(doc, s);
   sendToMQTT(espsensor, s);
@@ -360,6 +400,7 @@ void read_config()
       if(error)
         return;
       conf.led_enabled = jsonBuffer["led_enabled"];
+      conf.save_eeprom = jsonBuffer["save_eeprom"];
       conf.pingTime = jsonBuffer["pingTime"];
       conf.setupFlag = jsonBuffer["setupFlag"];
       conf.updateFlag = jsonBuffer["updateFlag"];

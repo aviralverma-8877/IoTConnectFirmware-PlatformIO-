@@ -9,15 +9,17 @@
     #include <DNSServer.h>                    //For redirecting the user on connecting to device WiFi
     #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>
+    #include <DHT.h>
     #include "structures.h"
     #include "device_handler.h"
-    #include "DHTesp.h"
     
     AsyncMqttClient mqtt;                     //Variable to initiate MQTT. 
     ShiftRegister74HC595<1> sr (16, 14, 12);  //Setting up shift register.
     uint8_t LDR_PIN = 0;
     uint8_t dht_pin;
     String DHTType;
+    DHT11 sensor_dht11;
+    DHT22 sensor_dht22;
     byte indicator_led = 13;
     byte reset_btn = 4;
     bool hasSensor = false;

@@ -12,6 +12,7 @@
     void feedbackLED();
     void reset();
     void pinging();
+    void setup_sensor();
     void sendSensorData();
     void checkReset();
     bool comp(const char *val1,const char *val2);

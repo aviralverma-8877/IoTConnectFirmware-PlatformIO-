@@ -14,23 +14,22 @@ void setup()
 {
   Serial.begin(115200);
   SPIFFS.begin();
-  if (SPIFFS.exists("/config.json")) {
-    read_config();
-    delayMS = conf.pingTime;
-  }
-  else{
+  if (!SPIFFS.exists("/config.json")) 
+  {
     configuration newConfig = {false,false,true,false,2000,"admin","admin","","",false};
     newConfig.setupFlag = true;
     newConfig.wifi_setup_done = false;
     write_config(newConfig);
-    read_config();
   }
+  read_config();
+  delayMS = conf.pingTime;
   setup_web_server();
   callback = &blank;
   while(WiFi.status() != WL_CONNECTED){}
   configure_gpio();
   if(conf.save_eeprom)
     perform_action();
+  setup_sensor();
   setup_mqtt();
   setup_tickers();
 }
