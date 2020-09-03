@@ -120,3 +120,18 @@ body{
   #mqtt_detail_table{
     display: none;
   }
+
+  #signal_bk
+  {
+    width:100px;
+    height: 10px;
+    background-color: #666;
+    margin:10px;
+  }
+
+  #signal_fk
+  {
+    width:0px;
+    height: 10px;
+    background-color: #4CAF50;
+  }

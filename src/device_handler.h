@@ -4,6 +4,7 @@
     #include<ArduinoJson.h>
 
     void setup_tickers();
+    String device_status();
     String read_mqtt_config();  
     void relay_action(String relay, bool value, String by);
     void updateESPFirmware();

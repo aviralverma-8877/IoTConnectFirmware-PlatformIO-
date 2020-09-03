@@ -19,9 +19,20 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 void connect_to_mqtt();
 
 /*-------Meathod called when connected to MQTT--------------*/
+void checkMQTTStatus()
+{
+  if(mqtt.connected())
+  {
+    MQTTStatus = true;
+  }
+  else
+  {
+    MQTTStatus = false;
+  }
+  send_data_to_webSocket(device_status());
+}
 void onMqttConnect(bool sessionPresent) {
   serialDisplay("MQTT","MQTT is Connected");
-  MQTTStatus = true;
   TickerForFeedbackLED.detach();
   digitalWrite(indicator_led, LOW);     // set pin to the opposite state
   
@@ -37,9 +48,6 @@ void onMqttConnect(bool sessionPresent) {
     String service = doc["mqtt"]["service"];
     if(!comp(service.c_str(), "N/A"))
       subscribe_mqtt_input();
-    TickerForPinging.attach_ms(10000, pinging);
-    if(hasSensor)
-      TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
   }
 }
 /*-------Meathod called when connected to MQTT--------------*/
@@ -57,7 +65,6 @@ void onMqttUnsubscribe(uint16_t packetId) {
 /*-------Meathod called when disconnected from MQTT Topic---*/
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
   serialDisplay("MQTT","MQTT is disconnected.");
-  MQTTStatus = false;
   TickerForFeedbackLED.attach(0.6, feedbackLED);
 }
 /*-------Meathod called when disconnected from MQTT Topic---*/
@@ -227,6 +234,8 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   }
   else
   {
+    const char* relay = "";
+    bool action = false;
     String mqtt_data = read_mqtt_config();
     DynamicJsonDocument doc(1500);
     DeserializationError error_1 = deserializeJson(doc, mqtt_data);
@@ -244,16 +253,27 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       serialDisplay("MQTT Topics",(prefix+config_topic+suffix));
       if(comp(topic, (prefix+config_topic+suffix).c_str()))
       {
-        bool action = msg["action"];
+        relay = (const char*)kv["name"];
+        action = msg["action"];
         kv["status"] = action;
       }
     }
     mqtt_data = "";
     serializeJsonPretty(doc, mqtt_data);
-    write_mqtt_topics(mqtt_data);
-    TickerForTimeOut.once_ms(10,[](){
-      perform_action();
-    });
+    read_config();
+    if(conf.save_eeprom)
+    {
+      write_mqtt_topics(mqtt_data);
+      TickerForTimeOut.once_ms(10,[](){
+        perform_action();
+      });
+    }
+    else
+    {
+      TickerForTimeOut.once_ms(10,[relay, action](){
+        perform_action(relay, action);
+      });
+    }
   }
 }
 /*-------Meathod called on reciving message from MQTT-------*/

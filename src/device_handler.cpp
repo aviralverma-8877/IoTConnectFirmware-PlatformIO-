@@ -17,6 +17,8 @@ void fetchIP();
 void feedbackLED();
 void checkReset();
 void read_config();
+void pinging();
+void sendSensorData();
 
 void setup_tickers()
 {
@@ -24,8 +26,44 @@ void setup_tickers()
   TickerForfetchIP.attach(10, fetchIP);
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   TickerForcheckReset.attach_ms(10, checkReset);
+  TickerForMQTTStatus.attach(1,checkMQTTStatus);
+  TickerForPinging.attach(10, pinging);
+  if(hasSensor)
+    TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
 }
 
+String device_status()
+{
+  String return_msg = "";
+  DynamicJsonDocument return_doc(500);
+  return_doc["action"] = "device_status";
+  return_doc["uname"] = conf.http_username;
+  return_doc["wifi_ssid"] = Wifi_ssid;
+  return_doc["wifi_rssi"] = WiFi.RSSI();
+  return_doc["onb_led"] = conf.led_enabled;
+  return_doc["save_eeprom"] = conf.save_eeprom;
+  return_doc["firmware_version"] = FIRMWARE_V;
+  return_doc["mqtt_status"] = MQTTStatus;
+  bool WiFi_status = (WiFi.status() == WL_CONNECTED);
+  return_doc["wifi_status"] = WiFi_status;
+  return_doc["chip_id"] = chipid;
+  String device_config = read_device_config();
+  StaticJsonDocument<100> filter;
+  filter["init_setup_done"] = true;
+  DynamicJsonDocument doc(100);
+  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+  if(error)
+  {}
+  else
+  {
+    bool init_setup = doc["init_setup_done"];
+    return_doc["init_setup"] = init_setup;
+  }
+  doc.clear();
+  serializeJson(return_doc, return_msg);
+  return_doc.clear();
+  return return_msg;
+}
 void relay_action(String relay, bool value, String by)
 {
   DynamicJsonDocument doc(1500);

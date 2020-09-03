@@ -5,7 +5,7 @@ function init_socket()
 {
     Socket = new WebSocket('ws://'+window.location.hostname+":81/");
     Socket.onmessage = function(event){
-        console.log("Text : "+event.data);
+        //console.log("Text : "+event.data);
         try
         {
             json = JSON.parse(event.data);
@@ -18,21 +18,25 @@ function init_socket()
                 if(json.relay != null)
                     update_table_data(json);
             }
+            else if(json.action == "device_status")
+            {
+                show_status(json);
+            }
         }
         catch(err)
         {
-            console.log("Error : "+err);
+           // console.log("Error : "+err);
         }
     }
     Socket.onopen = function(event){
-        console.log("Connected to web sockets...")
+        //console.log("Connected to web sockets...")
         httpGet(0, 0, 'get_status');
     }
     Socket.onclose = function(event){
-        console.log("Connection to websockets closed....")
+       // console.log("Connection to websockets closed....")
     }
     Socket.onerror = function(event){
-        console.log("Error in websockets");
+      //  console.log("Error in websockets");
     }
 }
 
@@ -84,6 +88,11 @@ function set_ui()
     if(json.chip_id != undefined)
         chipid = json.chip_id;
     init_socket();
+    show_status(json);
+}
+
+function show_status(json)
+{
     if(!json.init_setup)
     {
         document.getElementById("cover").onclick = "";
@@ -103,14 +112,20 @@ function set_ui()
         if(wifi_status)
             cont = "Connected to <b>"+wifi_ssid+"</b>";
         if(mqtt_status)
-            cont += "<br />MQTT Status : <b>Connected</b>";
+            cont += "<br />MQTT Status : <b>Connected</b><br />";
         else
-            cont += "<br />MQTT Status : <b>Not Connected</b>";
+            cont += "<br />MQTT Status : <b>Not Connected</b><br />";
+        cont += "Signal Strength : <span id='signal_st'></span><div id='signal_bk'><div id='signal_fk'></div></div>"
         element = document.getElementById('WiFi_Status');
         element.innerHTML = cont;
-        document.getElementById("firmware_version").innerHTML = json["firmware_version"]
-    }    
+        dBm = json["wifi_rssi"];
+        quality = 2 * (dBm + 100);
+        document.getElementById("signal_fk").style.width = quality+"px";
+        document.getElementById("signal_st").innerHTML = quality+" %";
+        document.getElementById("firmware_version").innerHTML = json["firmware_version"];
+    }
 }
+
 function toggle_relay(element, relay)
 {
     if(element.checked) 
@@ -546,7 +561,6 @@ function save_config()
                 config.device_config.light.GPIO = "A0"
             }
         }
-        console.log(config);
         data = httpGet(0,0,"update_device_config", config);
         result = JSON.parse(data);
         if(result.done)

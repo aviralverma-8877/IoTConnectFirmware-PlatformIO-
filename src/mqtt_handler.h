@@ -4,6 +4,7 @@
 #include <ArduinoJson.h>                  //Encoading and Decoding JSON
 #include <ESP8266httpUpdate.h>            //ESP Update Library.
 
+void checkMQTTStatus();
 void onMqttConnect(bool sessionPresent);
 void onMqttSubscribe(uint16_t packetId, uint8_t qos);
 void onMqttUnsubscribe(uint16_t packetId);
