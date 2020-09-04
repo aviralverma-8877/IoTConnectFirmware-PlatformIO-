@@ -25,6 +25,8 @@
     bool hasSensor = false;
     bool hasDHTSensor = false;
     bool hasLightSensor = false;
+    bool def_led_value = HIGH;
+    bool def_btn_value = HIGH;
     /*----------------------------------------------------------*/
     /*----------------------------------------------------------*/
     String payload;                           //Global variables
@@ -88,9 +90,27 @@
             }
         }
         byte status_led = doc["device_config"]["status_led"]["led_pin"];
+        bool led_value = doc["device_config"]["status_led"]["def"];
+        if(led_value)
+        {
+            def_led_value = HIGH;
+        }
+        else
+        {
+            def_led_value = LOW;
+        }
         pinMode(status_led, OUTPUT);
         indicator_led = status_led;
-        byte reset_pin = doc["device_config"]["reset_btn"];
+        byte reset_pin = doc["device_config"]["reset_btn"]["btn_pin"];
+        bool btn_value = doc["device_config"]["reset_btn"]["def"];
+        if(btn_value)
+        {
+            def_btn_value = HIGH;
+        }
+        else
+        {
+            def_btn_value = LOW;
+        }
         pinMode(reset_pin, INPUT);
         reset_btn = reset_pin;
         bool hasDHT = doc["device_config"]["dht"]["INSTALLED"];

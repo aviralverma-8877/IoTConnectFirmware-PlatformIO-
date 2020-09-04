@@ -18,10 +18,14 @@
             "latchPin" : 12
         },
         "status_led" : {
-            "led_pin":13,
-            "status":true
+            "led_pin" : 13,
+            "status" : true,
+            "def" : false
         },
-        "reset_btn" : 4,
+        "reset_btn" : {
+            "btn_pin" : 4,
+            "def" : false
+        },
         "relay" : {
             "count" : 0,
             "GPIO" : []

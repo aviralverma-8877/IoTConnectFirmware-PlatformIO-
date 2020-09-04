@@ -33,6 +33,8 @@
     extern bool hasSensor; 
     extern bool hasDHTSensor;
     extern bool hasLightSensor;
+    extern bool def_led_value;
+    extern bool def_btn_value;
     extern configuration conf;
     extern AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
     extern uint8_t dht_pin;

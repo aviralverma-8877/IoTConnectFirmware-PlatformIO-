@@ -421,9 +421,13 @@ function save_config()
                 },
                 "status_led" : {
                     "led_pin":13,
-                    "status":true
+                    "status":true,
+                    "def" : true
                 },
-                "reset_btn" : 4,
+                "reset_btn" : {
+                    "btn_pin" : 4,
+                    "def" : true
+                },
                 "relay" : {
                     "count" : 0,
                     "GPIO" : []
@@ -494,7 +498,9 @@ function save_config()
             config.device_config.shift_out_reg.clockPin = 14;
             config.device_config.shift_out_reg.latchPin = 12;
             config.device_config.status_led.led_pin = 13;
-            config.device_config.reset_btn = 4;
+            config.device_config.status_led.def = true;
+            config.device_config.reset_btn.btn_pin = 4;
+            config.device_config.reset_btn.def = true;
             config.device_config.relay.count = 0;
             config.device_config.dht.INSTALLED = false;
             config.device_config.light.INSTALLED = false;
@@ -506,7 +512,9 @@ function save_config()
             config.device_config.shift_out_reg.clockPin = 14;
             config.device_config.shift_out_reg.latchPin = 12;
             config.device_config.status_led.led_pin = 13;
-            config.device_config.reset_btn = 4;
+            config.device_config.status_led.def = true;
+            config.device_config.reset_btn.btn_pin = 4;
+            config.device_config.reset_btn.def = true;
             config.device_config.relay.count = 0;
             config.device_config.dht.INSTALLED = true;
             config.device_config.dht.TYPE = "dht11"
@@ -518,7 +526,9 @@ function save_config()
         {
             config.device_config.shift_out_reg.avail = false;
             config.device_config.status_led.led_pin = 13;
-            config.device_config.reset_btn = 0;
+            config.device_config.status_led.def = false;
+            config.device_config.reset_btn.btn_pin = 0;
+            config.device_config.reset_btn.def = false;
             config.device_config.relay.count = 1;
             config.device_config.relay.GPIO = [12]
             config.device_config.dht.INSTALLED = false;
@@ -538,7 +548,25 @@ function save_config()
                 config.device_config.shift_out_reg.avail = false;
             }
             config.device_config.status_led.led_pin = document.getElementById("status_led").value;
-            config.device_config.reset_btn = document.getElementById("rst_pin").value;
+            if(document.getElementById("led_default_high").checked)
+            {
+                def = true;
+            }
+            else
+            {
+                def = false;
+            }
+            config.device_config.status_led.def = def;
+            config.device_config.reset_btn.btn_pin = document.getElementById("rst_pin").value;
+            if(document.getElementById("btn_default_high").checked)
+            {
+                def = true;
+            }
+            else
+            {
+                def = false;
+            }
+            config.device_config.relay.def = def;
             config.device_config.relay.count = 0;
             for(i=1; i<=5; i++)
             {

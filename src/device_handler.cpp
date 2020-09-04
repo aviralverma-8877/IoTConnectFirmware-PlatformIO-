@@ -197,7 +197,7 @@ void feedbackLED()
   }
   else
   {
-    digitalWrite(indicator_led, LOW);
+    digitalWrite(indicator_led, !def_led_value);
   }
   
 }
@@ -342,7 +342,7 @@ void sendSensorData()
 /*-----Meathod for checking reset button--------------------*/
 void checkReset()
 {
-  if(digitalRead(reset_btn) == HIGH)
+  if(digitalRead(reset_btn) == def_btn_value)
   {
     if(!reset_btn_status)
     {
@@ -360,7 +360,7 @@ void checkReset()
       }
     }
   }
-  if(digitalRead(reset_btn) == LOW)
+  if(digitalRead(reset_btn) == !def_btn_value)
   {
     if(reset_btn_status)
     {
