@@ -34,6 +34,14 @@
             <table id="relay_table" cellspacing="15" style="border:#ccc solid thin">
             </table>
             <hr/>
+            <div style="font-family: 'Fjalla One'">
+                Control 
+                <select id="relay_select" class="list_relay" onchange="httpGet(0,0,'device','{\'action\':\'change_relay_btn_action\',\'status\':\''+this.value+'\'}')">
+                    <option value="N/A">Nothing</option>
+                </select>
+                using reset button.
+                </div>
+            <hr />
             <div>
                 <table>
                     <tr>

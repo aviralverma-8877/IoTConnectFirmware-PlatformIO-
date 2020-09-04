@@ -16,6 +16,7 @@ void write_config(configuration config)
   jsonBuffer["led_enabled"] = config.led_enabled;
   jsonBuffer["save_eeprom"] = config.save_eeprom;
   jsonBuffer["pingTime"] = config.pingTime;
+  jsonBuffer["btn_relay_act"] = config.btn_relay_act;
   jsonBuffer["http_username"] = config.http_username;
   jsonBuffer["http_password"] = config.http_password;
   jsonBuffer["WiFi_SSID"] = config.WiFi_SSID;

@@ -19,6 +19,7 @@ void checkReset();
 void read_config();
 void pinging();
 void sendSensorData();
+void toggle_relay(String relay);
 
 void setup_tickers()
 {
@@ -35,12 +36,13 @@ void setup_tickers()
 String device_status()
 {
   String return_msg = "";
-  DynamicJsonDocument return_doc(500);
+  DynamicJsonDocument return_doc(700);
   return_doc["action"] = "device_status";
   return_doc["uname"] = conf.http_username;
   return_doc["wifi_ssid"] = Wifi_ssid;
   return_doc["wifi_rssi"] = WiFi.RSSI();
   return_doc["onb_led"] = conf.led_enabled;
+  return_doc["btn_relay_act"] = conf.btn_relay_act;
   return_doc["save_eeprom"] = conf.save_eeprom;
   return_doc["firmware_version"] = FIRMWARE_V;
   return_doc["mqtt_status"] = MQTTStatus;
@@ -220,7 +222,7 @@ void reset()
   serialDisplay("Format","Formatting SPIFFS");
   SPIFFS.format();
   serialDisplay("Format","Formatting Completed");
-  configuration newConf = {false,false,true,false,2000,"admin","admin"};
+  configuration newConf = {false,false,true,false,2000,"N/A","admin","admin","","",false};
   newConf.setupFlag = true;
   serialDisplay("Writing","Writing Config");
   write_config(newConf);
@@ -373,6 +375,12 @@ void checkReset()
       String r;
       serializeJson(doc,r);
       sendToMQTT(espaction,r);
+      read_config();
+      String relay = conf.btn_relay_act;
+      if(!comp(relay.c_str(), "N/A"))
+      {
+        toggle_relay(relay);
+      }
     }
   }
 
@@ -443,6 +451,8 @@ void read_config()
       conf.setupFlag = jsonBuffer["setupFlag"];
       conf.updateFlag = jsonBuffer["updateFlag"];
       conf.wifi_setup_done = jsonBuffer["wifi_setup_done"];
+      String relay = jsonBuffer["btn_relay_act"];
+      conf.btn_relay_act = relay;
       String http_username = jsonBuffer["http_username"];      
       conf.http_username = http_username;
       String http_password = jsonBuffer["http_password"];
@@ -574,6 +584,43 @@ void perform_action()
     }
   }
   send_status();
+}
+
+void toggle_relay(String relay)
+{
+  String mqtt_data = read_mqtt_config();
+  DynamicJsonDocument doc(1000);
+  StaticJsonDocument<200> filter;
+  filter["relay"][0]["name"] = true;
+  filter["relay"][0]["pin"] = true;
+  filter["relay"][0]["comp"] = true;
+  DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
+  if(error)
+    return;
+  JsonArray array = doc["relay"];
+  for( int t=0; t< array.size(); t++) 
+  {
+    DynamicJsonDocument ele = array[t];
+    String com = ele["comp"];
+    String name = ele["name"];
+    byte pin = ele["pin"];
+    if(comp(com.c_str(), "shift_reg"))
+    {
+      if(comp(name.c_str(), relay.c_str()))
+      {
+        bool status = sr.get(pin);
+        relay_action(relay,!status,"");
+      }          
+    }
+    if(comp(com.c_str(), "gpio"))
+    {
+      if(comp(name.c_str(), relay.c_str()))
+      {
+        bool status = digitalRead(pin);
+        relay_action(relay,!status,"");
+      }
+    }
+  }
 }
 
 void perform_action(String relay, bool value)

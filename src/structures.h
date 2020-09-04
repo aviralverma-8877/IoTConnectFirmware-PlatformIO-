@@ -8,6 +8,7 @@
     bool led_enabled;
     bool save_eeprom;
     int pingTime;
+    String btn_relay_act;
     String http_username;
     String http_password;
     String WiFi_SSID;

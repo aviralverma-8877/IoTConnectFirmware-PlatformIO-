@@ -23,6 +23,7 @@
     void manage_dns_request();
     void generate_mqtt_topics();
     String read_device_config();
+    void toggle_relay(String relay);
     void perform_action();
     void perform_action(String relay, bool value);
     void enable_ap();

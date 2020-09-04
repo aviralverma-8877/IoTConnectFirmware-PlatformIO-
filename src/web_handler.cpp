@@ -70,11 +70,25 @@ void handleWebControl(AsyncWebServerRequest *request)
       bool status = doc["status"];
       conf.led_enabled = status;
       write_config(conf);
+      if(conf.led_enabled)
+      {
+        digitalWrite(indicator_led, def_led_value);
+      }
+      else
+      {
+        digitalWrite(indicator_led, !def_led_value);
+      }
     }
     if(comp(action.c_str(),"save_status"))
     {
       bool status = doc["status"];
       conf.save_eeprom = status;
+      write_config(conf);
+    }
+    if(comp(action.c_str(),"change_relay_btn_action"))
+    {
+      String relay = doc["status"];
+      conf.btn_relay_act = relay;
       write_config(conf);
     }
   }

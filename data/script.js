@@ -91,6 +91,11 @@ function set_ui()
     show_status(json);
 }
 
+function selectElement(id, valueToSelect) {    
+    let element = document.getElementById(id);
+    element.value = valueToSelect;
+}
+
 function show_status(json)
 {
     if(!json.init_setup)
@@ -104,6 +109,8 @@ function show_status(json)
         document.getElementById("on_board_led").checked = onb_status;
         save_eeprom = json['save_eeprom'];
         document.getElementById("save_status").checked = save_eeprom;
+        btn_relay_act = json["btn_relay_act"];
+        selectElement("relay_select", btn_relay_act)
         var cont = "";
         wifi_ssid = json['wifi_ssid'];
         wifi_type = json['type'];
@@ -154,6 +161,9 @@ function print_table(relay_count, on_change_val, name)
     </th>\
     </tr>";
     table.innerHTML += content;
+    cont = document.getElementById("relay_select").innerHTML;
+    cont += "<option value='"+name+"'>"+name+"</option>";
+    document.getElementById("relay_select").innerHTML = cont;
 }
 function update_table_data(json)
 {
@@ -566,7 +576,7 @@ function save_config()
             {
                 def = false;
             }
-            config.device_config.relay.def = def;
+            config.device_config.reset_btn.def = def;
             config.device_config.relay.count = 0;
             for(i=1; i<=5; i++)
             {

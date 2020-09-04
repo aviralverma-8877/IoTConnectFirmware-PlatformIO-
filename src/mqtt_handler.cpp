@@ -26,7 +26,15 @@ void sendWebSocketStatus()
 void onMqttConnect(bool sessionPresent) {
   serialDisplay("MQTT","MQTT is Connected");
   TickerForFeedbackLED.detach();
-  digitalWrite(indicator_led, !def_led_value);     // set pin to the opposite state
+  read_config();
+  if(conf.led_enabled)
+  {
+    digitalWrite(indicator_led, def_led_value);
+  }
+  else
+  {
+    digitalWrite(indicator_led, !def_led_value);
+  }
   MQTTStatus = true;
   if (SPIFFS.exists("/mqtt_topics.json")) 
   {
