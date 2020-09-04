@@ -120,6 +120,10 @@ function show_status(json)
         element.innerHTML = cont;
         dBm = json["wifi_rssi"];
         quality = 2 * (dBm + 100);
+        if(quality > 100)
+        {
+            quality = 100;
+        }
         document.getElementById("signal_fk").style.width = quality+"px";
         document.getElementById("signal_st").innerHTML = quality+" %";
         document.getElementById("firmware_version").innerHTML = json["firmware_version"];

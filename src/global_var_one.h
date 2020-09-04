@@ -74,7 +74,7 @@
     extern Ticker TickerForUARTUpdater;
     extern Ticker TickerForTimeOut;
     extern Ticker TickerForTimeOutTwo;
-    extern Ticker TickerForMQTTStatus;
+    extern Ticker TickerForWebSocketStatus;
     /*--------------Tickers for Async Meathods------------------*/
      void configure_gpio();
 #endif

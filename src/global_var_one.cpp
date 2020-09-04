@@ -58,7 +58,7 @@
     Ticker TickerForUARTUpdater;
     Ticker TickerForTimeOut;
     Ticker TickerForTimeOutTwo;
-    Ticker TickerForMQTTStatus;
+    Ticker TickerForWebSocketStatus;
     /*--------------Tickers for Async Meathods------------------*/
     void configure_gpio()
     {

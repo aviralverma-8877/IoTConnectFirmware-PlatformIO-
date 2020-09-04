@@ -26,7 +26,7 @@ void setup_tickers()
   TickerForfetchIP.attach(10, fetchIP);
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   TickerForcheckReset.attach_ms(10, checkReset);
-  TickerForMQTTStatus.attach(1,checkMQTTStatus);
+  TickerForWebSocketStatus.attach(1,sendWebSocketStatus);
   TickerForPinging.attach(10, pinging);
   if(hasSensor)
     TickerForsendSensorData.attach_ms(delayMS, sendSensorData);

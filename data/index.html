@@ -19,7 +19,7 @@
             </div>
             <div align="right">
                 <button class='style_btn' onclick="if(confirm('Are you sure you want to reset this device?')){httpGet(0,0,'device','{\'action\':\'reset\'}')}">Reset</button>
-                <button class='style_btn' onclick="httpGet(0,0,'device','{\'action\':\'reboot\'}')">Reboot</button>
+            <button class='style_btn' onclick="httpGet(0,0,'device','{\'action\':\'reboot\'}');setTimeout(function(){location.reload()},1000);">Reboot</button>
                 <button class='style_btn' onclick="location.href = ('/update')">Update</button>
                 <br />
                 <button class='style_btn' onclick="start_init_setup()">Re-Configure Device</button>

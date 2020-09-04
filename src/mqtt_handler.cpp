@@ -19,23 +19,15 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 void connect_to_mqtt();
 
 /*-------Meathod called when connected to MQTT--------------*/
-void checkMQTTStatus()
+void sendWebSocketStatus()
 {
-  if(mqtt.connected())
-  {
-    MQTTStatus = true;
-  }
-  else
-  {
-    MQTTStatus = false;
-  }
   send_data_to_webSocket(device_status());
 }
 void onMqttConnect(bool sessionPresent) {
   serialDisplay("MQTT","MQTT is Connected");
   TickerForFeedbackLED.detach();
   digitalWrite(indicator_led, LOW);     // set pin to the opposite state
-  
+  MQTTStatus = true;
   if (SPIFFS.exists("/mqtt_topics.json")) 
   {
     StaticJsonDocument<1000> doc;
@@ -366,7 +358,13 @@ void connectToMqtt()
 {
   if(WiFi.status() != WL_CONNECTED) {
     if(debugging)
-      Serial.print(".");
+      serialDisplay("Reconnecting","WiFi");
+    read_config();
+    WiFi.disconnect();
+    TickerForTimeOut.attach_ms(100,[](){
+      WiFi.mode(WIFI_STA);
+      WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
+    });
   }
   else
   {
