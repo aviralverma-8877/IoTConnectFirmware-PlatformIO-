@@ -2,7 +2,6 @@
 #include <AsyncMqttClient.h>              //Async MQTT Library
 #include <Ticker.h>                       //Ticker for running multithread
 #include <ArduinoJson.h>                  //Encoading and Decoding JSON
-#include <ESP8266httpUpdate.h>            //ESP Update Library.
 #include "global_var_one.h"
 #include "global_var_two.h"
 #include "device_handler.h"
@@ -200,18 +199,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         sendToMQTT(outtopic, r);
       }
   /*-----Action command for getting getting firmware version--*/
-  /*-------Action command for updating firmware---------------*/
-      else if(comp(action,"UPDATE"))
-      {
-        String type = root["type"];
-        const char* url = root["url"];
-        updateAddress = url;
-        if(comp(type.c_str(),"Firmware"))
-          callback = &updateESPFirmware;
-        else if(comp(type.c_str(),"Spiffs"))
-          callback = &updateESPSpiffs;
-      }
-  /*-------Action command for updating firmware---------------*/
   /*-------Get MQTT Topic list--------------------------------*/
       else if(comp(action,"GET_MQTT_TOPICS"))
       {

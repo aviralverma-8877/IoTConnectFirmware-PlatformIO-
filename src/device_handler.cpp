@@ -118,77 +118,6 @@ void relay_action(String relay, bool value, String by)
     sendToMQTT(norttopic, r);
   });
 }
-
-/*-------Meathod to update ESP------------------------------*/
-void updateESPFirmware()
-{
-  callback = &blank;
-  StaticJsonDocument<200> doc;
-  doc["action"] = "UpdateStatus";
-  doc["stat"] = "Updating Device...";
-  String r;
-  serializeJson(doc, r);
-  sendToMQTT(outtopic, r);
-  delay(100);
-  t_httpUpdate_return ret = ESPhttpUpdate.update(updateAddress.c_str());
-  serialDisplay("Update Address",updateAddress);
-  String stat = "";
-  switch(ret) 
-  {
-    case HTTP_UPDATE_FAILED:
-        stat = "Failed to update.";
-        break;
-    case HTTP_UPDATE_NO_UPDATES:
-        stat = "No Update Available...";
-        break;
-    case HTTP_UPDATE_OK:
-        stat = "Update Successfull...";
-        break;
-  }
-  StaticJsonDocument<200> doc_1;
-  doc_1["action"] = "UpdateStatus";
-  doc_1["stat"] = stat;
-  r = "";
-  serializeJson(doc_1, r);
-  sendToMQTT(outtopic, r);
-  delay(100);
-  serialDisplay("Update",stat);
-}
-void updateESPSpiffs()
-{
-  callback = &blank;
-  StaticJsonDocument<200> doc;
-  doc["action"] = "UpdateStatus";
-  doc["stat"] = "Updating Device...";
-  String r;
-  serializeJson(doc, r);
-  sendToMQTT(outtopic, r);
-  delay(100);
-  t_httpUpdate_return ret = ESPhttpUpdate.updateSpiffs(updateAddress.c_str());
-  serialDisplay("Update Address",updateAddress);
-  String stat = "";
-  switch(ret) 
-  {
-    case HTTP_UPDATE_FAILED:
-        stat = "Failed to update.";
-        break;
-    case HTTP_UPDATE_NO_UPDATES:
-        stat = "No Update Available...";
-        break;
-    case HTTP_UPDATE_OK:
-        stat = "Update Successfull...";
-        break;
-  }
-  StaticJsonDocument<200> doc_1;
-  doc_1["action"] = "UpdateStatus";
-  doc_1["stat"] = stat;
-  r = "";
-  serializeJson(doc_1, r);
-  sendToMQTT(outtopic, r);
-  delay(100);
-  serialDisplay("Update",stat);
-}
-/*-------Meathod to update ESP------------------------------*/
 /*-------feedbackLED----------------------------------------*/
 void feedbackLED()
 {
@@ -290,13 +219,13 @@ void setup_sensor()
   bool has_dht = doc["device_config"]["dht"]["INSTALLED"];
   if(has_dht)
   {
-    if(comp(DHTType.c_str(), "DHT11"))
+    if(comp(DHTType.c_str(), "dht11"))
     {
       sensor_dht11.setup(dht_pin);
       sensor_dht11.onData(handleData);
       sensor_dht11.onError(handleError);
     }
-    else if(comp(DHTType.c_str(), "DHT22"))
+    else if(comp(DHTType.c_str(), "dht22"))
     {
       sensor_dht22.setup(dht_pin);
       sensor_dht22.onData(handleData);
@@ -321,11 +250,11 @@ void sendSensorData()
   doc["d"] = chipid;  
   if(has_dht)
   {
-    if(comp(DHTType.c_str(), "DHT11"))
+    if(comp(DHTType.c_str(), "dht11"))
     {
       sensor_dht11.read();
     }
-    else if(comp(DHTType.c_str(), "DHT22"))
+    else if(comp(DHTType.c_str(), "dht22"))
     {
       sensor_dht22.read();
     }  

@@ -2,7 +2,6 @@
 #include <AsyncMqttClient.h>              //Async MQTT Library
 #include <Ticker.h>                       //Ticker for running multithread
 #include <ArduinoJson.h>                  //Encoading and Decoding JSON
-#include <ESP8266httpUpdate.h>            //ESP Update Library.
 
 void sendWebSocketStatus();
 void onMqttConnect(bool sessionPresent);

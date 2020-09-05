@@ -7,7 +7,6 @@
     String device_status();
     String read_mqtt_config();  
     void relay_action(String relay, bool value, String by);
-    void updateESPFirmware();
     void updateESPSpiffs();
     void switch_wifi();
     void feedbackLED();
