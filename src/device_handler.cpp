@@ -197,6 +197,7 @@ void ICACHE_RAM_ATTR handleData(float h, float t) {
   DynamicJsonDocument doc(500);
   volatile float humidity = h;
   volatile float temperature = t;
+  doc["d"] = chipid;
   doc["t"] = temperature;
   doc["h"] = humidity;
   String s;
