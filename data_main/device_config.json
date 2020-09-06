@@ -1,0 +1,43 @@
+{
+    "init_setup_done":false,
+    "mqtt": {
+        "service": "",
+        "host": "",
+        "port": 1883,
+        "uname": "",
+        "pass": "",
+        "prefix": "",
+        "suffix" : "",
+        "auth": false
+    },
+    "device_config":{
+        "shift_out_reg" : {
+            "avail" : true,
+            "serialDataPin" : 16,
+            "clockPin" : 14,
+            "latchPin" : 12
+        },
+        "status_led" : {
+            "led_pin" : 13,
+            "status" : true,
+            "def" : false
+        },
+        "reset_btn" : {
+            "btn_pin" : 4,
+            "def" : false
+        },
+        "relay" : {
+            "count" : 0,
+            "GPIO" : []
+        },
+        "dht":{
+            "TYPE":"DHT11",
+            "GPIO":2,
+            "INSTALLED":false
+        },
+        "light":{
+            "GPIO":"A0",
+            "INSTALLED":false
+        }
+    }
+}

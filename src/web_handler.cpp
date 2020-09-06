@@ -382,7 +382,6 @@ void setup_web_server()
 
         configFile.readBytes(buf.get(), size);
         configFile.close();
-        StaticJsonDocument<500> jsonBuffer;
         Serial.print(buf.get());
       }
     }
@@ -476,7 +475,6 @@ void setup_web_server()
   if(WiFi.status()!= WL_CONNECTED)
     while(WiFi.status()!= WL_CONNECTED)
     {
-      MDNS.update();
       webSocket.loop();
       dnsServer.processNextRequest();
     }

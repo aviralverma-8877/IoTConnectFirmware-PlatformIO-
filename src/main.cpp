@@ -12,7 +12,8 @@
 
 void setup() 
 {
-  Serial.begin(115200);
+  if(debugging)
+    Serial.begin(115200);
   SPIFFS.begin();
   if (!SPIFFS.exists("/config.json")) 
   {

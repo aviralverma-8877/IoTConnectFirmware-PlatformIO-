@@ -25,7 +25,7 @@ void setup_tickers()
 {
   TickerForconnectToMqtt.attach(1, connectToMqtt);
   TickerForfetchIP.attach(10, fetchIP);
-  TickerForFeedbackLED.attach(0.6, feedbackLED);
+  //TickerForFeedbackLED.attach(0.6, feedbackLED);
   TickerForcheckReset.attach_ms(10, checkReset);
   TickerForWebSocketStatus.attach(1,sendWebSocketStatus);
   TickerForPinging.attach(10, pinging);
@@ -197,11 +197,13 @@ void ICACHE_RAM_ATTR handleData(float h, float t) {
   DynamicJsonDocument doc(500);
   volatile float humidity = h;
   volatile float temperature = t;
+  doc["action"] = "sensor";
   doc["d"] = chipid;
   doc["t"] = temperature;
   doc["h"] = humidity;
   String s;
   serializeJson(doc, s);
+  send_data_to_webSocket(s);
   sendToMQTT(espsensor, s);
 }
 
@@ -248,6 +250,7 @@ void sendSensorData()
   bool has_dht = doc["device_config"]["dht"]["INSTALLED"];
   bool has_light = doc["device_config"]["light"]["INSTALLED"];
   doc.clear();
+  doc["action"] = "sensor";
   doc["d"] = chipid;  
   if(has_dht)
   {
@@ -263,11 +266,12 @@ void sendSensorData()
   int light;
   if(has_light)
   {
-    light = map(analogRead(LDR_PIN), 0, 255, 0, 100);
+    light = map(analogRead(LDR_PIN), 0, 1024, 0, 100);
     doc["l"] = light;
   }
   String s;
   serializeJson(doc, s);
+  send_data_to_webSocket(s);
   sendToMQTT(espsensor, s);
 }
 /*-----Meathod for sending sensor data----------------------*/
@@ -594,9 +598,11 @@ void enable_ap()
 {
   const byte DNS_PORT = 53;
   IPAddress apIP(192, 168, 4, 1);
+  WiFi.disconnect();
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP("IoT Connect");
+  WiFi.begin();
   dnsServer.start(DNS_PORT, "*", apIP);
 }
 

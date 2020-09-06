@@ -1,0 +1,13 @@
+{
+    "setupFlag": false,
+    "updateFlag": false,
+    "led_enabled": true,
+    "save_eeprom": false,
+    "pingTime": 2000,
+    "btn_relay_act": "N/A",
+    "http_username": "admin",
+    "http_password": "admin",
+    "WiFi_SSID": "",
+    "WiFi_PASS": "",
+    "wifi_setup_done":false
+  }

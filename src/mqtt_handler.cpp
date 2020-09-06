@@ -352,6 +352,7 @@ void onMqttPublish(uint16_t packetId) {
 void connectToMqtt() 
 {
   if(WiFi.status() != WL_CONNECTED) {
+    TickerForFeedbackLED.attach(0.6, feedbackLED);
     if(debugging)
       serialDisplay("Reconnecting","WiFi");
     read_config();
@@ -363,6 +364,16 @@ void connectToMqtt()
   }
   else
   {
+    TickerForFeedbackLED.detach();
+    read_config();
+    if(conf.led_enabled)
+    {
+      digitalWrite(indicator_led, def_led_value);
+    }
+    else
+    {
+      digitalWrite(indicator_led, !def_led_value);
+    }
     mqtt.connect();
   }
 }
