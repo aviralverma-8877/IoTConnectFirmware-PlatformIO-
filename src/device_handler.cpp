@@ -291,6 +291,15 @@ void checkReset()
       {
         if((millis()-reset_btn_press_time)>(10*1000))
         {
+          read_config();
+          if(conf.led_enabled)
+          {
+            digitalWrite(indicator_led, !def_led_value);
+          }
+          else
+          {
+            digitalWrite(indicator_led, def_led_value);
+          }
           reset();
         }
       }
