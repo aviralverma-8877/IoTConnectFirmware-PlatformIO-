@@ -214,26 +214,24 @@ void web_set_wifi(AsyncWebServerRequest *request)
     conf.WiFi_PASS = pass;
     conf.wifi_setup_done = true;
     write_config(conf);
-
-    WiFi.disconnect();
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
-
     String return_msg = "";
     StaticJsonDocument<200> return_doc;
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);
     request->send(200, "application/json", return_msg);
-    TickerForTimeOut.once(15,[](){
-      if(WiFi.status() == WL_CONNECTED)
-      {
-        ESP.reset();
-      }
-      else
-      {
-        reset();
-      }
+
+    WiFi.disconnect();
+    TickerForTimeOut.once(1,[request](){
+      WiFi.mode(WIFI_STA);
+      WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
+      TickerForTimeOut.once(15,[](){
+        if(WiFi.status() != WL_CONNECTED)
+        {
+          reset();
+        }
+      });
     });
+
   }
   else
   {
@@ -478,10 +476,10 @@ void setup_web_server()
   if(WiFi.status()!= WL_CONNECTED)
     while(WiFi.status()!= WL_CONNECTED)
     {
+      MDNS.update();
       webSocket.loop();
       dnsServer.processNextRequest();
     }
-  WiFi.mode(WIFI_STA);
   conf.setupFlag = false;
   write_config(conf);
 }
