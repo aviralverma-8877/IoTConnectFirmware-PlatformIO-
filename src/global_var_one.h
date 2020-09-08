@@ -11,9 +11,9 @@
     #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>
     #include <DHT.h>
+    #include "fauxmoESP.h"
     #include "structures.h"
     #include "device_handler.h"
-
     #ifndef MQTT_HOST
         #define MQTT_HOST "iot-connect.in"        //MQTT Server address
     #endif
@@ -46,6 +46,7 @@
     extern uint8_t LDR_PIN;
     extern byte indicator_led;
     extern byte reset_btn;
+    extern fauxmoESP fauxmo;
     extern ShiftRegister74HC595<1> sr;  //Setting up shift register.
     /*----------------------------------------------------------*/
     /*----------------------------------------------------------*/

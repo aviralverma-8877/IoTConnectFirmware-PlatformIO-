@@ -9,6 +9,7 @@
 #include "mqtt_handler.h"
 #include "device_handler.h"
 #include "web_sockets_handler.h"
+#include "fauxmo_handler.h"
 
 void setup() 
 {
@@ -30,7 +31,7 @@ void setup()
   callback = &blank;
   
   setup_web_server();
-  
+  setup_fauxmo();
   setup_sensor();
   setup_mqtt();
   setup_tickers();
@@ -40,5 +41,6 @@ void loop()
 {
   MDNS.update();
   webSocket.loop();
+  fauxmo.handle();
   callback();
 }

@@ -14,6 +14,7 @@ bool hasDHTSensor = false;
 bool hasLightSensor = false;
 bool def_led_value = HIGH;
 bool def_btn_value = HIGH;
+fauxmoESP fauxmo;
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 String payload;                           //Global variables

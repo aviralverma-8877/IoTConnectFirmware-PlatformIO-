@@ -388,6 +388,22 @@ void setup_web_server()
       }
     }
   }
+
+  server.onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+      if (fauxmo.process(request->client(), request->method() == HTTP_GET, request->url(), String((char *)data))) return;
+      // Handle any other body request here...
+  });
+
+  server.onNotFound([](AsyncWebServerRequest *request) {
+      String body = (request->hasParam("body", true)) ? request->getParam("body", true)->value() : String();
+      if (fauxmo.process(request->client(), request->method() == HTTP_GET, request->url(), body)) return;
+
+      if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+      {
+        return request->requestAuthentication();
+      }
+      request->redirect("/");
+  });
 /*-------Web Update Server----------------------------------*/
   firmware_web_updater();
 /*-------Web Update Server----------------------------------*/
@@ -434,13 +450,6 @@ void setup_web_server()
     index.close();
   });
   server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
-  server.onNotFound([](AsyncWebServerRequest *request){
-    if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
-    {
-      return request->requestAuthentication();
-    }
-    request->redirect("/");
-  });
   server.begin();
 
   read_config();
