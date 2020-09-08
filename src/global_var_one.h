@@ -7,11 +7,12 @@
     #include <ArduinoJson.h>                  //Encoading and Decoding JSON
     #include <ESP8266httpUpdate.h>            //ESP Update Library.
     #include <ShiftRegister74HC595.h>         //For controlling Relays from 74HC595 shift register
-    #include <DNSServer.h>                    //For redirecting the user on connecting to device WiFi
+    #include <DNSServer.h>            //For redirecting the user on connecting to device WiFi
     #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>
     #include <DHT.h>
     #include "structures.h"
+    #include "device_handler.h"
 
     #ifndef MQTT_HOST
         #define MQTT_HOST "iot-connect.in"        //MQTT Server address
@@ -61,10 +62,12 @@
     extern uint32_t delayMS;                         //Global variables
     extern String updateAddress;                     //Update address
     extern DNSServer dnsServer;                      //Global variables
-    extern AsyncWebServer webServer;             //Global variables
+    extern AsyncWebServer server;             //Global variables
     extern bool shouldReboot;
     extern String wifi_ssid;
     extern String wifi_pass;
+    extern const byte DNS_PORT;
+    extern IPAddress apIP;
     /*----------------------------------------------------------*/
     /*--------------Tickers for Async Meathods------------------*/
     extern Ticker TickerForPinging;

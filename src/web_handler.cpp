@@ -1,16 +1,4 @@
-#include <Arduino.h>
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-#include <ESP8266mDNS.h>        // Include the mDNS library
-#include <Ticker.h>                       //Ticker for running multithread
-#include <ArduinoJson.h>                  //Encoading and Decoding JSON
-#include <ESP8266HTTPClient.h>            //HTTP Client library.
-#include "global_var_one.h"
-#include "global_var_two.h"
-#include "device_handler.h"
-#include "common_meathods.h"
-#include "mqtt_handler.h"
-#include "web_sockets_handler.h"
+#include "web_handler.h"
 
 extern "C" uint32_t _FS_start;
 extern "C" uint32_t _FS_end;
@@ -244,7 +232,7 @@ void web_set_wifi(AsyncWebServerRequest *request)
 // Simple Firmware Update Form
 void firmware_web_updater()
 {
-  webServer.on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
     if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
     {
       return request->requestAuthentication();
@@ -278,7 +266,7 @@ void firmware_web_updater()
     <button onclick=\"if(confirm('Are you sure you want to reset this device?')){httpGet('device','{\\'action\\':\\'reset\\'}')}\">Reset</button>");
   });
 
-  webServer.on("/update_flash", HTTP_POST, [](AsyncWebServerRequest *request){
+  server.on("/update_flash", HTTP_POST, [](AsyncWebServerRequest *request){
     shouldReboot = !Update.hasError();
     if(shouldReboot)
     {
@@ -320,7 +308,7 @@ void firmware_web_updater()
     }
   });
 
-  webServer.on("/update_spiffs", HTTP_POST, [](AsyncWebServerRequest *request){
+  server.on("/update_spiffs", HTTP_POST, [](AsyncWebServerRequest *request){
     shouldReboot = !Update.hasError();
     if(shouldReboot)
     {
@@ -364,6 +352,22 @@ void firmware_web_updater()
     }
   });
 }
+
+void enable_ap()
+{
+  WiFi.disconnect();
+  WiFi.mode(WIFI_AP);
+  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+  WiFi.softAP("IoT Connect");
+  dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+  dnsServer.start(DNS_PORT, "*", apIP);
+}
+
+void disable_ap()
+{
+  WiFi.mode(WIFI_STA);
+}
+
 /*---------Firmware Update---------------------------------*/
 void setup_web_server()
 {
@@ -384,7 +388,61 @@ void setup_web_server()
       }
     }
   }
-    
+/*-------Web Update Server----------------------------------*/
+  firmware_web_updater();
+/*-------Web Update Server----------------------------------*/
+/*-------Web Server Setup-----------------------------------*/
+  server.on("/control", HTTP_GET, [](AsyncWebServerRequest *request){
+    handleWebControl(request);
+  });
+
+  server.on("/get_status", HTTP_GET, [](AsyncWebServerRequest *request){
+    handleWebStatus(request);
+  });
+  server.on("/scan_wifi", HTTP_GET, [](AsyncWebServerRequest *request){
+    web_scan_wifi(request);
+  });
+  server.on("/set_wifi", HTTP_GET, [](AsyncWebServerRequest *request){
+    web_set_wifi(request);
+  });
+  server.on("/update_login", HTTP_GET, [](AsyncWebServerRequest *request){
+    web_update_login(request);
+  });
+  server.on("/update_device_config", HTTP_GET, [](AsyncWebServerRequest *request){
+    handleDeviceConfig(request);
+  });
+  if(debugging)
+  {
+    server.serveStatic("/device_config.json", SPIFFS, "/device_config.json");
+    server.serveStatic("/config.json", SPIFFS, "/config.json");
+    server.serveStatic("/mqtt_topics.json", SPIFFS, "/mqtt_topics.json");
+  }
+  server.serveStatic("/script.js", SPIFFS, "/script.js");
+  server.serveStatic("/style.css", SPIFFS, "/style.css");
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    File index = SPIFFS.open("/index.html", "r");
+    if (index) {
+      if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+      {
+        return request->requestAuthentication();
+      }
+      request->send(SPIFFS, "/index.html", "text/html");
+    }
+    else{
+      request->redirect("/update");
+    }
+    index.close();
+  });
+  server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
+  server.onNotFound([](AsyncWebServerRequest *request){
+    if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+    {
+      return request->requestAuthentication();
+    }
+    request->redirect("/");
+  });
+  server.begin();
+
   read_config();
   bool setup_flag = bool(conf.setupFlag);
   serialDisplay("Setup Flag", String(setup_flag));
@@ -406,79 +464,18 @@ void setup_web_server()
     serialDisplay("Setup","Setup Flag is true.");
     enable_ap();
   }
-  
-/*-------HOST Name Setup------------------------------------*/
+
   WiFi.hostname("iot-connect-"+chipid);
   MDNS.begin("iot-connect-"+chipid);
+  MDNS.addService("http", "tcp", 80);
   webSocket.begin();
   webSocket.enableHeartbeat(15000, 3000, 2);
-
-/*-------HOST Name Setup------------------------------------*/
-/*-------Web Update Server----------------------------------*/
-  firmware_web_updater();
-/*-------Web Update Server----------------------------------*/
 /*-------Web Server Setup-----------------------------------*/
-  webServer.on("/control", HTTP_GET, [](AsyncWebServerRequest *request){
-    handleWebControl(request);
-  });
-
-  webServer.on("/get_status", HTTP_GET, [](AsyncWebServerRequest *request){
-    handleWebStatus(request);
-  });
-  webServer.on("/scan_wifi", HTTP_GET, [](AsyncWebServerRequest *request){
-    web_scan_wifi(request);
-  });
-  webServer.on("/set_wifi", HTTP_GET, [](AsyncWebServerRequest *request){
-    web_set_wifi(request);
-  });
-  webServer.on("/update_login", HTTP_GET, [](AsyncWebServerRequest *request){
-    web_update_login(request);
-  });
-  webServer.on("/update_device_config", HTTP_GET, [](AsyncWebServerRequest *request){
-    handleDeviceConfig(request);
-  });
-  if(debugging)
-  {
-    webServer.serveStatic("/device_config.json", SPIFFS, "/device_config.json");
-    webServer.serveStatic("/config.json", SPIFFS, "/config.json");
-    webServer.serveStatic("/mqtt_topics.json", SPIFFS, "/mqtt_topics.json");
-  }
-  webServer.serveStatic("/script.js", SPIFFS, "/script.js");
-  webServer.serveStatic("/style.css", SPIFFS, "/style.css");
-  webServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    File index = SPIFFS.open("/index.html", "r");
-    if (index) {
-      if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
-      {
-        return request->requestAuthentication();
-      }
-      request->send(SPIFFS, "/index.html", "text/html");
-    }
-    else{
-      request->redirect("/update");
-    }
-    index.close();
-  });
-  webServer.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
-  webServer.onNotFound([](AsyncWebServerRequest *request){
-    if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
-    {
-      return request->requestAuthentication();
-    }
-    request->redirect("/");
-  });
-
-  webServer.begin();
-/*-------Web Server Setup-----------------------------------*/
-/*-------HOST Name Setup------------------------------------*/
-  MDNS.addService("http", "tcp", 80);
-/*-------HOST Name Setup------------------------------------*/
   if(WiFi.status()!= WL_CONNECTED)
     while(WiFi.status()!= WL_CONNECTED)
     {
-      MDNS.update();
-      webSocket.loop();
       dnsServer.processNextRequest();
+      webSocket.loop();
     }
   conf.setupFlag = false;
   write_config(conf);

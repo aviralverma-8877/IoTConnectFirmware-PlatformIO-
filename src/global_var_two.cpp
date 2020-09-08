@@ -1,5 +1,4 @@
-#include <Arduino.h>
-#include <WebSocketsServer.h>
+#include "global_var_two.h"
 
 WebSocketsServer webSocket = WebSocketsServer(81);
 bool reset_btn_status = false;

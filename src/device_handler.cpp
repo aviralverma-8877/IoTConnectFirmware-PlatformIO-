@@ -1,25 +1,4 @@
-#include <Arduino.h>
-#include <ESP8266mDNS.h> 
-#include <DHT.h>
-#include "mqtt_handler.h"
-#include "global_var_one.h"
-#include "global_var_two.h"
-#include "common_meathods.h"
-#include "web_sockets_handler.h"
-#include "mqtt_handler.h"
-
-String read_device_config();
-String read_mqtt_config();
-void perform_action();
-void perform_action(String relay, bool value);
-bool comp(const char *val1,const char *val2);
-void fetchIP();
-void feedbackLED();
-void checkReset();
-void read_config();
-void pinging();
-void sendSensorData();
-void toggle_relay(String relay);
+#include "device_handler.h"
 
 void setup_tickers()
 {
@@ -133,10 +112,7 @@ void feedbackLED()
   
 }
 /*-------feedbackLED----------------------------------------*/
-void manage_dns_request()
-{
-  dnsServer.processNextRequest();
-}
+
 
 
 /*----Meathod for reconfiguring WiFi settings---------------*/
@@ -603,19 +579,3 @@ void perform_action(String relay, bool value)
   send_status();
 }
 
-void enable_ap()
-{
-  const byte DNS_PORT = 53;
-  IPAddress apIP(192, 168, 4, 1);
-  WiFi.disconnect();
-  WiFi.mode(WIFI_AP);
-  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  WiFi.softAP("IoT Connect");
-  WiFi.begin();
-  dnsServer.start(DNS_PORT, "*", apIP);
-}
-
-void disable_ap()
-{
-  WiFi.mode(WIFI_STA);
-}

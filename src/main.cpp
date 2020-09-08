@@ -24,12 +24,13 @@ void setup()
   }
   read_config();
   delayMS = conf.pingTime;
-  setup_web_server();
-  callback = &blank;
-  while(WiFi.status() != WL_CONNECTED){}
   configure_gpio();
   if(conf.save_eeprom)
     perform_action();
+  callback = &blank;
+  
+  setup_web_server();
+  
   setup_sensor();
   setup_mqtt();
   setup_tickers();

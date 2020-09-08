@@ -2,6 +2,14 @@
     #define device_handler
     #include<Arduino.h>
     #include<ArduinoJson.h>
+    #include <ESP8266mDNS.h> 
+    #include <DHT.h>
+    #include "mqtt_handler.h"
+    #include "global_var_one.h"
+    #include "global_var_two.h"
+    #include "common_meathods.h"
+    #include "web_sockets_handler.h"
+    #include "mqtt_handler.h"
 
     void setup_tickers();
     String device_status();
@@ -19,12 +27,9 @@
     void fetchIP();
     void read_config();
     void send_status_uart();  
-    void manage_dns_request();
     void generate_mqtt_topics();
     String read_device_config();
     void toggle_relay(String relay);
     void perform_action();
     void perform_action(String relay, bool value);
-    void enable_ap();
-    void disable_ap();
 #endif
