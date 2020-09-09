@@ -232,6 +232,9 @@ function update_fuxmo_list(){
         "relay_2" : relay_2,
         "relay_3" : relay_3
     })
+    setTimeout(function(){
+        location.reload();
+    },1000)
 }
 
 function update_table_data(json)
