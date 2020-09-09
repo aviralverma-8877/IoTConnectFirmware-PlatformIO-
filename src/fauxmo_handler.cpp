@@ -5,6 +5,7 @@ void setup_fauxmo()
     fauxmo.createServer(false);
     fauxmo.setPort(80);
     fauxmo.enable(true);
+    fauxmo_remove_all_device();
     fauxmo_add_device();
     fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
         relay_action(device_name, state, "");
@@ -14,13 +15,19 @@ void setup_fauxmo()
 void fauxmo_add_device(const char* device_name)
 {
     if(!comp(device_name,"N/A"))
+    {
+        serialDisplay("Fauxmo Device Added",device_name);
         fauxmo.addDevice(device_name);
+    }
 }
 
 void fauxmo_remove_device(const char* device_name)
 {
     if(!comp(device_name,"N/A"))
+    {
+        serialDisplay("Fauxmo Device Removed",device_name);
         fauxmo.removeDevice(device_name);
+    }
 }
 
 void fauxmo_remove_all_device()
@@ -35,7 +42,6 @@ void fauxmo_remove_all_device()
     for( JsonObject kv : doc["relay"].as<JsonArray>())
     {
         const char* device_name = kv["name"];
-        serialDisplay("Fauxmo","Device Added "+String(device_name));
         fauxmo_remove_device(device_name);
     }
 }
