@@ -88,6 +88,35 @@ void handleWebStatus(AsyncWebServerRequest *request)
   request->send(200, "application/json", return_msg);
   send_status();
 }
+void handlefauxmo(AsyncWebServerRequest *request)
+{
+  int params = request->params();
+  if(request->hasParam("options"))
+  {
+    String fauxmo_relay = request->arg("options");
+    StaticJsonDocument<500> doc;
+    DeserializationError error = deserializeJson(doc, fauxmo_relay);
+    if(error)
+    {
+      return;
+    }
+
+    StaticJsonDocument<200> return_doc;
+    String return_msg;
+    return_doc["done"] = true;
+    serializeJson(return_doc, return_msg);
+    request->send(200, "application/json", return_msg);
+
+    read_config();
+    conf.fauxmo_relay_1 = doc["relay_1"].as<String>();
+    conf.fauxmo_relay_2 = doc["relay_2"].as<String>();
+    conf.fauxmo_relay_3 = doc["relay_3"].as<String>();
+    write_config(conf);
+    TickerForTimeOut.attach(1, [](){
+      ESP.reset();
+    });
+  }
+}
 void handleDeviceConfig(AsyncWebServerRequest *request)
 {
   String return_msg;
@@ -411,7 +440,9 @@ void setup_web_server()
   server.on("/control", HTTP_GET, [](AsyncWebServerRequest *request){
     handleWebControl(request);
   });
-
+  server.on("/update_fauxmo", HTTP_GET, [](AsyncWebServerRequest *request){
+    handlefauxmo(request);
+  });
   server.on("/get_status", HTTP_GET, [](AsyncWebServerRequest *request){
     handleWebStatus(request);
   });
@@ -427,6 +458,7 @@ void setup_web_server()
   server.on("/update_device_config", HTTP_GET, [](AsyncWebServerRequest *request){
     handleDeviceConfig(request);
   });
+
   if(debugging)
   {
     server.serveStatic("/device_config.json", SPIFFS, "/device_config.json");

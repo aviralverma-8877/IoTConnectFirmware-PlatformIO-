@@ -28,7 +28,7 @@ String updateAddress;                     //Update address
 DNSServer dnsServer;                      //Global variables
 AsyncWebServer server(80);             //Global variables
 /*----------------------------------------------------------*/
-configuration conf = {false,false,true,false,2000,"N/A","admin","admin","","",false};
+configuration conf = {false,false,true,false,2000,"N/A","admin","admin","","",false,"N/A","N/A","N/A"};
 String IpAddress = "";                    //Global variables
 String LocalIP = "";                      //Global variables
 byte loopCount = 0;                       //Global variables

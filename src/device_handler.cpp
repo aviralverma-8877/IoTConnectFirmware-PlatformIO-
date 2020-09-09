@@ -16,6 +16,7 @@ String device_status()
 {
   String return_msg = "";
   DynamicJsonDocument return_doc(700);
+  read_config();
   return_doc["action"] = "device_status";
   return_doc["uname"] = conf.http_username;
   return_doc["wifi_ssid"] = Wifi_ssid;
@@ -24,6 +25,10 @@ String device_status()
   return_doc["btn_relay_act"] = conf.btn_relay_act;
   return_doc["save_eeprom"] = conf.save_eeprom;
   return_doc["firmware_version"] = FIRMWARE_V;
+  return_doc["mqtt_status"] = MQTTStatus;
+  return_doc["fauxmo_relay_1"] = conf.fauxmo_relay_1;
+  return_doc["fauxmo_relay_2"] = conf.fauxmo_relay_2;
+  return_doc["fauxmo_relay_3"] = conf.fauxmo_relay_3;
   return_doc["mqtt_status"] = MQTTStatus;
   bool WiFi_status = (WiFi.status() == WL_CONNECTED);
   return_doc["wifi_status"] = WiFi_status;
@@ -127,7 +132,7 @@ void reset()
   serialDisplay("Format","Formatting SPIFFS");
   SPIFFS.format();
   serialDisplay("Format","Formatting Completed");
-  configuration newConf = {false,false,true,false,2000,"N/A","admin","admin","","",false};
+  configuration newConf = {false,false,true,false,2000,"N/A","admin","admin","","",false,"N/A","N/A","N/A"};
   newConf.setupFlag = true;
   serialDisplay("Writing","Writing Config");
   write_config(newConf);
@@ -380,6 +385,12 @@ void read_config()
       conf.WiFi_SSID = ssid;
       String pass = jsonBuffer["WiFi_PASS"];
       conf.WiFi_PASS = pass; 
+      String fauxmo_relay_1 = jsonBuffer["fauxmo_relay_1"];
+      conf.fauxmo_relay_1 = fauxmo_relay_1;
+      String fauxmo_relay_2 = jsonBuffer["fauxmo_relay_2"];
+      conf.fauxmo_relay_2 = fauxmo_relay_2;
+      String fauxmo_relay_3 = jsonBuffer["fauxmo_relay_3"];
+      conf.fauxmo_relay_3 = fauxmo_relay_3;
     }
   }
 }

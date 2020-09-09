@@ -16,6 +16,9 @@ void write_config(configuration config)
   jsonBuffer["WiFi_SSID"] = config.WiFi_SSID;
   jsonBuffer["WiFi_PASS"] = config.WiFi_PASS;
   jsonBuffer["wifi_setup_done"] = config.wifi_setup_done;
+  jsonBuffer["fauxmo_relay_1"] = config.fauxmo_relay_1;
+  jsonBuffer["fauxmo_relay_2"] = config.fauxmo_relay_2;
+  jsonBuffer["fauxmo_relay_3"] = config.fauxmo_relay_3;
   String r;
   serializeJsonPretty(jsonBuffer, r);
   configFile.print(r); 

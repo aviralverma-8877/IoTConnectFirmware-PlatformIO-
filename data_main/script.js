@@ -66,6 +66,10 @@ function httpGet(relay, value, action, options = {})
     {
         theUrl = '/set_wifi?options='+JSON.stringify(options);
     }
+    if(action == "update_fauxmo")
+    {
+        theUrl = '/update_fauxmo?options='+JSON.stringify(options);
+    }
     if(action == "update_login")
     {
         theUrl = '/update_login?options='+JSON.stringify(options);
@@ -129,6 +133,15 @@ function show_status(json)
         document.getElementById("save_status").checked = save_eeprom;
         btn_relay_act = json["btn_relay_act"];
         selectElement("relay_select", btn_relay_act)
+        fauxmo_relay_1 = json["fauxmo_relay_1"]
+        if(fauxmo_relay_1 != "N/A")
+            selectElement("fauxmo_select_1", fauxmo_relay_1)
+        fauxmo_relay_2 = json["fauxmo_relay_2"]
+        if(fauxmo_relay_2 != "N/A")
+            selectElement("fauxmo_select_2", fauxmo_relay_2)
+        fauxmo_relay_3 = json["fauxmo_relay_3"]
+        if(fauxmo_relay_3 != "N/A")
+            selectElement("fauxmo_select_3", fauxmo_relay_3)
         var cont = "";
         wifi_ssid = json['wifi_ssid'];
         wifi_type = json['type'];
@@ -182,7 +195,45 @@ function print_table(relay_count, on_change_val, name)
     cont = document.getElementById("relay_select").innerHTML;
     cont += "<option value='"+name+"'>"+name+"</option>";
     document.getElementById("relay_select").innerHTML = cont;
+    document.getElementById("fauxmo_select_1").innerHTML = cont;
+    document.getElementById("fauxmo_select_2").innerHTML = cont;
+    document.getElementById("fauxmo_select_3").innerHTML = cont;
 }
+function update_fuxmo_list(){
+    relay_1 = document.getElementById("fauxmo_select_1").value;
+    relay_2 = document.getElementById("fauxmo_select_2").value;
+    relay_3 = document.getElementById("fauxmo_select_3").value;
+    if(relay_1 != "N/A")
+    {
+        if(relay_1 == relay_2 || relay_1 == relay_3)
+        {
+            alert(relay_1+" is selected more than once.");
+            return;
+        }
+    }
+    if(relay_2 != "N/A")
+    {
+        if(relay_2 == relay_1 || relay_2 == relay_3)
+        {
+            alert(relay_2+" is selected more than once.");
+            return;
+        }
+    }
+    if(relay_3 != "N/A")
+    {
+        if(relay_3 == relay_2 || relay_3 == relay_1)
+        {
+            alert(relay_3+" is selected more than once.");
+            return;
+        }
+    }
+    httpGet(0,0,"update_fauxmo",{
+        "relay_1" : relay_1,
+        "relay_2" : relay_2,
+        "relay_3" : relay_3
+    })
+}
+
 function update_table_data(json)
 {
     relays = json.relay;

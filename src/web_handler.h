@@ -13,7 +13,7 @@
     #include "common_meathods.h"
     #include "mqtt_handler.h"
     #include "web_sockets_handler.h"
-
+    #include "fauxmo_handler.h"
 
     void handleWebControl(AsyncWebServerRequest *request);
     void handleWebStatus(AsyncWebServerRequest *request);

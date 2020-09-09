@@ -9,5 +9,8 @@
     "http_password": "admin",
     "WiFi_SSID": "",
     "WiFi_PASS": "",
-    "wifi_setup_done":false
+    "wifi_setup_done":false,
+    "fauxmo_relay_1": "N/A",
+    "fauxmo_relay_2": "N/A",
+    "fauxmo_relay_3": "N/A"
   }

@@ -10,5 +10,6 @@
     void setup_fauxmo();
     void fauxmo_add_device(const char* device_name);
     void fauxmo_remove_device(const char* device_name);
-    void fauxmo_add_all_device();
+    void fauxmo_remove_all_device();
+    void fauxmo_add_device();
 #endif
