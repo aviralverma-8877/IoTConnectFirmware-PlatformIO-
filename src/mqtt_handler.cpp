@@ -47,7 +47,7 @@ void onMqttUnsubscribe(uint16_t packetId) {
 /*-------Meathod called when disconnected from MQTT Topic---*/
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
   serialDisplay("MQTT","MQTT is disconnected.");
-  TickerForFeedbackLED.attach(0.6, feedbackLED);
+  MQTTStatus = false;
 }
 /*-------Meathod called when disconnected from MQTT Topic---*/
 
@@ -336,17 +336,11 @@ void connectToMqtt()
 {
   if(WiFi.status() != WL_CONNECTED) {
     TickerForFeedbackLED.attach(0.6, feedbackLED);
-    if(debugging)
-      serialDisplay("Reconnecting","WiFi");
-    read_config();
-    WiFi.disconnect();
-    TickerForTimeOut.attach_ms(100,[](){
-      WiFi.mode(WIFI_STA);
-      WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
-    });
+    serialDisplay("WiFi","Disconnected");
   }
   else
   {
+    serialDisplay("WiFi","Connected");
     TickerForFeedbackLED.detach();
     read_config();
     if(conf.led_enabled)
