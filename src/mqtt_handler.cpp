@@ -352,6 +352,7 @@ void connectToMqtt()
       digitalWrite(indicator_led, !def_led_value);
     }
     mqtt.connect();
+    MQTTStatus = true;
   }
 }
 
