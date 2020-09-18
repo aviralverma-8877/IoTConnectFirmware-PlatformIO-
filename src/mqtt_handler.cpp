@@ -47,7 +47,6 @@ void onMqttUnsubscribe(uint16_t packetId) {
 /*-------Meathod called when disconnected from MQTT Topic---*/
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
   serialDisplay("MQTT","MQTT is disconnected.");
-  MQTTStatus = false;
 }
 /*-------Meathod called when disconnected from MQTT Topic---*/
 
@@ -352,7 +351,6 @@ void connectToMqtt()
       digitalWrite(indicator_led, !def_led_value);
     }
     mqtt.connect();
-    MQTTStatus = true;
   }
 }
 

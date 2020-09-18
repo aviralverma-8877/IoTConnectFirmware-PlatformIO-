@@ -505,10 +505,6 @@ void setup_web_server()
     serialDisplay("Setup","Setup Flag is true.");
     enable_ap();
   }
-
-  WiFi.hostname("iot-connect-"+chipid);
-  MDNS.begin("iot-connect-"+chipid);
-  MDNS.addService("http", "tcp", 80);
   webSocket.begin();
   webSocket.enableHeartbeat(15000, 3000, 2);
 /*-------Web Server Setup-----------------------------------*/
@@ -520,4 +516,7 @@ void setup_web_server()
     }
   conf.setupFlag = false;
   write_config(conf);
+  WiFi.hostname("iot-connect-"+chipid);
+  MDNS.begin("iot-connect-"+chipid);
+  MDNS.addService("http", "tcp", 80);
 }
