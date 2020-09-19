@@ -249,22 +249,25 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*----Meathod for sending MQTT Data-------------------------*/
 void sendToMQTT(String topic, String msg)
 {
-  if(MQTTStatus)
+
+  DynamicJsonDocument doc(500);
+  StaticJsonDocument<200> filter;
+  filter["mqtt"]["prefix"] = true;
+  filter["mqtt"]["suffix"] = true;
+  filter["mqtt"]["service"] = true;
+  String device_config = read_device_config();
+  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+  if(error)
   {
-    DynamicJsonDocument doc(500);
-    StaticJsonDocument<200> filter;
-    filter["mqtt"]["prefix"] = true;
-    filter["mqtt"]["suffix"] = true;
-    String device_config = read_device_config();
-    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
-    if(error)
-    {
-      return;
-    }
+    return;
+  }
+  String service = doc["mqtt"]["service"];
+  if(!comp(service.c_str(),"N/A"))
+  {
     String prefix = doc["mqtt"]["prefix"];
     String suffix = doc["mqtt"]["suffix"];
     serialDisplay("MQTT","Published to "+prefix+topic+suffix);
-    mqtt.publish((prefix+topic+suffix).c_str(), 2, false, msg.c_str(), msg.length());
+    mqtt.publish((prefix+topic+suffix).c_str(), 0, false, msg.c_str(), msg.length());
   }
 }
 /*----Meathod for sending MQTT Data-------------------------*/
@@ -418,12 +421,23 @@ void connect_to_mqtt()
 
 void setup_mqtt()
 {
-  mqtt.onConnect(onMqttConnect);
-  mqtt.onDisconnect(onMqttDisconnect);
-  mqtt.onSubscribe(onMqttSubscribe);
-  mqtt.onUnsubscribe(onMqttUnsubscribe);
-  mqtt.onMessage(onMqttMessage);
-//  mqtt.onPublish(onMqttPublish);
-  fetchIP();
-  connect_to_mqtt();
+  String device_config = read_device_config();
+  StaticJsonDocument<100> filter;
+  filter["mqtt"]["service"] = true;
+  StaticJsonDocument<100> doc;
+  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+  if(error)
+    return;
+  String service = doc["mqtt"]["service"];
+  if(!comp(service.c_str(),"N/A"))
+  {
+    mqtt.onConnect(onMqttConnect);
+    mqtt.onDisconnect(onMqttDisconnect);
+    mqtt.onSubscribe(onMqttSubscribe);
+    mqtt.onUnsubscribe(onMqttUnsubscribe);
+    mqtt.onMessage(onMqttMessage);
+    mqtt.onPublish(onMqttPublish);
+    fetchIP();
+    connect_to_mqtt();
+  }
 }

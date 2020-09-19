@@ -112,7 +112,7 @@ void handlefauxmo(AsyncWebServerRequest *request)
     conf.fauxmo_relay_2 = doc["relay_2"].as<String>();
     conf.fauxmo_relay_3 = doc["relay_3"].as<String>();
     write_config(conf);
-    TickerForTimeOut.attach(1, [](){
+    TickerForTimeOut.once(1, [](){
       ESP.reset();
     });
   }
