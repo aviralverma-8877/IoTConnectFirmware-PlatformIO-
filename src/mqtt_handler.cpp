@@ -279,13 +279,14 @@ void send_status()
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
     String mqtt_data = read_mqtt_config();
-    DynamicJsonDocument doc(1000);
+    DynamicJsonDocument doc(1500);
     StaticJsonDocument<200> filter;
     filter["relay"][0]["name"] = true;
     if(conf.save_eeprom)
       filter["relay"][0]["status"] = true;
     filter["relay"][0]["pin"] = true;
     filter["relay"][0]["comp"] = true;
+    filter["relay"][0]["topic"] = true;
     DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
     if(error)
       return;

@@ -176,7 +176,7 @@ function toggle_relay(element, relay)
         httpGet(relay,0,"toggle_relay");
 }
 table_printed = false;
-function print_table(relay_count, on_change_val, name)
+function print_table(relay_count, on_change_val, name, topic)
 {
     var table = document.getElementById("relay_table");
     var content = "";
@@ -189,6 +189,9 @@ function print_table(relay_count, on_change_val, name)
             <input type=\"checkbox\" id=\"checkbox-"+relay_count+"\" onchange=\""+on_change_val+"\">\
             <span class=\"slider round\"></span>\
         </label>\
+    </th>\
+    <th>\
+        <spam style='font-family:Courier New'>"+topic+"</spam>\
     </th>\
     </tr>";
     table.innerHTML += content;
@@ -246,7 +249,8 @@ function update_table_data(json)
         {
             on_change_val = "toggle_relay(this, '"+element.name+"')"
             pin = element.comp + "-" + element.pin;
-            print_table(pin, on_change_val, element.name);
+            topic = element.topic;
+            print_table(pin, on_change_val, element.name, topic);
         });
         table_printed = true;
     }
