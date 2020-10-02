@@ -180,19 +180,25 @@ function print_table(relay_count, on_change_val, name, topic)
 {
     var table = document.getElementById("relay_table");
     var content = "";
-    content = "<tr>\
-    <th style='font:Fjalla One'>\
-        "+name+" : <span id='status-"+relay_count+"'></span>\
-    </th>\
-    <th>\
-        <label class=\"switch\">\
-            <input type=\"checkbox\" id=\"checkbox-"+relay_count+"\" onchange=\""+on_change_val+"\">\
-            <span class=\"slider round\"></span>\
-        </label>\
-    </th>\
-    <th>\
-        <spam style='font-family:Courier New'>"+topic+"</spam>\
-    </th>\
+    content = "\
+    <tr>\
+        <th style='font:Fjalla One'>\
+            "+name+" : <span id='status-"+relay_count+"'></span>\
+        </th>\
+        <th>\
+            <label class=\"switch\">\
+                <input type=\"checkbox\" id=\"checkbox-"+relay_count+"\" onchange=\""+on_change_val+"\">\
+                <span class=\"slider round\"></span>\
+            </label>\
+        </th>\
+    </tr>\
+    <tr>\
+        <th>\
+            Mqtt Topic ("+name+")\
+        </th>\
+        <th>\
+            <input type=\"text\" readonly style='font-family:Courier New; width:100%' value=\""+topic+"\" />\
+        </th>\
     </tr>";
     table.innerHTML += content;
     cont = document.getElementById("relay_select").innerHTML;
