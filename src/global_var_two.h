@@ -24,4 +24,5 @@
     extern bool MQTTStatus;
     extern String intopic;
     extern String espsensor;
+    extern String websocket_msg;
 #endif
