@@ -514,6 +514,7 @@ void setup_web_server()
     {
       dnsServer.processNextRequest();
       webSocket.loop();
+      callback();
     }
   conf.setupFlag = false;
   write_config(conf);

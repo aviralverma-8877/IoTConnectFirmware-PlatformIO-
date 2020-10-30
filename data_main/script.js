@@ -94,7 +94,11 @@ function set_ui()
     data = httpGet(0, 0, 'get_status');
     json = JSON.parse(data);
     if(json.chip_id != undefined)
+    {
         chipid = json.chip_id;
+        document.getElementById("hostname").innerHTML = "http://iot-connect-"+json.chip_id+".local";
+        document.getElementById("hostname").setAttribute('href', "http://iot-connect-"+json.chip_id+".local");
+    }
     init_socket();
     show_status(json);
 }
