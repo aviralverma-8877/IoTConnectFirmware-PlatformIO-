@@ -133,6 +133,8 @@ function show_status(json)
     if(!json.init_setup)
     {
         document.getElementById("cover").onclick = "";
+        document.getElementById("close_btn").style.display = "none";
+        document.getElementById("pair_btn").style.display = "none";
         start_init_setup();
     }
     if(json != null)
