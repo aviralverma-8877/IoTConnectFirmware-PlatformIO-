@@ -89,6 +89,10 @@ function httpGet(relay, value, action, options = {})
         return JSON.stringify({"done":false,"error":err});
     }
 }
+function pair_device(esp_id)
+{
+    window.open("https://iot-connect.in/add_device/"+esp_id, '_blank');
+}
 function set_ui()
 {
     data = httpGet(0, 0, 'get_status');
@@ -98,6 +102,8 @@ function set_ui()
         chipid = json.chip_id;
         document.getElementById("hostname").innerHTML = "http://iot-connect-"+json.chip_id+".local";
         document.getElementById("hostname").setAttribute('href', "http://iot-connect-"+json.chip_id+".local");
+        document.getElementById("pair_btn").setAttribute('onclick',"pair_device("+chipid+")");
+        document.getElementById("pair_btn").style.display = "block";
     }
     init_socket();
     show_status(json);

@@ -30,11 +30,11 @@ void setup()
     perform_action();
   callback = &blank;
   
-  setup_web_server();
-  setup_fauxmo();
-  setup_sensor();
-  setup_mqtt();
-  setup_tickers();
+  setup_web_server();    //Webserver Handler
+  setup_fauxmo();        //Fauxmo Alexa handler
+  setup_sensor();        //DHT and LDR Setup
+  setup_mqtt();          //MQTT Setup
+  setup_tickers();       //Ticker Setup
 }
 
 void loop() 

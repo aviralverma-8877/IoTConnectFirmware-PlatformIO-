@@ -135,3 +135,7 @@ body{
     height: 10px;
     background-color: #4CAF50;
   }
+  #pair_btn
+  {
+    display: none;
+  }
