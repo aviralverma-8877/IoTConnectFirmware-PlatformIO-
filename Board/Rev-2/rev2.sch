@@ -7742,6 +7742,7 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <library name="LD1117V33">
 <packages>
 <package name="LD1117V33">
+<circle x="0" y="6.096" radius="1.8034" width="0.1524" layer="21"/>
 <wire x1="-5.207" y1="-6.35" x2="5.207" y2="-6.35" width="0.1524" layer="21"/>
 <wire x1="5.207" y1="9.525" x2="-5.207" y2="9.525" width="0.1524" layer="21"/>
 <wire x1="5.207" y1="-6.35" x2="5.207" y2="6.096" width="0.1524" layer="21"/>
@@ -7758,25 +7759,21 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <wire x1="4.572" y1="2.54" x2="4.572" y2="-5.715" width="0.0508" layer="21"/>
 <wire x1="4.572" y1="2.54" x2="-4.572" y2="2.54" width="0.0508" layer="21"/>
 <wire x1="-4.572" y1="-5.715" x2="-4.572" y2="2.54" width="0.0508" layer="21"/>
-<circle x="0" y="6.096" radius="1.8034" width="0.1524" layer="21"/>
-<circle x="0" y="6.096" radius="4.191" width="0" layer="42"/>
-<circle x="0" y="6.096" radius="4.191" width="0" layer="43"/>
-<pad name="GND" x="-2.54" y="-8.89" drill="1.016" shape="long" rot="R90"/>
-<pad name="OUT" x="0" y="-8.89" drill="1.016" shape="long" rot="R90"/>
-<pad name="IN" x="2.54" y="-8.89" drill="1.016" shape="long" rot="R90"/>
-<text x="-3.81" y="0" size="1.778" layer="25" ratio="10">&gt;NAME</text>
-<text x="-3.937" y="-2.54" size="1.778" layer="27" ratio="10">&gt;VALUE</text>
-<text x="-4.445" y="2.794" size="0.9906" layer="21" ratio="10">A15,2mm</text>
-<text x="-3.048" y="-5.08" size="1.27" layer="51" ratio="10">-</text>
-<text x="2.032" y="-5.08" size="1.27" layer="51" ratio="10">I</text>
-<text x="-0.508" y="-5.08" size="1.27" layer="51" ratio="10">O</text>
 <rectangle x1="1.905" y1="-7.239" x2="3.175" y2="-6.35" layer="21"/>
 <rectangle x1="1.905" y1="-8.89" x2="3.175" y2="-7.239" layer="51"/>
 <rectangle x1="-0.635" y1="-7.239" x2="0.635" y2="-6.35" layer="21"/>
 <rectangle x1="-3.175" y1="-7.239" x2="-1.905" y2="-6.35" layer="21"/>
 <rectangle x1="-0.635" y1="-8.89" x2="0.635" y2="-7.239" layer="51"/>
 <rectangle x1="-3.175" y1="-8.89" x2="-1.905" y2="-7.239" layer="51"/>
-<hole x="0" y="6.096" drill="3.302"/>
+<pad name="GND" x="-2.54" y="-8.89" drill="1.016" shape="long" rot="R90"/>
+<pad name="IN" x="2.54" y="-8.89" drill="1.016" shape="long" rot="R90"/>
+<pad name="OUT" x="0" y="-8.89" drill="1.016" shape="long" rot="R90"/>
+<text x="-3.81" y="0" size="1.778" layer="25" ratio="10">&gt;NAME</text>
+<text x="-3.937" y="-2.54" size="1.778" layer="27" ratio="10">&gt;VALUE</text>
+<text x="-4.445" y="2.794" size="0.9906" layer="21" ratio="10">A15,2mm</text>
+<text x="-3.048" y="-5.08" size="1.27" layer="51" ratio="10">-</text>
+<text x="2.032" y="-5.08" size="1.27" layer="51" ratio="10">I</text>
+<text x="-0.508" y="-5.08" size="1.27" layer="51" ratio="10">O</text>
 </package>
 </packages>
 <symbols>
@@ -7785,14 +7782,14 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <wire x1="5.08" y1="-2.54" x2="5.08" y2="5.08" width="0.4064" layer="94"/>
 <wire x1="5.08" y1="5.08" x2="-5.08" y2="5.08" width="0.4064" layer="94"/>
 <wire x1="-5.08" y1="5.08" x2="-5.08" y2="-2.54" width="0.4064" layer="94"/>
+<pin name="GND" x="0" y="-5.08" visible="off" length="short" direction="in" rot="R90"/>
+<pin name="IN" x="-7.62" y="2.54" visible="off" length="short" direction="in"/>
+<pin name="OUT" x="7.62" y="2.54" visible="off" length="short" direction="out" rot="R180"/>
 <text x="2.54" y="-5.08" size="1.778" layer="95">&gt;NAME</text>
 <text x="2.54" y="-7.62" size="1.778" layer="96">&gt;VALUE</text>
 <text x="-2.032" y="-1.778" size="1.524" layer="95">GND</text>
 <text x="-4.445" y="1.905" size="1.524" layer="95">IN</text>
 <text x="0.635" y="1.905" size="1.524" layer="95">OUT</text>
-<pin name="IN" x="-7.62" y="2.54" visible="off" length="short" direction="in"/>
-<pin name="GND" x="0" y="-5.08" visible="off" length="short" direction="in" rot="R90"/>
-<pin name="OUT" x="7.62" y="2.54" visible="off" length="short" direction="out" rot="R180"/>
 </symbol>
 </symbols>
 <devicesets>

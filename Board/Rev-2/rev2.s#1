@@ -8336,7 +8336,7 @@ General purpose 1N400x type rectifier
 <part name="VCC_SWITCH" library="Toggle Switch" deviceset="TOGGLE_SWITCH" device=""/>
 <part name="FLASH" library="Toggle Switch" deviceset="TOGGLE_SWITCH" device=""/>
 <part name="PULLUP" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:25945/1" value="10kohm"/>
-<part name="EXTRA_GPIO" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA06-2" device="" package3d_urn="urn:adsk.eagle:package:8342/1"/>
+<part name="EXTRA_GPIO" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA06-2" device="" package3d_urn="urn:adsk.eagle:package:8342/1" value="Extra GPIO"/>
 <part name="9V10" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="9V11" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="9V12" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
