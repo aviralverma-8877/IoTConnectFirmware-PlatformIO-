@@ -159,14 +159,10 @@
 <board>
 <fusionteam huburn="a.cGVyc29uYWw6dWUyYjdhYjY5" projecturn="a.cGVyc29uYWw6dWUyYjdhYjY5IzIwMTcwNzA4ODMxMDc1NTY" folderUrn="urn:adsk.wipprod:fs.folder:co.GYMhV0F4TrqMDaTDnEaPZQ" urn="urn:adsk.wipprod:dm.lineage:VBlSYLAqTCGUwhFHxG7cdA"  versionUrn="urn:adsk.wipprod:fs.file:vf.VBlSYLAqTCGUwhFHxG7cdA?version=1" camFileUrn="" camFileVersionUrn="" lastpublishedchangeguid="a700656a-fba6-487a-2f14-d8389a4a237f"/>
 <plain>
-<wire x1="-0.0703" y1="61.130659375" x2="-0.0703" y2="1.960659375" width="0" layer="20"/>
-<wire x1="-0.0703" y1="1.960659375" x2="1.9297" y2="-0.039340625" width="0" layer="20" curve="90"/>
-<wire x1="1.9297" y1="-0.039340625" x2="148.4997" y2="-0.039340625" width="0" layer="20"/>
-<wire x1="148.4997" y1="-0.039340625" x2="150.4997" y2="1.960659375" width="0" layer="20" curve="90"/>
-<wire x1="150.4997" y1="1.960659375" x2="150.4997" y2="61.130659375" width="0" layer="20"/>
-<wire x1="150.4997" y1="61.130659375" x2="148.4997" y2="63.130659375" width="0" layer="20" curve="90"/>
-<wire x1="148.4997" y1="63.130659375" x2="1.9297" y2="63.130659375" width="0" layer="20"/>
-<wire x1="1.9297" y1="63.130659375" x2="-0.0703" y2="61.130659375" width="0" layer="20" curve="90"/>
+<wire x1="-0.0703" y1="-0.039340625" x2="150.4997" y2="-0.039340625" width="0" layer="20"/>
+<wire x1="150.4997" y1="-0.039340625" x2="150.4997" y2="63.130659375" width="0" layer="20"/>
+<wire x1="150.4997" y1="63.130659375" x2="-0.0703" y2="63.130659375" width="0" layer="20"/>
+<wire x1="-0.0703" y1="63.130659375" x2="-0.0703" y2="-0.039340625" width="0" layer="20"/>
 <hole x="3.0097" y="59.830659375" drill="3"/>
 <hole x="147.0097" y="59.830659375" drill="3"/>
 <hole x="147.0097" y="3.830659375" drill="3"/>

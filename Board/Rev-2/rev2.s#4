@@ -8336,10 +8336,7 @@ General purpose 1N400x type rectifier
 <part name="VCC_SWITCH" library="Toggle Switch" deviceset="TOGGLE_SWITCH" device=""/>
 <part name="FLASH" library="Toggle Switch" deviceset="TOGGLE_SWITCH" device=""/>
 <part name="PULLUP" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:25945/1" value="10kohm"/>
-<part name="EXTRA_GPIO" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA06-2" device="" package3d_urn="urn:adsk.eagle:package:8342/1" value="Extra GPIO"/>
-<part name="9V10" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
-<part name="9V11" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
-<part name="9V12" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
+<part name="SV1" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA06-2" device="" package3d_urn="urn:adsk.eagle:package:8342/1"/>
 </parts>
 <sheets>
 <sheet>
@@ -8607,18 +8604,9 @@ General purpose 1N400x type rectifier
 <attribute name="NAME" x="37.0586" y="87.63" size="1.778" layer="95" rot="R270"/>
 <attribute name="VALUE" x="32.258" y="92.71" size="1.778" layer="96" rot="R270"/>
 </instance>
-<instance part="EXTRA_GPIO" gate="1" x="358.14" y="106.68" smashed="yes" rot="R90">
+<instance part="SV1" gate="1" x="358.14" y="106.68" smashed="yes" rot="R90">
 <attribute name="VALUE" x="370.84" y="102.87" size="1.778" layer="96" rot="R90"/>
 <attribute name="NAME" x="349.758" y="102.87" size="1.778" layer="95" rot="R90"/>
-</instance>
-<instance part="9V10" gate="VCC" x="-5.08" y="38.1" smashed="yes">
-<attribute name="VALUE" x="-7.62" y="35.56" size="1.778" layer="96" rot="R90"/>
-</instance>
-<instance part="9V11" gate="VCC" x="5.08" y="25.4" smashed="yes" rot="R90">
-<attribute name="VALUE" x="2.54" y="27.94" size="1.778" layer="96" rot="R270"/>
-</instance>
-<instance part="9V12" gate="VCC" x="88.9" y="93.98" smashed="yes" rot="R180">
-<attribute name="VALUE" x="86.36" y="91.44" size="1.778" layer="96"/>
 </instance>
 </instances>
 <busses>
@@ -8879,21 +8867,6 @@ General purpose 1N400x type rectifier
 <wire x1="393.7" y1="101.6" x2="393.7" y2="88.9" width="0.1524" layer="91"/>
 <label x="393.7" y="88.9" size="1.778" layer="95"/>
 </segment>
-<segment>
-<pinref part="IC1" gate="P" pin="VCC"/>
-<wire x1="-5.08" y1="30.48" x2="-5.08" y2="35.56" width="0.1524" layer="91"/>
-<pinref part="9V10" gate="VCC" pin="VCC"/>
-</segment>
-<segment>
-<pinref part="IC1" gate="A" pin="SCL"/>
-<pinref part="9V11" gate="VCC" pin="VCC"/>
-<wire x1="7.62" y1="25.4" x2="12.7" y2="25.4" width="0.1524" layer="91"/>
-</segment>
-<segment>
-<pinref part="U$2" gate="G$1" pin="VDD"/>
-<pinref part="9V12" gate="VCC" pin="VCC"/>
-<wire x1="88.9" y1="96.52" x2="88.9" y2="104.14" width="0.1524" layer="91"/>
-</segment>
 </net>
 <net name="RX" class="0">
 <segment>
@@ -8907,7 +8880,7 @@ General purpose 1N400x type rectifier
 <label x="-10.16" y="114.3" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
-<pinref part="EXTRA_GPIO" gate="1" pin="3"/>
+<pinref part="SV1" gate="1" pin="3"/>
 <wire x1="363.22" y1="114.3" x2="363.22" y2="121.92" width="0.1524" layer="91"/>
 <label x="363.22" y="116.84" size="1.778" layer="95" rot="R90"/>
 </segment>
@@ -8924,7 +8897,7 @@ General purpose 1N400x type rectifier
 <label x="-7.62" y="114.3" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
-<pinref part="EXTRA_GPIO" gate="1" pin="1"/>
+<pinref part="SV1" gate="1" pin="1"/>
 <wire x1="365.76" y1="114.3" x2="365.76" y2="121.92" width="0.1524" layer="91"/>
 <label x="365.76" y="116.84" size="1.778" layer="95" rot="R90"/>
 </segment>
@@ -9096,7 +9069,6 @@ General purpose 1N400x type rectifier
 <label x="127" y="106.68" size="1.778" layer="95"/>
 <wire x1="124.46" y1="116.84" x2="129.54" y2="116.84" width="0.1524" layer="91"/>
 <pinref part="RESET_REG" gate="G$1" pin="2"/>
-<junction x="124.46" y="116.84"/>
 </segment>
 </net>
 <net name="CS0" class="0">
@@ -9107,7 +9079,7 @@ General purpose 1N400x type rectifier
 <junction x="-12.7" y="71.12"/>
 </segment>
 <segment>
-<pinref part="EXTRA_GPIO" gate="1" pin="6"/>
+<pinref part="SV1" gate="1" pin="6"/>
 <wire x1="360.68" y1="99.06" x2="360.68" y2="91.44" width="0.1524" layer="91"/>
 <label x="360.68" y="91.44" size="1.778" layer="95" rot="R90"/>
 </segment>
@@ -9120,7 +9092,7 @@ General purpose 1N400x type rectifier
 <junction x="-10.16" y="71.12"/>
 </segment>
 <segment>
-<pinref part="EXTRA_GPIO" gate="1" pin="8"/>
+<pinref part="SV1" gate="1" pin="8"/>
 <wire x1="358.14" y1="99.06" x2="358.14" y2="91.44" width="0.1524" layer="91"/>
 <label x="358.14" y="91.44" size="1.778" layer="95" rot="R90"/>
 </segment>
@@ -9133,7 +9105,7 @@ General purpose 1N400x type rectifier
 <junction x="-7.62" y="71.12"/>
 </segment>
 <segment>
-<pinref part="EXTRA_GPIO" gate="1" pin="9"/>
+<pinref part="SV1" gate="1" pin="9"/>
 <wire x1="355.6" y1="114.3" x2="355.6" y2="121.92" width="0.1524" layer="91"/>
 <label x="355.6" y="116.84" size="1.778" layer="95" rot="R90"/>
 </segment>
@@ -9146,7 +9118,7 @@ General purpose 1N400x type rectifier
 <junction x="-5.08" y="71.12"/>
 </segment>
 <segment>
-<pinref part="EXTRA_GPIO" gate="1" pin="7"/>
+<pinref part="SV1" gate="1" pin="7"/>
 <wire x1="358.14" y1="114.3" x2="358.14" y2="121.92" width="0.1524" layer="91"/>
 <label x="358.14" y="116.84" size="1.778" layer="95" rot="R90"/>
 </segment>
@@ -9159,7 +9131,7 @@ General purpose 1N400x type rectifier
 <junction x="-2.54" y="71.12"/>
 </segment>
 <segment>
-<pinref part="EXTRA_GPIO" gate="1" pin="10"/>
+<pinref part="SV1" gate="1" pin="10"/>
 <wire x1="355.6" y1="99.06" x2="355.6" y2="91.44" width="0.1524" layer="91"/>
 <label x="355.6" y="91.44" size="1.778" layer="95" rot="R90"/>
 </segment>
@@ -9172,7 +9144,7 @@ General purpose 1N400x type rectifier
 <junction x="0" y="71.12"/>
 </segment>
 <segment>
-<pinref part="EXTRA_GPIO" gate="1" pin="11"/>
+<pinref part="SV1" gate="1" pin="11"/>
 <wire x1="353.06" y1="114.3" x2="353.06" y2="121.92" width="0.1524" layer="91"/>
 <label x="353.06" y="116.84" size="1.778" layer="95" rot="R90"/>
 </segment>
@@ -9185,7 +9157,7 @@ General purpose 1N400x type rectifier
 <junction x="10.16" y="101.6"/>
 </segment>
 <segment>
-<pinref part="EXTRA_GPIO" gate="1" pin="5"/>
+<pinref part="SV1" gate="1" pin="5"/>
 <wire x1="360.68" y1="114.3" x2="360.68" y2="121.92" width="0.1524" layer="91"/>
 <label x="360.68" y="116.84" size="1.778" layer="95" rot="R90"/>
 </segment>
@@ -9238,6 +9210,16 @@ General purpose 1N400x type rectifier
 <label x="121.92" y="71.12" size="1.778" layer="95"/>
 </segment>
 <segment>
+<pinref part="IC1" gate="P" pin="VCC"/>
+<wire x1="-5.08" y1="30.48" x2="-5.08" y2="33.02" width="0.1524" layer="91"/>
+<label x="-5.08" y="33.02" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="IC1" gate="A" pin="SCL"/>
+<wire x1="12.7" y1="25.4" x2="5.08" y2="25.4" width="0.1524" layer="91"/>
+<label x="5.08" y="25.4" size="1.778" layer="95"/>
+</segment>
+<segment>
 <pinref part="ESP8266" gate="G$1" pin="VCC"/>
 <wire x1="-22.86" y1="88.9" x2="-27.94" y2="88.9" width="0.1524" layer="91"/>
 <label x="-27.94" y="88.9" size="1.778" layer="95"/>
@@ -9251,6 +9233,11 @@ General purpose 1N400x type rectifier
 <pinref part="PROGRAMMER" gate="1" pin="4"/>
 <wire x1="-5.08" y1="119.38" x2="-5.08" y2="114.3" width="0.1524" layer="91"/>
 <label x="-5.08" y="114.3" size="1.778" layer="95" rot="R90"/>
+</segment>
+<segment>
+<pinref part="U$2" gate="G$1" pin="VDD"/>
+<wire x1="88.9" y1="104.14" x2="88.9" y2="99.06" width="0.1524" layer="91"/>
+<label x="88.9" y="99.06" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
 <pinref part="PHOTO_REG" gate="G$1" pin="P$1"/>
@@ -9272,7 +9259,7 @@ General purpose 1N400x type rectifier
 <label x="22.86" y="73.66" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="EXTRA_GPIO" gate="1" pin="4"/>
+<pinref part="SV1" gate="1" pin="4"/>
 <wire x1="363.22" y1="99.06" x2="363.22" y2="91.44" width="0.1524" layer="91"/>
 <label x="363.22" y="91.44" size="1.778" layer="95" rot="R90"/>
 </segment>
@@ -9540,7 +9527,7 @@ General purpose 1N400x type rectifier
 <pinref part="GND_SWITCH" gate="G$1" pin="ON"/>
 <wire x1="332.74" y1="93.98" x2="332.74" y2="99.06" width="0.1524" layer="91"/>
 <wire x1="332.74" y1="99.06" x2="353.06" y2="99.06" width="0.1524" layer="91"/>
-<pinref part="EXTRA_GPIO" gate="1" pin="12"/>
+<pinref part="SV1" gate="1" pin="12"/>
 </segment>
 </net>
 <net name="N$56" class="0">
@@ -9548,7 +9535,7 @@ General purpose 1N400x type rectifier
 <pinref part="VCC_SWITCH" gate="G$1" pin="ON"/>
 <wire x1="383.54" y1="101.6" x2="383.54" y2="99.06" width="0.1524" layer="91"/>
 <wire x1="365.76" y1="99.06" x2="383.54" y2="99.06" width="0.1524" layer="91"/>
-<pinref part="EXTRA_GPIO" gate="1" pin="2"/>
+<pinref part="SV1" gate="1" pin="2"/>
 </segment>
 </net>
 <net name="N$57" class="0">
@@ -9602,6 +9589,18 @@ General purpose 1N400x type rectifier
 </nets>
 </sheet>
 </sheets>
+<errors>
+<approved hash="104,1,-50.8,-10.16,IC1P,VCC,3.5V,,,"/>
+<approved hash="106,1,-10.16,78.74,ADC,,,,,"/>
+<approved hash="106,1,0,45.72,CS0,,,,,"/>
+<approved hash="106,1,22.86,68.58,GPIO2,,,,,"/>
+<approved hash="106,1,22.86,76.2,GPIO5,,,,,"/>
+<approved hash="106,1,5.08,45.72,GPIO9,,,,,"/>
+<approved hash="106,1,7.62,45.72,GPIO10,,,,,"/>
+<approved hash="106,1,2.54,45.72,MISO,,,,,"/>
+<approved hash="106,1,10.16,45.72,MOSI,,,,,"/>
+<approved hash="106,1,12.7,45.72,SCLK,,,,,"/>
+</errors>
 </schematic>
 </drawing>
 <compatibility>
