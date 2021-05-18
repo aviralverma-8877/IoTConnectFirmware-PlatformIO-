@@ -336,30 +336,6 @@ void onMqttPublish(uint16_t packetId) {
 }
 /*----Meathod called on sending/publishing message on MQTT--*/
 
-void reactivateMqtt()
-{
-  if(WiFi.status() != WL_CONNECTED) {
-    TickerForFeedbackLED.attach(0.6, feedbackLED);
-    serialDisplay("WiFi","Disconnected");
-  }
-  else
-  {
-    serialDisplay("WiFi","Connected");
-    TickerForFeedbackLED.detach();
-    read_config();
-    if(conf.led_enabled)
-    {
-      digitalWrite(indicator_led, def_led_value);
-    }
-    else
-    {
-      digitalWrite(indicator_led, !def_led_value);
-    }
-    mqtt.disconnect();
-    setup_mqtt();  
-  }  
-}
-
 void connectToMqtt() 
 {
   if(WiFi.status() != WL_CONNECTED) {

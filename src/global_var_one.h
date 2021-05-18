@@ -29,7 +29,7 @@
     #endif
     //Configuring Device
     #ifndef FIRMWARE_V
-    #define FIRMWARE_V "2.1.5"                //Current firmware version. (Displayed on Device Portal)
+    #define FIRMWARE_V "2.1.4"                //Current firmware version. (Displayed on Device Portal)
     #endif
 
     extern bool hasSensor; 
@@ -76,7 +76,6 @@
     extern Ticker TickerForcheckReset;
     extern Ticker TickerForfetchIP;
     extern Ticker TickerForconnectToMqtt;
-    extern Ticker TickerForreactivateMqtt;
     extern Ticker TickerForFeedbackLED;
     extern Ticker TickerForSerialListner;
     extern Ticker TickerForUARTUpdater;
