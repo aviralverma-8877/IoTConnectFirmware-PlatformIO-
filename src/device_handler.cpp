@@ -3,11 +3,12 @@
 void setup_tickers()
 {
   TickerForconnectToMqtt.attach(5, connectToMqtt);
+  TickerForreactivateMqtt.attach(60, reactivateMqtt);
   TickerForfetchIP.attach(10, fetchIP);
   //TickerForFeedbackLED.attach(0.6, feedbackLED);
   TickerForcheckReset.attach_ms(10, checkReset);
   TickerForWebSocketStatus.attach(1,sendWebSocketStatus);
-  TickerForPinging.attach(10, pinging);
+  TickerForPinging.attach(1, pinging);
   if(hasSensor)
     TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
 }

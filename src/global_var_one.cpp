@@ -45,6 +45,7 @@ Ticker TickerForsendSensorData;
 Ticker TickerForcheckReset;
 Ticker TickerForfetchIP;
 Ticker TickerForconnectToMqtt;
+Ticker TickerForreactivateMqtt;
 Ticker TickerForFeedbackLED;
 Ticker TickerForSerialListner;
 Ticker TickerForUARTUpdater;
