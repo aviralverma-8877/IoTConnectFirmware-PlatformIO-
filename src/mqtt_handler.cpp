@@ -46,7 +46,9 @@ void onMqttUnsubscribe(uint16_t packetId) {
 
 /*-------Meathod called when disconnected from MQTT Topic---*/
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
+  MQTTStatus = false;
   serialDisplay("MQTT","MQTT is disconnected.");
+  connectToMqtt();
 }
 /*-------Meathod called when disconnected from MQTT Topic---*/
 
@@ -57,6 +59,7 @@ void MqttBlank(AsyncMqttClientDisconnectReason reason) {
 /*-------Meathod called on reciving message from MQTT-------*/
 void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) 
 {
+  MQTTStatus = true;
   serialDisplay("MQTT Topic",topic);
   serialDisplay("MQTT Message",payload);
   String p = "";

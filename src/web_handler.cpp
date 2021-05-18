@@ -500,6 +500,8 @@ void setup_web_server()
   {
     WiFi.mode(WIFI_STA);
     WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
+    WiFi.setAutoReconnect(true);
+    WiFi.persistent(true);
     serialDisplay("Setup","Setup Flag is false.");        
   }
   else
