@@ -356,9 +356,7 @@ void reactivateMqtt()
       digitalWrite(indicator_led, !def_led_value);
     }
     mqtt.disconnect();
-    TickerForTimeOut.once_ms(100,[](){
-        mqtt.connect();
-    });
+    setup_mqtt();  
   }  
 }
 
