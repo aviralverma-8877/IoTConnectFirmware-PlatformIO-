@@ -24,12 +24,15 @@ void setup()
     write_config(newConfig);
   }
   read_config();
+  print_config();
   delayMS = conf.pingTime;
   configure_gpio();
   if(conf.save_eeprom)
     perform_action();
   callback = &blank;
   
+  wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
+  wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
   setup_web_server();    //Webserver Handler
   setup_fauxmo();        //Fauxmo Alexa handler
   setup_sensor();        //DHT and LDR Setup

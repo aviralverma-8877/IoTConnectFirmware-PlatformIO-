@@ -12,6 +12,8 @@
     #include "mqtt_handler.h"
 
     void setup_tickers();
+    void onWifiConnect(const WiFiEventStationModeGotIP& event);
+    void onWifiDisconnect(const WiFiEventStationModeDisconnected& event);
     String device_status();
     String read_mqtt_config();  
     void relay_action(String relay, bool value, String by);
@@ -25,6 +27,8 @@
     void checkReset();
     bool comp(const char *val1,const char *val2);
     void fetchIP();
+    void connectToWiFi();
+    void print_config();
     void read_config();
     void send_status_uart();  
     void generate_mqtt_topics();

@@ -18,18 +18,21 @@ void onMqttConnect(bool sessionPresent) {
     digitalWrite(indicator_led, !def_led_value);
   }
   MQTTStatus = true;
-  if (SPIFFS.exists("/mqtt_topics.json")) 
+  if(!subscribed_to_mqtt_topics)
   {
-    StaticJsonDocument<1000> doc;
-    StaticJsonDocument<100> filter;
-    filter["mqtt"]["service"] = true;
-    String device_config = read_device_config();
-    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
-    if(error)
-      return;
-    String service = doc["mqtt"]["service"];
-    if(!comp(service.c_str(), "N/A"))
-      subscribe_mqtt_input();
+    if (SPIFFS.exists("/mqtt_topics.json")) 
+    {
+      StaticJsonDocument<1000> doc;
+      StaticJsonDocument<100> filter;
+      filter["mqtt"]["service"] = true;
+      String device_config = read_device_config();
+      DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+      if(error)
+        return;
+      String service = doc["mqtt"]["service"];
+      if(!comp(service.c_str(), "N/A"))
+        subscribe_mqtt_input();
+    }
   }
 }
 /*-------Meathod called when connected to MQTT--------------*/
@@ -48,7 +51,6 @@ void onMqttUnsubscribe(uint16_t packetId) {
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
   MQTTStatus = false;
   serialDisplay("MQTT","MQTT is disconnected.");
-  connectToMqtt();
 }
 /*-------Meathod called when disconnected from MQTT Topic---*/
 
@@ -324,11 +326,14 @@ void send_status()
       serialDisplay("Sending Status","WebSocket");
       send_data_to_webSocket(r);
       serialDisplay("Sending Status","WebSocket Sent");
-      TickerForTimeOut.once_ms(100,[r](){
-        serialDisplay("Sending Status","MQTT");
-        sendToMQTT(outtopic, r);
-        serialDisplay("Sending Status","MQTT Sent");
-      });
+      if(MQTTStatus)
+      {
+        TickerForTimeOut.once_ms(100,[r](){
+          serialDisplay("Sending Status","MQTT");
+          sendToMQTT(outtopic, r);
+          serialDisplay("Sending Status","MQTT Sent");
+        });
+      }
     });
   }  
 }
@@ -339,26 +344,16 @@ void onMqttPublish(uint16_t packetId) {
 }
 /*----Meathod called on sending/publishing message on MQTT--*/
 
-void connectToMqtt() 
+
+void connectToMqtt()
 {
-  if(WiFi.status() != WL_CONNECTED) {
-    TickerForFeedbackLED.attach(0.6, feedbackLED);
-    serialDisplay("WiFi","Disconnected");
-  }
-  else
+  if (WiFi.status() == WL_CONNECTED)
   {
-    serialDisplay("WiFi","Connected");
-    TickerForFeedbackLED.detach();
-    read_config();
-    if(conf.led_enabled)
+    if(!MQTTStatus)
     {
-      digitalWrite(indicator_led, def_led_value);
+      serialDisplay("MQTT","Trying MQTT Connect");
+      mqtt.connect();
     }
-    else
-    {
-      digitalWrite(indicator_led, !def_led_value);
-    }
-    mqtt.connect();
   }
 }
 
@@ -394,10 +389,12 @@ void subscribe_mqtt_input()
 //    serialDisplay("MQTT Topic", prefix+topic+suffix);
     mqtt.subscribe((prefix+topic+suffix).c_str(), 2);
   }
+  subscribed_to_mqtt_topics = true;
 }
 
 void connect_to_mqtt()
 {
+  serialDisplay("MQTT Setup","Setting up MQTT Properties");
   StaticJsonDocument<500> doc;
   StaticJsonDocument<100> filter;
   filter["mqtt"] = true;
@@ -436,13 +433,13 @@ void setup_mqtt()
   String service = doc["mqtt"]["service"];
   if(!comp(service.c_str(),"N/A"))
   {
+    serialDisplay("MQTT Setup","Setting up MQTT Actions");
     mqtt.onConnect(onMqttConnect);
     mqtt.onDisconnect(onMqttDisconnect);
     mqtt.onSubscribe(onMqttSubscribe);
     mqtt.onUnsubscribe(onMqttUnsubscribe);
     mqtt.onMessage(onMqttMessage);
     mqtt.onPublish(onMqttPublish);
-    fetchIP();
     connect_to_mqtt();
   }
 }

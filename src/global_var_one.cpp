@@ -1,5 +1,6 @@
 #include "global_var_one.h"
 
+HTTPClient httpAPI;
 AsyncMqttClient mqtt;                     //Variable to initiate MQTT. 
 ShiftRegister74HC595<1> sr (16, 14, 12);  //Setting up shift register.
 uint8_t LDR_PIN = 0;

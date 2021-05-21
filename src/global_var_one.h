@@ -29,9 +29,9 @@
     #endif
     //Configuring Device
     #ifndef FIRMWARE_V
-    #define FIRMWARE_V "2.1.4"                //Current firmware version. (Displayed on Device Portal)
+    #define FIRMWARE_V "2.1.5"                //Current firmware version. (Displayed on Device Portal)
     #endif
-
+    extern HTTPClient httpAPI;
     extern bool hasSensor; 
     extern bool hasDHTSensor;
     extern bool hasLightSensor;

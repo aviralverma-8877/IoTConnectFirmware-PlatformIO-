@@ -246,6 +246,10 @@ void web_set_wifi(AsyncWebServerRequest *request)
         {
           reset();
         }
+        else
+        {
+          ESP.reset();
+        }        
       });
     });
 
@@ -402,24 +406,6 @@ void disable_ap()
 /*---------Firmware Update---------------------------------*/
 void setup_web_server()
 {
-  if(debugging)
-  {
-    if (SPIFFS.exists("/config.json")) 
-    {
-      File configFile = SPIFFS.open("/config.json", "r");
-      if (configFile) 
-      {
-        size_t size = configFile.size();
-        // Allocate a buffer to store contents of the file.
-        std::unique_ptr<char[]> buf(new char[size]);
-
-        configFile.readBytes(buf.get(), size);
-        configFile.close();
-        Serial.print(buf.get());
-      }
-    }
-  }
-
   server.onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
       if (fauxmo.process(request->client(), request->method() == HTTP_GET, request->url(), String((char *)data))) return;
       // Handle any other body request here...
@@ -485,30 +471,7 @@ void setup_web_server()
   });
   server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
   server.begin();
-
-  read_config();
-  bool setup_flag = bool(conf.setupFlag);
-  serialDisplay("Setup Flag", String(setup_flag));
-  bool wifi_setup_done = bool(conf.wifi_setup_done);
-  serialDisplay("WiFI setup done", String(wifi_setup_done));
-  if(setup_flag)
-  {
-    serialDisplay("Setup","Setup Flag is true.");
-    enable_ap();
-  }
-  else if(wifi_setup_done)
-  {
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
-    WiFi.setAutoReconnect(true);
-    WiFi.persistent(true);
-    serialDisplay("Setup","Setup Flag is false.");        
-  }
-  else
-  {
-    serialDisplay("Setup","Setup Flag is true.");
-    enable_ap();
-  }
+  connectToWiFi();
   webSocket.begin();
   webSocket.enableHeartbeat(15000, 3000, 2);
 /*-------Web Server Setup-----------------------------------*/

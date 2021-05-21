@@ -1,15 +1,36 @@
 #include "device_handler.h"
-
+#include "web_handler.h"
 void setup_tickers()
 {
-  TickerForconnectToMqtt.attach(5, connectToMqtt);
-  TickerForfetchIP.attach(10, fetchIP);
-  //TickerForFeedbackLED.attach(0.6, feedbackLED);
   TickerForcheckReset.attach_ms(10, checkReset);
-  TickerForWebSocketStatus.attach(1,sendWebSocketStatus);
+}
+
+void onWifiConnect(const WiFiEventStationModeGotIP& event) {
+  serialDisplay("WiFi","Connected");
+  TickerForFeedbackLED.detach();
+  read_config();
+  if(conf.led_enabled)
+  {
+    digitalWrite(indicator_led, def_led_value);
+  }
+  else
+  {
+    digitalWrite(indicator_led, !def_led_value);
+  }
+  fetchIP();
   TickerForPinging.attach(1, pinging);
   if(hasSensor)
     TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
+  TickerForWebSocketStatus.attach(1,sendWebSocketStatus);
+}
+
+void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
+  TickerForFeedbackLED.attach(0.6, feedbackLED);
+  serialDisplay("WiFi","Disconnected");
+  TickerForPinging.detach();
+  if(hasSensor)
+    TickerForsendSensorData.detach();
+  TickerForWebSocketStatus.detach();
 }
 
 String device_status()
@@ -158,18 +179,21 @@ void send_status_uart()
 /*---Meathod for pinging MQTT Server for active connection--*/
 void pinging()
 {
-  serialDisplay("Ping","Pinged now");
-  StaticJsonDocument<200> doc;
-  doc["d"] = chipid;
-  if(hasSensor)
-    doc["s"] = true;
-  else
-    doc["s"] = false;
-  doc["i"] = IpAddress;
-  doc["l"] = LocalIP;
-  String r;
-  serializeJson(doc, r);
-  sendToMQTT(espraw, r);
+  if(MQTTStatus)
+  {
+    serialDisplay("Ping","Pinged now");
+    StaticJsonDocument<200> doc;
+    doc["d"] = chipid;
+    if(hasSensor)
+      doc["s"] = true;
+    else
+      doc["s"] = false;
+    doc["i"] = IpAddress;
+    doc["l"] = LocalIP;
+    String r;
+    serializeJson(doc, r);
+    sendToMQTT(espraw, r);
+  }
 }
 /*---Meathod for pinging MQTT Server for active connection--*/
 /*-----Meathod for sending sensor data----------------------*/
@@ -327,11 +351,12 @@ bool comp(const char *val1,const char *val2)
 /*-----Meathod for feyching IP Address----------------------*/
 void fetchIP()
 {
+  serialDisplay("IP", "Fetching IP");
   if (WiFi.status() == WL_CONNECTED)
   {
-    HTTPClient httpAPI;
     httpAPI.begin("http://api.ipify.org/?format=json");
     int HttpCode = httpAPI.GET();
+    serialDisplay("Get IP HTTP response code", String(HttpCode));
     if(HttpCode > 0)
     {  
       String payload = httpAPI.getString();
@@ -353,7 +378,51 @@ void fetchIP()
   callback = &blank;
 }
 /*-----Meathod for fetching IP Address----------------------*/
+void connectToWiFi()
+{
+  read_config();
+  bool setup_flag = bool(conf.setupFlag);
+  serialDisplay("Setup Flag", String(setup_flag));
+  bool wifi_setup_done = bool(conf.wifi_setup_done);
+  serialDisplay("WiFI setup done", String(wifi_setup_done));
+  if(setup_flag)
+  {
+    serialDisplay("Setup","Setup Flag is true.");
+    enable_ap();
+  }
+  else if(wifi_setup_done)
+  {
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
+    WiFi.setAutoReconnect(true);
+    WiFi.persistent(true);
+    serialDisplay("Setup","Setup Flag is false.");        
+  }
+  else
+  {
+    serialDisplay("Setup","Setup Flag is true.");
+    enable_ap();
+  }
+}
+void print_config(){
+  if(debugging)
+  {
+    if (SPIFFS.exists("/config.json")) 
+    {
+      File configFile = SPIFFS.open("/config.json", "r");
+      if (configFile) 
+      {
+        size_t size = configFile.size();
+        // Allocate a buffer to store contents of the file.
+        std::unique_ptr<char[]> buf(new char[size]);
 
+        configFile.readBytes(buf.get(), size);
+        configFile.close();
+        Serial.print(buf.get());
+      }
+    }
+  }
+}
 void read_config()
 {
   if (SPIFFS.exists("/config.json")) {
