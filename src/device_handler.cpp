@@ -2,6 +2,10 @@
 #include "web_handler.h"
 void setup_tickers()
 {
+  TickerForconnectToMqtt.attach(5, connectToMqtt);
+  TickerForPinging.attach(1, pinging);
+  if(hasSensor)
+    TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
   TickerForcheckReset.attach_ms(10, checkReset);
 }
 
@@ -17,19 +21,12 @@ void onWifiConnect(const WiFiEventStationModeGotIP& event) {
   {
     digitalWrite(indicator_led, !def_led_value);
   }
-  fetchIP();
-  TickerForPinging.attach(1, pinging);
-  if(hasSensor)
-    TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
   TickerForWebSocketStatus.attach(1,sendWebSocketStatus);
 }
 
 void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   serialDisplay("WiFi","Disconnected");
-  TickerForPinging.detach();
-  if(hasSensor)
-    TickerForsendSensorData.detach();
   TickerForWebSocketStatus.detach();
 }
 

@@ -440,6 +440,7 @@ void setup_mqtt()
     mqtt.onUnsubscribe(onMqttUnsubscribe);
     mqtt.onMessage(onMqttMessage);
     mqtt.onPublish(onMqttPublish);
+    fetchIP();
     connect_to_mqtt();
   }
 }
