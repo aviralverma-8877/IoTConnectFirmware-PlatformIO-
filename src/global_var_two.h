@@ -13,6 +13,7 @@
         #define espaction "ESP_ACTION"           //MQTT Topic for sending sensor status data.
     #endif
     /*--------------MQTT global Configration---------------------------*/
+    extern bool reconnect_mqtt;
     extern bool reset_btn_status;
     extern byte reset_btn_press_count;
     extern unsigned long reset_btn_press_time;

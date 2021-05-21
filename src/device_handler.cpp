@@ -22,12 +22,18 @@ void onWifiConnect(const WiFiEventStationModeGotIP& event) {
     digitalWrite(indicator_led, !def_led_value);
   }
   TickerForWebSocketStatus.attach(1,sendWebSocketStatus);
+  if(reconnect_mqtt)
+  {
+    setup_mqtt();
+  }
 }
 
 void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   serialDisplay("WiFi","Disconnected");
   TickerForWebSocketStatus.detach();
+  reconnect_mqtt = true;
+  mqtt.disconnect();
 }
 
 String device_status()

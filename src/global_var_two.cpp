@@ -3,6 +3,7 @@
 WiFiEventHandler wifiConnectHandler;
 WiFiEventHandler wifiDisconnectHandler;
 WebSocketsServer webSocket = WebSocketsServer(81);
+bool reconnect_mqtt = false;
 bool reset_btn_status = false;
 byte reset_btn_press_count = 0;
 unsigned long reset_btn_press_time = 0;
