@@ -2,13 +2,10 @@
 #include "web_handler.h"
 void setup_tickers()
 {
-  if(mqtt_enabled())
-  {
-    TickerForconnectToMqtt.attach(5, connectToMqtt);
-    TickerForPinging.attach(1, pinging);
-    if(hasSensor)
-      TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
-  }
+  TickerForconnectToMqtt.attach(5, connectToMqtt);
+  TickerForPinging.attach(1, pinging);
+  if(hasSensor)
+    TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
   TickerForcheckReset.attach_ms(10, checkReset);
 }
 
@@ -36,6 +33,9 @@ void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   serialDisplay("WiFi","Disconnected");
   TickerForWebSocketStatus.detach();
+  reconnect_mqtt = true;
+  mqtt.disconnect();
+  mqtt.setCleanSession(true);
   WiFi.disconnect();
   subscribed_to_mqtt_topics = false;
   connectToWiFi();
