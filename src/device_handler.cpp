@@ -25,6 +25,7 @@ void onWifiConnect(const WiFiEventStationModeGotIP& event) {
   if(reconnect_mqtt)
   {
     setup_mqtt();
+    reconnect_mqtt = false;
   }
 }
 
