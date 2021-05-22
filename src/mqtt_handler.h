@@ -23,6 +23,7 @@
     void sendToMQTT(String topic, String msg);
     void send_status();
     void connectToMqtt();
+    bool mqtt_enabled();
     void subscribe_mqtt_input();
     void connect_to_mqtt();
     void setup_mqtt();
