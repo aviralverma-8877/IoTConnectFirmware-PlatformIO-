@@ -18,6 +18,8 @@ void onMqttConnect(bool sessionPresent) {
     digitalWrite(indicator_led, !def_led_value);
   }
   MQTTStatus = true;
+  reconnect_mqtt = false;
+  TickerForconnectToMqtt.detach();
   if(!subscribed_to_mqtt_topics)
   {
     if (SPIFFS.exists("/mqtt_topics.json")) 

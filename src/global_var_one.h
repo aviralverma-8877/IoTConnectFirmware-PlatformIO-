@@ -15,7 +15,7 @@
     #include "structures.h"
     #include "device_handler.h"
     #ifndef MQTT_HOST
-        #define MQTT_HOST "iot-connect.in"        //MQTT Server address
+        #define MQTT_HOST "mqtt.iot-connect.in"        //MQTT Server address
     #endif
     #ifndef MQTT_PORT
         #define MQTT_PORT 1883                    //MQTT Server port
@@ -29,7 +29,7 @@
     #endif
     //Configuring Device
     #ifndef FIRMWARE_V
-    #define FIRMWARE_V "2.1.5"                //Current firmware version. (Displayed on Device Portal)
+    #define FIRMWARE_V "2.1.6"                //Current firmware version. (Displayed on Device Portal)
     #endif
     extern HTTPClient httpAPI;
     extern int MQTT_QoS;

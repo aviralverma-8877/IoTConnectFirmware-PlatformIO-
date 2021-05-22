@@ -2,7 +2,6 @@
 #include "web_handler.h"
 void setup_tickers()
 {
-  TickerForconnectToMqtt.attach(5, connectToMqtt);
   TickerForPinging.attach(1, pinging);
   if(hasSensor)
     TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
@@ -24,8 +23,8 @@ void onWifiConnect(const WiFiEventStationModeGotIP& event) {
   TickerForWebSocketStatus.attach(1,sendWebSocketStatus);
   if(reconnect_mqtt)
   {
-    setup_mqtt();
-    reconnect_mqtt = false;
+    TickerForconnectToMqtt.detach();
+    TickerForconnectToMqtt.attach(5, setup_mqtt);
   }
 }
 
@@ -38,7 +37,7 @@ void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
   mqtt.setCleanSession(true);
   WiFi.disconnect();
   subscribed_to_mqtt_topics = false;
-  connectToWiFi();
+  TickerForTimeOut.once(20,connectToWiFi);
 }
 
 String device_status()
