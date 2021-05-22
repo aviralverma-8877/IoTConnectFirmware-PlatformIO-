@@ -56,6 +56,7 @@ Ticker TickerForWebSocketStatus;
 /*--------------Tickers for Async Meathods------------------*/
 void configure_gpio()
 {
+    serialDisplay("GPIO","Configuring GPIO");
     String config = read_device_config();
     DynamicJsonDocument doc(1000);
     DeserializationError error = deserializeJson(doc, config);

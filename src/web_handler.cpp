@@ -389,12 +389,12 @@ void firmware_web_updater()
 }
 void enable_sta()
 {
+  serialDisplay("WiFi","Enabling STA");
   WiFi.disconnect();
   WiFi.mode(WIFI_STA);
   WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
   WiFi.setAutoReconnect(true);
   WiFi.persistent(true);
-  serialDisplay("Setup","Setup Flag is false.");
 }
 
 void enable_ap()

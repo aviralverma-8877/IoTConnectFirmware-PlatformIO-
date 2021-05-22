@@ -11,7 +11,6 @@ void setup_tickers()
 
 void onWifiConnect(const WiFiEventStationModeGotIP& event) {
   serialDisplay("WiFi","Connected");
-  TickerForWiFiConnect.detach();
   TickerForFeedbackLED.detach();
   read_config();
   if(conf.led_enabled)
@@ -39,7 +38,7 @@ void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
   mqtt.setCleanSession(true);
   WiFi.disconnect();
   subscribed_to_mqtt_topics = false;
-  TickerForWiFiConnect.attach(5, connectToWiFi);
+  connectToWiFi();
 }
 
 String device_status()
