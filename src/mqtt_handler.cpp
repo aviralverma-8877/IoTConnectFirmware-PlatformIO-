@@ -387,7 +387,7 @@ void subscribe_mqtt_input()
   {
     String topic = kv["topic"];
 //    serialDisplay("MQTT Topic", prefix+topic+suffix);
-    mqtt.subscribe((prefix+topic+suffix).c_str(), 2);
+    mqtt.subscribe((prefix+topic+suffix).c_str(), MQTT_QoS);
   }
   subscribed_to_mqtt_topics = true;
 }

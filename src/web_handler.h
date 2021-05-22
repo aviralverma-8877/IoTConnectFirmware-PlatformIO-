@@ -23,6 +23,7 @@
     void web_update_login(AsyncWebServerRequest *request);
     void firmware_web_updater();
     void setup_web_server();
+    void enable_sta();
     void enable_ap();
     void disable_ap();
 #endif

@@ -32,6 +32,7 @@
     #define FIRMWARE_V "2.1.5"                //Current firmware version. (Displayed on Device Portal)
     #endif
     extern HTTPClient httpAPI;
+    extern int MQTT_QoS;
     extern bool hasSensor; 
     extern bool hasDHTSensor;
     extern bool hasLightSensor;
@@ -80,6 +81,7 @@
     extern Ticker TickerForUARTUpdater;
     extern Ticker TickerForTimeOut;
     extern Ticker TickerForTimeOutTwo;
+    extern Ticker TickerForWiFiConnect;
     extern Ticker TickerForWebSocketStatus;
     /*--------------Tickers for Async Meathods------------------*/
      void configure_gpio();

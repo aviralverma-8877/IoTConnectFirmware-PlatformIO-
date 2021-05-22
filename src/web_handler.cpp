@@ -387,9 +387,19 @@ void firmware_web_updater()
     }
   });
 }
+void enable_sta()
+{
+  WiFi.disconnect();
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
+  WiFi.setAutoReconnect(true);
+  WiFi.persistent(true);
+  serialDisplay("Setup","Setup Flag is false.");
+}
 
 void enable_ap()
 {
+  serialDisplay("WiFi","Enabling AP");
   WiFi.disconnect();
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));

@@ -11,6 +11,7 @@ void setup_tickers()
 
 void onWifiConnect(const WiFiEventStationModeGotIP& event) {
   serialDisplay("WiFi","Connected");
+  TickerForWiFiConnect.detach();
   TickerForFeedbackLED.detach();
   read_config();
   if(conf.led_enabled)
@@ -35,6 +36,10 @@ void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
   TickerForWebSocketStatus.detach();
   reconnect_mqtt = true;
   mqtt.disconnect();
+  mqtt.setCleanSession(true);
+  WiFi.disconnect();
+  subscribed_to_mqtt_topics = false;
+  TickerForWiFiConnect.attach(5, connectToWiFi);
 }
 
 String device_status()
@@ -396,16 +401,13 @@ void connectToWiFi()
   }
   else if(wifi_setup_done)
   {
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
-    WiFi.setAutoReconnect(true);
-    WiFi.persistent(true);
-    serialDisplay("Setup","Setup Flag is false.");        
+    serialDisplay("WiFi","Connecting to "+conf.WiFi_SSID+".");
+    enable_sta();
   }
   else
   {
     serialDisplay("Setup","Setup Flag is true.");
-    enable_ap();
+    enable_ap();      
   }
 }
 void print_config(){

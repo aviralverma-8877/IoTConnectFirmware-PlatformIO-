@@ -15,6 +15,7 @@ bool hasDHTSensor = false;
 bool hasLightSensor = false;
 bool def_led_value = HIGH;
 bool def_btn_value = HIGH;
+int MQTT_QoS = 0;
 fauxmoESP fauxmo;
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
@@ -50,6 +51,7 @@ Ticker TickerForSerialListner;
 Ticker TickerForUARTUpdater;
 Ticker TickerForTimeOut;
 Ticker TickerForTimeOutTwo;
+Ticker TickerForWiFiConnect;
 Ticker TickerForWebSocketStatus;
 /*--------------Tickers for Async Meathods------------------*/
 void configure_gpio()
