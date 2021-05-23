@@ -36,7 +36,7 @@ void setup()
   setup_web_server();    //Webserver Handler
   setup_fauxmo();        //Fauxmo Alexa handler
   setup_sensor();        //DHT and LDR Setup
-  //setup_mqtt();          //MQTT Setup
+  fetchIP();
   setup_tickers();       //Ticker Setup
 }
 
