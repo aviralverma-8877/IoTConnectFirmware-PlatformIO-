@@ -3,11 +3,11 @@
 WiFiEventHandler wifiConnectHandler;
 WiFiEventHandler wifiDisconnectHandler;
 WebSocketsServer webSocket = WebSocketsServer(81);
-bool reconnect_mqtt = false;
+bool reconnect_mqtt = true;
 bool reset_btn_status = false;
 byte reset_btn_press_count = 0;
 unsigned long reset_btn_press_time = 0;
-bool debugging = true;                   //Turn On or Off the serial output.
+bool debugging = false;                   //Turn On or Off the serial output.
 String websocket_msg = "";
 bool subscribed_to_mqtt_topics = false;
 /*--------------MQTT Configration---------------------------*/
