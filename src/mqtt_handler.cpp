@@ -52,6 +52,8 @@ void onMqttUnsubscribe(uint16_t packetId) {
 /*-------Meathod called when disconnected from MQTT Topic---*/
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
   MQTTStatus = false;
+  if(WiFi.status() == WL_CONNECTED)
+    TickerForconnectToMqtt.attach(5, setup_mqtt);
   serialDisplay("MQTT","MQTT is disconnected.");
 }
 /*-------Meathod called when disconnected from MQTT Topic---*/
