@@ -23,6 +23,7 @@ void setup()
     newConfig.wifi_setup_done = false;
     write_config(newConfig);
   }
+  delay(100);
   read_config();
   print_config();
   delayMS = conf.pingTime;
