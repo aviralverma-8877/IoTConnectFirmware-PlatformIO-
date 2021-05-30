@@ -20,21 +20,18 @@ void onMqttConnect(bool sessionPresent) {
   MQTTStatus = true;
   reconnect_mqtt = false;
   TickerForconnectToMqtt.detach();
-  if(!subscribed_to_mqtt_topics)
+  if (SPIFFS.exists("/mqtt_topics.json")) 
   {
-    if (SPIFFS.exists("/mqtt_topics.json")) 
-    {
-      StaticJsonDocument<1000> doc;
-      StaticJsonDocument<100> filter;
-      filter["mqtt"]["service"] = true;
-      String device_config = read_device_config();
-      DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
-      if(error)
-        return;
-      String service = doc["mqtt"]["service"];
-      if(!comp(service.c_str(), "N/A"))
-        subscribe_mqtt_input();
-    }
+    StaticJsonDocument<1000> doc;
+    StaticJsonDocument<100> filter;
+    filter["mqtt"]["service"] = true;
+    String device_config = read_device_config();
+    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+    if(error)
+      return;
+    String service = doc["mqtt"]["service"];
+    if(!comp(service.c_str(), "N/A"))
+      subscribe_mqtt_input();
   }
 }
 /*-------Meathod called when connected to MQTT--------------*/
@@ -57,7 +54,6 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
     reconnect_mqtt = true;
     mqtt.disconnect();
     mqtt.setCleanSession(true);
-    subscribed_to_mqtt_topics = false;
     TickerForconnectToMqtt.detach();
     TickerForconnectToMqtt.attach(5, setup_mqtt);
   }
@@ -400,7 +396,6 @@ void subscribe_mqtt_input()
 //    serialDisplay("MQTT Topic", prefix+topic+suffix);
     mqtt.subscribe((prefix+topic+suffix).c_str(), MQTT_QoS);
   }
-  subscribed_to_mqtt_topics = true;
 }
 
 void connect_to_mqtt()

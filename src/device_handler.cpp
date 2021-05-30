@@ -35,7 +35,6 @@ void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
   reconnect_mqtt = true;
   mqtt.disconnect();
   mqtt.setCleanSession(true);
-  subscribed_to_mqtt_topics = false;
 }
 
 String device_status()

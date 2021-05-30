@@ -9,7 +9,6 @@ byte reset_btn_press_count = 0;
 unsigned long reset_btn_press_time = 0;
 bool debugging = false;                   //Turn On or Off the serial output.
 String websocket_msg = "";
-bool subscribed_to_mqtt_topics = false;
 /*--------------MQTT Configration---------------------------*/
 bool MQTTStatus = false;
 String chipid = String(ESP.getChipId());  //Fetching ESP device ID.

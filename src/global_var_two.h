@@ -20,7 +20,6 @@
     extern WiFiEventHandler wifiConnectHandler;
     extern WiFiEventHandler wifiDisconnectHandler;
     extern WebSocketsServer webSocket;
-    extern bool subscribed_to_mqtt_topics;
     extern String chipid;  //Fetching ESP device ID.
     extern bool debugging;                   //Turn On or Off the serial output.
     extern String outtopic;          //MQTT Topic for sending data from ESP.
