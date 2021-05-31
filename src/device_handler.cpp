@@ -376,6 +376,12 @@ void fetchIP()
       serialDisplay("LocalIP",LocalIP);
       serialDisplay("Gateway",WiFi_gateway);
     }
+    else
+    {
+      TickerForTimeOut.once(1,[](){
+        fetchIP();
+      });
+    }
   }
   Wifi_ssid = WiFi.SSID();
   serialDisplay("SSID",Wifi_ssid);
