@@ -327,6 +327,7 @@ void send_status()
     }
     doc["esp_clip_id"] = chipid;
     doc["action"] = "status";
+    doc["hasSensor"] = hasSensor;
     String r;
     serializeJson(doc, r);
     TickerForTimeOut.once_ms(100,[r](){
