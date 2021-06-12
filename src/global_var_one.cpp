@@ -15,7 +15,7 @@ bool hasDHTSensor = false;
 bool hasLightSensor = false;
 bool def_led_value = HIGH;
 bool def_btn_value = HIGH;
-int MQTT_QoS = 0;
+int MQTT_QoS = 2;
 fauxmoESP fauxmo;
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
