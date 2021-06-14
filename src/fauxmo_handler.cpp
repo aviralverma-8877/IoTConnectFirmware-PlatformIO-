@@ -1,5 +1,4 @@
 #include "fauxmo_handler.h"
-
 void setup_fauxmo()
 {
     fauxmo.createServer(false);

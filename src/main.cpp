@@ -35,9 +35,9 @@ void setup()
   wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
   wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
   setup_web_server();    //Webserver Handler
-  setup_sensor();        //DHT and LDR Setup
-  fetchIP();
+  fetchIP();             //Fetching Public and Local IP
   setup_fauxmo();        //Fauxmo Alexa handler
+  setup_sensor();        //DHT and LDR Setup
   setup_tickers();       //Ticker Setup
 }
 

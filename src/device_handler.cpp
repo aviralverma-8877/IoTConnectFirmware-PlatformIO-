@@ -358,7 +358,7 @@ void fetchIP()
   serialDisplay("IP", "Fetching IP");
   if (WiFi.status() == WL_CONNECTED)
   {
-    httpAPI.begin("http://api.ipify.org/?format=json");
+    httpAPI.begin(wifiClient, "http://api.ipify.org/?format=json");
     int HttpCode = httpAPI.GET();
     serialDisplay("Get IP HTTP response code", String(HttpCode));
     if(HttpCode > 0)
