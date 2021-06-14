@@ -29,7 +29,7 @@
     #endif
     //Configuring Device
     #ifndef FIRMWARE_V
-    #define FIRMWARE_V "2.1.6"                //Current firmware version. (Displayed on Device Portal)
+    #define FIRMWARE_V "2.1.7"                //Current firmware version. (Displayed on Device Portal)
     #endif
     extern HTTPClient httpAPI;
     extern int MQTT_QoS;
