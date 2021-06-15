@@ -53,25 +53,26 @@
     extern ShiftRegister74HC595<1> sr;  //Setting up shift register.
     /*----------------------------------------------------------*/
     /*----------------------------------------------------------*/
-    extern String payload;                           //Global variables
-    extern String IpAddress;                    //Global variables
-    extern String LocalIP;                      //Global variables
-    extern String data;                              //Global variables
-    extern String Wifi_ssid;                         //Global variables
-    extern String WiFi_gateway;
-    extern byte loopCount;                       //Global variables
-    extern uint8_t attempts;                     //Global variables
-    extern uint8_t i;                                //Global variables
-    extern HTTPClient http;                          //Global variables
-    extern uint32_t delayMS;                         //Global variables
-    extern String updateAddress;                     //Update address
-    extern DNSServer dnsServer;                      //Global variables
+    extern String payload;                    //Global variables
+    extern String IpAddress;                  //Global variables
+    extern String LocalIP;                    //Global variables
+    extern String data;                       //Global variables
+    extern String Wifi_ssid;                  //Global variables
+    extern String WiFi_gateway;               //Global variables
+    extern byte loopCount;                    //Global variables
+    extern uint8_t attempts;                  //Global variables
+    extern uint8_t i;                         //Global variables
+    extern HTTPClient http;                   //Global variables
+    extern uint32_t delayMS;                  //Global variables
+    extern String updateAddress;              //Global variables
+    extern DNSServer dnsServer;               //Global variables
     extern AsyncWebServer server;             //Global variables
-    extern bool shouldReboot;
-    extern String wifi_ssid;
-    extern String wifi_pass;
-    extern const byte DNS_PORT;
-    extern IPAddress apIP;
+    extern int illuminance_value;             //Global variables
+    extern bool shouldReboot;                 //Global variables
+    extern String wifi_ssid;                  //Global variables
+    extern String wifi_pass;                  //Global variables
+    extern const byte DNS_PORT;               //Global variables
+    extern IPAddress apIP;                    //Global variables
     /*----------------------------------------------------------*/
     /*--------------Tickers for Async Meathods------------------*/
     extern Ticker TickerForPinging;

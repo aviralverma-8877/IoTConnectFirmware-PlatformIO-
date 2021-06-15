@@ -210,6 +210,7 @@ void ICACHE_RAM_ATTR handleData(float h, float t) {
   doc["d"] = chipid;
   doc["t"] = temperature;
   doc["h"] = humidity;
+  doc["l"] = illuminance_value;
   String s;
   serializeJson(doc, s);
   send_data_to_webSocket(s);
@@ -258,9 +259,6 @@ void sendSensorData()
     return;
   bool has_dht = doc["device_config"]["dht"]["INSTALLED"];
   bool has_light = doc["device_config"]["light"]["INSTALLED"];
-  doc.clear();
-  doc["action"] = "sensor";
-  doc["d"] = chipid;  
   if(has_dht)
   {
     if(comp(DHTType.c_str(), "dht11"))
@@ -272,16 +270,10 @@ void sendSensorData()
       sensor_dht22.read();
     }  
   }
-  int light;
   if(has_light)
   {
-    light = map(analogRead(LDR_PIN), 0, 1024, 0, 100);
-    doc["l"] = light;
+    illuminance_value = map(analogRead(LDR_PIN), 0, 1024, 0, 100);
   }
-  String s;
-  serializeJson(doc, s);
-  send_data_to_webSocket(s);
-  sendToMQTT(espsensor, s);
 }
 /*-----Meathod for sending sensor data----------------------*/
 /*-----Meathod for checking reset button--------------------*/
