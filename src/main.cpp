@@ -35,16 +35,33 @@ void setup()
   wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
   wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
   setup_web_server();    //Webserver Handler
-  fetchIP();             //Fetching Public and Local IP
-  setup_fauxmo();        //Fauxmo Alexa handler
-  setup_sensor();        //DHT and LDR Setup
-  setup_tickers();       //Ticker Setup
+  if(!conf.setupFlag)
+  {
+    fetchIP();             //Fetching Public and Local IP
+    setup_fauxmo();        //Fauxmo Alexa handler
+    setup_sensor();        //DHT and LDR Setup
+    setup_tickers();       //Ticker Setup
+  }
+  else{
+    dnsServer.start(DNS_PORT, "*", apIP);
+    if(hasSensor)
+    {
+      setup_sensor();        //DHT and LDR Setup
+      TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
+    }
+  }
 }
 
 void loop() 
 {
-  MDNS.update();
+  if(conf.setupFlag)
+  {
+    dnsServer.processNextRequest();  
+  }
+  else{
+    MDNS.update();
+    fauxmo.handle();
+  }
   webSocket.loop();
-  fauxmo.handle();
   callback();
 }

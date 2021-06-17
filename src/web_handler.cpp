@@ -230,6 +230,7 @@ void web_set_wifi(AsyncWebServerRequest *request)
     conf.WiFi_SSID = ssid;
     conf.WiFi_PASS = pass;
     conf.wifi_setup_done = true;
+    conf.setupFlag = false;
     write_config(conf);
     String return_msg = "";
     StaticJsonDocument<200> return_doc;
@@ -407,8 +408,6 @@ void enable_ap()
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP("IoT Connect");
-  dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-  dnsServer.start(DNS_PORT, "*", apIP);
 }
 
 void disable_ap()
@@ -494,15 +493,8 @@ void setup_web_server()
   webSocket.begin();
   webSocket.enableHeartbeat(15000, 3000, 2);
 /*-------Web Server Setup-----------------------------------*/
-  if(WiFi.status()!= WL_CONNECTED)
-    while(WiFi.status()!= WL_CONNECTED)
-    {
-      dnsServer.processNextRequest();
-      webSocket.loop();
-      callback();
-    }
-  conf.setupFlag = false;
-  write_config(conf);
+  bool setup_flag = bool(conf.setupFlag);
+  serialDisplay("Setup Flag", String(setup_flag));
   WiFi.hostname("iot-connect-"+chipid);
   MDNS.begin("iot-connect-"+chipid);
   MDNS.addService("http", "tcp", 80);

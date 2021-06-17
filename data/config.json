@@ -1,5 +1,5 @@
 {
-    "setupFlag": false,
+    "setupFlag": true,
     "updateFlag": false,
     "led_enabled": true,
     "save_eeprom": false,
