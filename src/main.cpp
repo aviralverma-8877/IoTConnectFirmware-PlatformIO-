@@ -34,6 +34,11 @@ void setup()
   
   wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
   wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
+  if(conf.setupFlag)
+  {
+    dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+    dnsServer.start(DNS_PORT, "*", apIP);
+  }
   setup_web_server();    //Webserver Handler
   if(!conf.setupFlag)
   {
@@ -43,7 +48,6 @@ void setup()
     setup_tickers();       //Ticker Setup
   }
   else{
-    dnsServer.start(DNS_PORT, "*", apIP);
     if(hasSensor)
     {
       setup_sensor();        //DHT and LDR Setup
