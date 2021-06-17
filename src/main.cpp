@@ -40,7 +40,8 @@ void setup()
     dnsServer.start(DNS_PORT, "*", apIP);
   }
   setup_web_server();    //Webserver Handler
-  if(!conf.setupFlag)
+  serialDisplay("ap_enabled",String(ap_enabled));
+  if(!ap_enabled)
   {
     fetchIP();             //Fetching Public and Local IP
     setup_fauxmo();        //Fauxmo Alexa handler
@@ -58,14 +59,14 @@ void setup()
 
 void loop() 
 {
-  if(conf.setupFlag)
+  MDNS.update();
+  webSocket.loop();
+  if(ap_enabled)
   {
     dnsServer.processNextRequest();  
   }
   else{
-    MDNS.update();
     fauxmo.handle();
   }
-  webSocket.loop();
   callback();
 }
