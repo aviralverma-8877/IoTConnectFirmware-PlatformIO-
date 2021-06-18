@@ -1,6 +1,11 @@
 //Including Libraries
 #include <Arduino.h>
-#include <ESP8266mDNS.h>        // Include the mDNS library
+#include <ESP8266WiFi.h>
+#include <DNSServer.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h> 
+#include <ESP8266mDNS.h>
+
 #include "global_var_two.h"
 #include "global_var_one.h"
 #include "structures.h"
@@ -31,13 +36,17 @@ void setup()
   if(conf.save_eeprom)
     perform_action();
   callback = &blank;
-  
-  wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
-  wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
+
   if(conf.setupFlag)
   {
+    serialDisplay("DNS Server","Enabling DNS Server");
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
     dnsServer.start(DNS_PORT, "*", apIP);
+  }
+  else
+  {
+    wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
+    wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
   }
   setup_web_server();    //Webserver Handler
   serialDisplay("ap_enabled",String(ap_enabled));
@@ -59,14 +68,14 @@ void setup()
 
 void loop() 
 {
-  MDNS.update();
-  webSocket.loop();
   if(ap_enabled)
   {
-    dnsServer.processNextRequest();  
+    dnsServer.processNextRequest();
   }
   else{
+    MDNS.update();
     fauxmo.handle();
   }
   callback();
+  webSocket.loop();
 }

@@ -408,7 +408,7 @@ void enable_ap()
   WiFi.disconnect();
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  WiFi.softAP("IoT Connect");
+  WiFi.softAP("IoT Connect", "", 10);
   ap_enabled = true;
 }
 
@@ -475,7 +475,6 @@ void setup_web_server()
     //fauxmo request handling
       if (fauxmo.process(request->client(), request->method() == HTTP_GET, request->url(), String((char *)data))) return;
     //fauxmo request handling
-    // Handle any other body request here...
   });
 
   server.onNotFound([](AsyncWebServerRequest *request) {
@@ -490,10 +489,13 @@ void setup_web_server()
       }
       request->redirect("/");
   });
-  
-  connectToWiFi();
-  
   server.begin();
+
+  serialDisplay("Setting Hostname","iot-connect-"+chipid);
+  WiFi.hostname("iot-connect-"+chipid);
+
+  connectToWiFi();      //Connect to Access Point or start AP depending on config
+  
   webSocket.begin();
   webSocket.enableHeartbeat(15000, 3000, 2);
 
@@ -511,11 +513,7 @@ void setup_web_server()
       }
     }
   }
-  
-  serialDisplay("Setting Hostname","iot-connect-"+chipid);
-  WiFi.hostname("iot-connect-"+chipid);
-
-  serialDisplay("Enabling dns","iot-connect-"+chipid);
+  serialDisplay("Enabling mdns","iot-connect-"+chipid);
   if (MDNS.begin("iot-connect-"+chipid)) {  //Start mDNS with name esp8266
     MDNS.addService("http", "tcp", 80);
     serialDisplay("MSDN","MDNS started");
