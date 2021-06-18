@@ -128,7 +128,10 @@ body{
     background-color: #666;
     margin:10px;
   }
-
+  .fix_width
+  {
+    width: 200px;
+  }
   #signal_fk
   {
     width:0px;
