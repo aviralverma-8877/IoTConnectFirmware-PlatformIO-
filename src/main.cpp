@@ -1,11 +1,7 @@
 //Including Libraries
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include <DNSServer.h>
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h> 
-#include <ESP8266mDNS.h>
 
+//Include Local libraries
 #include "global_var_two.h"
 #include "global_var_one.h"
 #include "structures.h"
@@ -15,6 +11,13 @@
 #include "device_handler.h"
 #include "web_sockets_handler.h"
 #include "fauxmo_handler.h"
+
+//Include Global libraries
+#include <ESP8266WiFi.h>
+#include <DNSServer.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h> 
+#include <ESP8266mDNS.h>
 
 void setup() 
 {
