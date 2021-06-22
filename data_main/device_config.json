@@ -6,6 +6,7 @@
         "port": 1883,
         "uname": "",
         "pass": "",
+        "qos" : 1,
         "prefix": "",
         "suffix" : "",
         "auth": false

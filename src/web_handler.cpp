@@ -146,6 +146,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
       doc["mqtt"]["port"] = MQTT_PORT;
       doc["mqtt"]["uname"] = MQTT_UNAME;
       doc["mqtt"]["pass"] = MQTT_PASS;
+      doc["mqtt"]["qos"] = MQTT_QoS;
       doc["mqtt"]["auth"] = true;
     }
     TickerForTimeOut.once_ms(10,[doc]{

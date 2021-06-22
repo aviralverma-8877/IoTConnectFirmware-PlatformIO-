@@ -512,6 +512,7 @@ function save_config()
                 "port":1883,
                 "uname":"",
                 "pass":"",
+                "qos":1,
                 "prefix":"",
                 "suffix":"",
                 "auth":false
@@ -554,31 +555,39 @@ function save_config()
             port = document.getElementById("mqtt_port").value;
             uname = document.getElementById("mqtt_uname").value;
             pass = document.getElementById("mqtt_pass").value;
+            qos = document.getElementById("mqtt_qos").value;
             prefix = document.getElementById("mqtt_prefix").value;
             suffix = document.getElementById("mqtt_suffix").value;
             if(host != "")
             {    
                 if(port != "" && port > 0)
                 {
-                    if(uname == "")
-                        auth = false
-                    else
+                    if(qos in [0,1,2])
                     {
-                        auth = true
-                        if(pass == "")
+                        if(uname == "")
+                            auth = false
+                        else
                         {
-                            alert("Please provide MQTT login password.")
-                            return;
+                            auth = true
+                            if(pass == "")
+                            {
+                                alert("Please provide MQTT login password.")
+                                return;
+                            }
                         }
+                        config.mqtt.service = service;
+                        config.mqtt.host = host;
+                        config.mqtt.port = port;
+                        config.mqtt.uname = uname;
+                        config.mqtt.pass = pass;
+                        config.mqtt.qos = qos;
+                        config.mqtt.prefix = prefix;
+                        config.mqtt.suffix = suffix;
+                        config.mqtt.auth = auth;
                     }
-                    config.mqtt.service = service;
-                    config.mqtt.host = host;
-                    config.mqtt.port = port;
-                    config.mqtt.uname = uname;
-                    config.mqtt.pass = pass;
-                    config.mqtt.prefix = prefix;
-                    config.mqtt.suffix = suffix;
-                    config.mqtt.auth = auth;
+                    else{
+                        alert("QoS must be in 0, 1 or 2");
+                    }
                 }
                 else
                 {

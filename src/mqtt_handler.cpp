@@ -372,13 +372,14 @@ void subscribe_mqtt_input()
   StaticJsonDocument<200> filter;
   filter["mqtt"]["prefix"] = true;
   filter["mqtt"]["suffix"] = true;
+  filter["mqtt"]["qos"] = true;
   String device_config = read_device_config();
   DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
   if(error)
   {
     return;
   }
-
+  MQTT_QoS = doc["mqtt"]["qos"];
   String prefix = doc["mqtt"]["prefix"];
   String suffix = doc["mqtt"]["suffix"];
   mqtt.subscribe((prefix+intopic+suffix).c_str(), 2);
