@@ -477,6 +477,7 @@ String read_mqtt_config()
       return buf.get();
     }
   }
+  return "";
 }
 
 String read_device_config()
@@ -493,6 +494,7 @@ String read_device_config()
       return buf.get();
     }
   }
+  return "";
 }
 
 void generate_mqtt_topics()

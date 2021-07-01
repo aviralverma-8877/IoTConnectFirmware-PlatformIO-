@@ -20,7 +20,7 @@
         },
         "status_led" : {
             "led_pin" : 13,
-            "status" : true,
+            "status" : false,
             "def" : false
         },
         "reset_btn" : {
