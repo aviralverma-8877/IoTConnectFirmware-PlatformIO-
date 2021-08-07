@@ -117,15 +117,21 @@ function show_sensor(json)
 {
     if(json.hasOwnProperty("t"))
     {
-        document.getElementById("sensor_temp").innerHTML = json.t+" &#8451;";
+        document.getElementById("sensor_temp").innerHTML ="<span id='sensor_temp_st' class='signal_st'></span><div id='sensor_temp_bk' class='signal_bk'><div id='sensor_temp_fk' class='signal_fk'></div></div>"
+        document.getElementById("sensor_temp_fk").style.width = json.l+"px";
+        document.getElementById("sensor_temp_st").innerHTML = json.l+" °C";
     }
     if(json.hasOwnProperty("h"))
     {
-        document.getElementById("sensor_humid").innerHTML = json.h+" %";
+        document.getElementById("sensor_humid").innerHTML ="<span id='sensor_humid_st' class='signal_st'></span><div id='sensor_humid_bk' class='signal_bk'><div id='sensor_humid_fk' class='signal_fk'></div></div>"
+        document.getElementById("sensor_humid_fk").style.width = json.l+"px";
+        document.getElementById("sensor_humid_st").innerHTML = json.l+" %";
     }
     if(json.hasOwnProperty("l"))
     {
-        document.getElementById("sensor_light").innerHTML = json.l+" %";
+        document.getElementById("sensor_light").innerHTML ="<span id='sensor_light_st' class='signal_st'></span><div id='sensor_light_bk' class='signal_bk'><div id='sensor_light_fk' class='signal_fk'></div></div>"
+        document.getElementById("sensor_light_fk").style.width = json.l+"px";
+        document.getElementById("sensor_light_st").innerHTML = json.l+" %";
     }
 }
 function show_status(json)
@@ -165,7 +171,7 @@ function show_status(json)
             cont += "<br />MQTT Status : <b>Connected</b><br />";
         else
             cont += "<br />MQTT Status : <b>Not Connected</b><br />";
-        cont += "Signal Strength : <span id='signal_st'></span><div id='signal_bk'><div id='signal_fk'></div></div>"
+        cont += "Signal Strength : <span id='signal_st' class='signal_st'></span><div id='signal_bk' class='signal_bk'><div id='signal_fk' class='signal_fk'></div></div>"
         element = document.getElementById('WiFi_Status');
         element.innerHTML = cont;
         dBm = json["wifi_rssi"];
@@ -267,7 +273,7 @@ function update_table_data(json)
         {
             on_change_val = "toggle_relay(this, '"+element.name+"')"
             pin = element.comp + "-" + element.pin;
-            topic = element.topic;
+            topic = element.full_topic;
             print_table(pin, on_change_val, element.name, topic);
         });
         table_printed = true;

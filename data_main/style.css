@@ -121,7 +121,7 @@ body{
     display: none;
   }
 
-  #signal_bk
+  .signal_bk
   {
     width:100px;
     height: 10px;
@@ -132,7 +132,7 @@ body{
   {
     width: 200px;
   }
-  #signal_fk
+  .signal_fk
   {
     width:0px;
     height: 10px;

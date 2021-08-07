@@ -69,15 +69,16 @@ void MqttBlank(AsyncMqttClientDisconnectReason reason) {
 void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) 
 {
   MQTTStatus = true;
-  serialDisplay("MQTT Topic",topic);
-  serialDisplay("MQTT Message",payload);
   String p = "";
   for(int i=index; (unsigned)i<len;i++)
   {
     p += payload[i];
   }
+  serialDisplay("MQTT Topic",topic);
+  serialDisplay("MQTT Message",p);
+  send_data_to_webSocket(p);
   String device_config = read_device_config();
-  DynamicJsonDocument device_doc(100);
+  DynamicJsonDocument device_doc(500);
   DynamicJsonDocument device_filter(100);
   device_filter["mqtt"]["prefix"] = true;
   device_filter["mqtt"]["suffix"] = true;
@@ -236,6 +237,9 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       {
         relay = (const char*)kv["name"];
         action = msg["action"];
+        TickerForTimeOut.once_ms(10,[relay, action](){
+          perform_action(relay, action);
+        });
         kv["status"] = action;
       }
     }
@@ -245,15 +249,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     if(conf.save_eeprom)
     {
       write_mqtt_topics(mqtt_data);
-      TickerForTimeOut.once_ms(10,[](){
-        perform_action();
-      });
-    }
-    else
-    {
-      TickerForTimeOut.once_ms(10,[relay, action](){
-        perform_action(relay, action);
-      });
     }
   }
 }
@@ -290,16 +285,30 @@ void send_status()
   read_config();
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
-    String mqtt_data = read_mqtt_config();
     DynamicJsonDocument doc(1500);
     StaticJsonDocument<200> filter;
+    filter["mqtt"]["prefix"] = true;
+    filter["mqtt"]["suffix"] = true;
+    String device_config = read_device_config();
+    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+    if(error)
+    {
+      return;
+    }
+    String prefix = doc["mqtt"]["prefix"];
+    String suffix = doc["mqtt"]["suffix"];
+    serialDisplay("MQTT Prefix",prefix);
+    serialDisplay("MQTT Suffix",suffix);
+    doc.clear();
+    filter.clear();
+    String mqtt_data = read_mqtt_config();
     filter["relay"][0]["name"] = true;
     if(conf.save_eeprom)
       filter["relay"][0]["status"] = true;
     filter["relay"][0]["pin"] = true;
     filter["relay"][0]["comp"] = true;
     filter["relay"][0]["topic"] = true;
-    DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
+    error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
     if(error)
       return;
     if(!conf.save_eeprom)
@@ -312,6 +321,10 @@ void send_status()
           int pin = kv["pin"];
           bool status = bool(sr.get(pin));
           kv["status"] = status;
+          String topic = kv["topic"];
+          String full_topic = prefix+topic+suffix;
+          kv["full_topic"] = full_topic;
+          serialDisplay("full_topic",full_topic);
           serialDisplay("Pin", String(pin));
           serialDisplay("Status", String(status));
         }
@@ -320,6 +333,10 @@ void send_status()
           int pin = kv["pin"];
           bool status = bool(digitalRead(pin));
           kv["status"] = status;
+          String topic = kv["topic"];
+          String full_topic = prefix+topic+suffix;
+          kv["full_topic"] = full_topic;
+          serialDisplay("full_topic",full_topic);
           serialDisplay("Pin", String(pin));
           serialDisplay("Status", String(status));
         }
@@ -382,7 +399,7 @@ void subscribe_mqtt_input()
   MQTT_QoS = doc["mqtt"]["qos"];
   String prefix = doc["mqtt"]["prefix"];
   String suffix = doc["mqtt"]["suffix"];
-  mqtt.subscribe((prefix+intopic+suffix).c_str(), 2);
+  mqtt.subscribe((prefix+intopic+suffix).c_str(), MQTT_QoS);
   doc.clear();
   filter.clear();
   filter["relay"][0]["topic"] = true;
@@ -395,7 +412,7 @@ void subscribe_mqtt_input()
   for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
   {
     String topic = kv["topic"];
-//    serialDisplay("MQTT Topic", prefix+topic+suffix);
+    serialDisplay("MQTT Topic", prefix+topic+suffix);
     mqtt.subscribe((prefix+topic+suffix).c_str(), MQTT_QoS);
   }
 }
