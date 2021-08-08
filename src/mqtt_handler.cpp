@@ -311,34 +311,40 @@ void send_status()
     error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
     if(error)
       return;
-      for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
+    for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
+    {
+      String com = kv["comp"];
+      if(comp(com.c_str(), "shift_reg"))
       {
-        String com = kv["comp"];
-        if(comp(com.c_str(), "shift_reg"))
+        int pin = kv["pin"];
+        bool status = bool(sr.get(pin));
+        if(!conf.save_eeprom)
         {
-          int pin = kv["pin"];
-          bool status = bool(sr.get(pin));
           kv["status"] = status;
-          String topic = kv["topic"];
-          String full_topic = prefix+topic+suffix;
-          kv["full_topic"] = full_topic;
-          serialDisplay("full_topic",full_topic);
-          serialDisplay("Pin", String(pin));
-          serialDisplay("Status", String(status));
         }
-        else if(comp(com.c_str(), "gpio"))
-        {
-          int pin = kv["pin"];
-          bool status = bool(digitalRead(pin));
-          kv["status"] = status;
-          String topic = kv["topic"];
-          String full_topic = prefix+topic+suffix;
-          kv["full_topic"] = full_topic;
-          serialDisplay("full_topic",full_topic);
-          serialDisplay("Pin", String(pin));
-          serialDisplay("Status", String(status));
-        }
+        String topic = kv["topic"];
+        String full_topic = prefix+topic+suffix;
+        kv["full_topic"] = full_topic;
+        serialDisplay("full_topic",full_topic);
+        serialDisplay("Pin", String(pin));
+        serialDisplay("Status", String(status));
       }
+      else if(comp(com.c_str(), "gpio"))
+      {
+        int pin = kv["pin"];
+        bool status = bool(digitalRead(pin));
+        if(!conf.save_eeprom)
+        {
+          kv["status"] = status;
+        }
+        String topic = kv["topic"];
+        String full_topic = prefix+topic+suffix;
+        kv["full_topic"] = full_topic;
+        serialDisplay("full_topic",full_topic);
+        serialDisplay("Pin", String(pin));
+        serialDisplay("Status", String(status));
+      }
+    }
     doc["esp_clip_id"] = chipid;
     doc["action"] = "status";
     doc["hasSensor"] = hasSensor;
