@@ -311,8 +311,6 @@ void send_status()
     error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
     if(error)
       return;
-    if(!conf.save_eeprom)
-    {
       for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
       {
         String com = kv["comp"];
@@ -341,7 +339,6 @@ void send_status()
           serialDisplay("Status", String(status));
         }
       }
-    }
     doc["esp_clip_id"] = chipid;
     doc["action"] = "status";
     doc["hasSensor"] = hasSensor;
