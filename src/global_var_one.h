@@ -15,22 +15,9 @@
     #include "fauxmoESP.h"
     #include "structures.h"
     #include "device_handler.h"
-    #ifndef MQTT_HOST
-        #define MQTT_HOST "mqtt.iot-connect.in"        //MQTT Server address
-    #endif
-    #ifndef MQTT_PORT
-        #define MQTT_PORT 1883                    //MQTT Server port
-    #endif
-    //MQTT Cred
-    #ifndef MQTT_UNAME
-        #define MQTT_UNAME "iotconnect"
-    #endif
-    #ifndef MQTT_PASS
-        #define MQTT_PASS "iot-12345"
-    #endif
     //Configuring Device
     #ifndef FIRMWARE_V
-    #define FIRMWARE_V "2.1.10"                //Current firmware version. (Displayed on Device Portal)
+    #define FIRMWARE_V "2.1.11"                //Current firmware version. (Displayed on Device Portal)
     #endif
     extern WiFiClient wifiClient;
     extern HTTPClient httpAPI;

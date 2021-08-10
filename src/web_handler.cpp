@@ -142,6 +142,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
     String service = doc["mqtt"]["service"];
     if(comp(service.c_str(),"IoT Connect"))
     {
+      #include "iotconnect_mqtt_cred.h"
       doc["mqtt"]["host"] = MQTT_HOST;
       doc["mqtt"]["port"] = MQTT_PORT;
       doc["mqtt"]["uname"] = MQTT_UNAME;
