@@ -200,7 +200,7 @@ function print_table(relay_count, on_change_val, name, topic)
     var content = "";
     content = "\
     <tr>\
-        <th style='font:Fjalla One'>\
+        <th style=\"font-family: 'Fjalla One'\">\
             "+name+" : <span id='status-"+relay_count+"'></span>\
         </th>\
         <th>\
@@ -311,7 +311,7 @@ function scan_wifi()
     element = document.getElementById('ssid_list');
     element.innerHTML = "\
     <tr>\
-        <td style='font:Fjalla One'>\
+        <td style=\"font-family: 'Fjalla One'\">\
             <b>Scanning...</b>\
         </td>\
     </tr>";
@@ -323,7 +323,7 @@ function scan_wifi()
             for(i=0; i < ssid_list.length; i++)
             {
                 content = content + "<tr>\
-                                        <td style='font:Fjalla One'>\
+                                        <td style=\"font-family: 'Fjalla One'\">\
                                             <a href='#ssid_input' onclick='ssid_input.value=\""+ssid_list[i]+"\"'><b>"+ssid_list[i]+"</b></a>\
                                         </td>\
                                     </tr>"
