@@ -211,7 +211,7 @@ function print_table(relay_count, on_change_val, name, topic)
         </th>\
     </tr>\
     <tr>\
-        <th>\
+        <th style=\"font-family: 'Fjalla One'\">\
             Mqtt Topic ("+name+")\
         </th>\
         <th>\
