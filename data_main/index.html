@@ -11,101 +11,140 @@
         <script type="application/javascript" src="script.js"></script>
     </head>
     <body onload="set_ui()">
-        <h1 style="font-family: 'Fjalla One'">IoT Connect : Solutions for smart homes.<h4><a href="#" target="_blank" id="hostname"></a></h4></h1>
-        <h5>Firmware Version : <b><span id="firmware_version"></span></b></h5>
-        <hr />
+        <h1 style="font-family: 'Fjalla One'">IoT Connect : Solutions for smart homes.</h1>
         <center>
-            <table style="width:100%">
-                <tr>
-                    <td>
-                        <div id='WiFi_Status' align="left" style="font-family: 'Fjalla One'">
-                        </div>            
-                    </td>
-                    <td>
-                        <div id='sensor_readings' align="left" style="font-family: 'Fjalla One'">
-                            Temperature : <span id="sensor_temp">N/A</span><br />
-                            Humidity : <span id="sensor_humid">N/A</span><br />
-                            Light : <span id="sensor_light">N/A</span><br />              
+            <div class="tabset">
+                <!-- Tab 1 -->
+                <input type="radio" name="tabset" id="tab1" aria-controls="status" checked>
+                <label for="tab1">Status</label>                
+                <!-- Tab 2 -->
+                <input type="radio" name="tabset" id="tab2" aria-controls="relay_control">
+                <label for="tab2">Relay Control</label>
+                <!-- Tab 3 -->
+                <input type="radio" name="tabset" id="tab3" aria-controls="alexa">
+                <label for="tab3">Alexa</label>
+                <!-- Tab 4 -->
+                <input type="radio" name="tabset" id="tab4" aria-controls="security_setup">
+                <label for="tab4">Security Setup</label>
+                <!-- Tab 5 -->
+                <input type="radio" name="tabset" id="tab5" aria-controls="wifi_setup">
+                <label for="tab5">WiFi Setup</label>
+                <!-- Tab 5 -->
+                <input type="radio" name="tabset" id="tab6" aria-controls="device_setup">
+                <label for="tab6">Device Setup</label>
+
+                <div class="tab-panels">
+                    <section id="status" class="tab-panel">
+                        <table style="width:100%">
+                            <tr>
+                                <td>
+                                    <div style="font-family: 'Fjalla One'">
+                                        Device URL: <a href="#" target="_blank" id="hostname"></a>
+                                    </div>
+                                    <div id='WiFi_Status' align="left" style="font-family: 'Fjalla One'">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div id='sensor_readings' align="left" style="font-family: 'Fjalla One'">
+                                        Firmware Version : <span id="firmware_version"></span><br />
+                                        Temperature : <span id="sensor_temp">N/A</span><br />
+                                        Humidity : <span id="sensor_humid">N/A</span><br />
+                                        Light : <span id="sensor_light">N/A</span><br />              
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </section>
+                    <section id="relay_control" class="tab-panel">
+                        <table id="relay_table" cellspacing="15" style="border:#ccc solid thin">
+                        </table><br />
+                        <div style="font-family: 'Fjalla One'">
+                            Control 
+                            <select id="relay_select" class="list_relay" onchange="httpGet(0,0,'device','{\'action\':\'change_relay_btn_action\',\'status\':\''+this.value+'\'}')">
+                                <option value="N/A">Nothing</option>
+                            </select>
+                            using reset button.
                         </div>
-                    </td>
-                </tr>
-            </table>
-            <div align="right">
-                <button class='style_btn' onclick="if(confirm('Are you sure you want to reset this device?')){httpGet(0,0,'device','{\'action\':\'reset\'}')}">Reset</button>
-            <button class='style_btn' onclick="httpGet(0,0,'device','{\'action\':\'reboot\'}');setTimeout(function(){location.reload()},1000);">Reboot</button>
-                <button class='style_btn' onclick="location.href = ('/update')">Update</button>
-                <br />
-                <button class='style_btn' onclick="start_init_setup()">Re-Configure Device</button>
-            </div>
-            <div>
-                <input type="checkbox" id="on_board_led" onchange="httpGet(0,0,'device','{\'action\':\'toggle_onb\',\'status\':'+this.checked+'}')" /> <span style="font-family: 'Fjalla One'">Enable/Disable On Board LED</span>
-            </div>
-            <div>
-                <input type="checkbox" id="save_status" onchange="httpGet(0,0,'device','{\'action\':\'save_status\',\'status\':'+this.checked+'}')" /> <span style="font-family: 'Fjalla One'">Save last status on EEPROM</span>
-            </div>
-            <hr />
-            <table id="relay_table" cellspacing="15" style="border:#ccc solid thin">
-            </table>
-            <hr/>
-            <div style="font-family: 'Fjalla One'">
-                Control 
-                <select id="relay_select" class="list_relay" onchange="httpGet(0,0,'device','{\'action\':\'change_relay_btn_action\',\'status\':\''+this.value+'\'}')">
-                    <option value="N/A">Nothing</option>
-                </select>
-                using reset button.
-            </div>
-            <hr />
-            <div style="font-family: 'Fjalla One'">
-                Control 
-                <select id="fauxmo_select_1" class="list_relay" onchange="update_fuxmo_list()">
-                    <option value="N/A">Nothing</option>
-                </select>,
-                <select id="fauxmo_select_2" class="list_relay" onchange="update_fuxmo_list()">
-                    <option value="N/A">Nothing</option>
-                </select> and 
-                <select id="fauxmo_select_3" class="list_relay" onchange="update_fuxmo_list()">
-                    <option value="N/A">Nothing</option>
-                </select>
-                using Amazon Echo devices.
-            </div>
-            <hr />
-            <div>
-                <table>
-                    <tr>
-                        <td>
+                    </section>
+                    <section id="alexa" class="tab-panel">
+                        <div style="font-family: 'Fjalla One'">
+                            Select 3 relays to control using Amazon Echo devices.
+                            <table>
+                                <tr>
+                                    <td>
+                                        Relay #1
+                                    </td>
+                                    <td>
+                                        <select id="fauxmo_select_1" class="list_relay" onchange="update_fuxmo_list()">
+                                            <option value="N/A">N/A</option>
+                                        </select>            
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Relay #2
+                                    </td>
+                                    <td>
+                                        <select id="fauxmo_select_2" class="list_relay" onchange="update_fuxmo_list()">
+                                            <option value="N/A">N/A</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Relay #3
+                                    </td>
+                                    <td>
+                                        <select id="fauxmo_select_3" class="list_relay" onchange="update_fuxmo_list()">
+                                            <option value="N/A">N/A</option>
+                                        </select>            
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>        
+                    </section>
+                    <section id="security_setup" class="tab-panel">
+                        <div>                            
                             <input type="text" id="login_uname_input" placeholder="Login Username" style="margin:1px"/><br />
                             <input type="password" id="login_pass_input" placeholder="Login Password" style="margin:1px"/><br />
                             <input type="password" id="login_confirm_pass_input" placeholder="Confirm Password" style="margin:1px"/><br />
-                        </td>
-                        <td style="height:100%">
                             <button class='style_btn' onclick="update_login(login_uname_input, login_pass_input, login_confirm_pass_input)">Update Login Details</button>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            <hr />
-            <div>
-                <table>
-                    <tr>
-                        <td>
-                            <input type="text" id="ssid_input" placeholder="WiFi SSID" style="margin:1px"/><br />
-                            <input type="password" id="pass_input" placeholder="WiFi Password" style="margin:1px"/>
-                        </td>
-                        <td>
-                            <button class='style_btn' onclick="if(confirm('Make sure that you have proivided the correct WiFi details,\nIncorrect details will host an Access Point to configure WiFi after 30 sec.')) update_wifi(ssid_input.value, pass_input.value)">Update Wifi</button>
-                            <button class='style_btn' onclick="scan_wifi()">Scan</button>                               
-                        </td>
-                    </tr>
-                </table>
-                <table id="ssid_list" cellspacing="15" style="border:#ccc solid thin; width:100%">
-                    <tr>
-                        <td style="font:Fjalla One">
-                            <b>No SSID</b>
-                        </td>
-                    </tr>
-                </table>
-                <hr />
-            </div>
+                        </div>
+                    </section>
+                    <section id="wifi_setup" class="tab-panel">
+                        <div>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <input type="text" id="ssid_input" placeholder="WiFi SSID" style="margin:1px"/><br />
+                                        <input type="password" id="pass_input" placeholder="WiFi Password" style="margin:1px"/>
+                                    </td>
+                                    <td>
+                                        <button class='style_btn' onclick="if(confirm('Make sure that you have proivided the correct WiFi details,\nIncorrect details will host an Access Point to configure WiFi after 30 sec.')) update_wifi(ssid_input.value, pass_input.value)">Update Wifi</button>
+                                        <button class='style_btn' onclick="scan_wifi()">Scan</button>                               
+                                    </td>
+                                </tr>
+                            </table>
+                            <table id="ssid_list" cellspacing="15" style="border:#ccc solid thin; width:100%">
+                                <tr>
+                                    <td style="font:Fjalla One">
+                                        <b>No SSID</b>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </section>
+                    <section id="device_setup" class="tab-panel">
+                        <div>
+                            <input type="checkbox" id="on_board_led" onchange="httpGet(0,0,'device','{\'action\':\'toggle_onb\',\'status\':'+this.checked+'}')" /> <span style="font-family: 'Fjalla One'">Enable/Disable On Board LED</span>
+                            <input type="checkbox" id="save_status" onchange="httpGet(0,0,'device','{\'action\':\'save_status\',\'status\':'+this.checked+'}')" /> <span style="font-family: 'Fjalla One'">Save last status on EEPROM</span>
+                        </div>
+                        <button class='style_btn' onclick="if(confirm('Are you sure you want to reset this device?')){httpGet(0,0,'device','{\'action\':\'reset\'}')}">Reset</button>
+                        <button class='style_btn' onclick="httpGet(0,0,'device','{\'action\':\'reboot\'}');setTimeout(function(){location.reload()},1000);">Reboot</button>
+                        <button class='style_btn' onclick="location.href = ('/update')">Update</button>
+                        <button class='style_btn' onclick="start_init_setup()">Re-Configure Device</button>
+                    </section>
+                </div>
         </center>
         <div id="cover" class="slow" onclick="close_init_setup()"></div>
         <div id="popup" class="slow">
