@@ -209,13 +209,8 @@ function print_table(relay_count, on_change_val, name, topic)
                 <span class=\"slider round\"></span>\
             </label>\
         </th>\
-    </tr>\
-    <tr>\
         <th style=\"font-family: 'Fjalla One'\">\
-            Mqtt Topic ("+name+")\
-        </th>\
-        <th>\
-            <input type=\"text\" readonly style='font-family:Courier New; width:100%' value=\""+topic+"\" />\
+            Mqtt Topic : "+topic+"\
         </th>\
     </tr>";
     table.innerHTML += content;
