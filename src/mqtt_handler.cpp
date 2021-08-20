@@ -83,7 +83,9 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   web_payload["payload"] = p;
   String r;
   serializeJson(web_payload, r);
-  send_data_to_webSocket(r);
+  TickerForTimeOut.once_ms(100,[r](){
+    send_data_to_webSocket(r);
+  });
   web_payload.clear();
 
   String device_config = read_device_config();
@@ -291,7 +293,9 @@ void sendToMQTT(String topic, String msg)
     web_payload["payload"] = msg;
     String r;
     serializeJson(web_payload, r);
-    send_data_to_webSocket(r);
+    TickerForTimeOut.once_ms(100,[r](){
+      send_data_to_webSocket(r);
+    });
     web_payload.clear();
   }
 }
