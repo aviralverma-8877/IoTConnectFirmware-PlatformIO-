@@ -36,6 +36,9 @@ function init_socket()
                 var cont = document.getElementById("consoleBoard").innerHTML;
                 document.getElementById("consoleBoard").innerHTML = "MQTT ("+json.topic+") << "+json.payload+" <br />" + cont;
             }
+            else{
+                console.log(json)
+            }
         }
         catch(err)
         {

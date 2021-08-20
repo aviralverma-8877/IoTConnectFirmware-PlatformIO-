@@ -81,9 +81,9 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   web_payload["action"] = "mqtt_in";
   web_payload["topic"] = topic;
   web_payload["payload"] = p;
-  String r;
-  serializeJson(web_payload, r);
-  send_data_to_webSocket(r);
+  String pl;
+  serializeJson(web_payload, pl);
+  send_data_to_webSocket(pl);
   web_payload.clear();
 
   String device_config = read_device_config();
