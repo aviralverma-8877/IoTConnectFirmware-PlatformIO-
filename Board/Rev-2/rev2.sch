@@ -8329,8 +8329,6 @@ General purpose 1N400x type rectifier
 <part name="D7" library="adafruit" library_urn="urn:adsk.eagle:library:420" deviceset="1N4004" device="" package3d_urn="urn:adsk.eagle:package:6240344/1"/>
 <part name="D6" library="adafruit" library_urn="urn:adsk.eagle:library:420" deviceset="1N4004" device="" package3d_urn="urn:adsk.eagle:package:6240344/1"/>
 <part name="D5" library="adafruit" library_urn="urn:adsk.eagle:library:420" deviceset="1N4004" device="" package3d_urn="urn:adsk.eagle:package:6240344/1"/>
-<part name="GND_SWITCH" library="Toggle Switch" deviceset="TOGGLE_SWITCH" device=""/>
-<part name="VCC_SWITCH" library="Toggle Switch" deviceset="TOGGLE_SWITCH" device=""/>
 <part name="FLASH" library="Toggle Switch" deviceset="TOGGLE_SWITCH" device=""/>
 <part name="PULLUP" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:25945/1" value="10kohm"/>
 <part name="EXTRA_GPIO" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA06-2" device="" package3d_urn="urn:adsk.eagle:package:8342/1" value="Extra GPIO"/>
@@ -8579,8 +8577,6 @@ General purpose 1N400x type rectifier
 <instance part="D5" gate="1" x="195.58" y="20.32" smashed="yes">
 <attribute name="VALUE" x="195.58" y="23.0886" size="1.27" layer="96"/>
 </instance>
-<instance part="GND_SWITCH" gate="G$1" x="327.66" y="86.36" smashed="yes" rot="R180"/>
-<instance part="VCC_SWITCH" gate="G$1" x="388.62" y="109.22" smashed="yes"/>
 <instance part="FLASH" gate="G$1" x="40.64" y="66.04" smashed="yes" rot="R180"/>
 <instance part="PULLUP" gate="G$1" x="35.56" y="83.82" smashed="yes" rot="R270">
 <attribute name="NAME" x="37.0586" y="87.63" size="1.778" layer="95" rot="R270"/>
@@ -8726,19 +8722,14 @@ General purpose 1N400x type rectifier
 <label x="144.78" y="116.84" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="GND_SWITCH" gate="G$1" pin="IN"/>
-<wire x1="327.66" y1="93.98" x2="327.66" y2="106.68" width="0.1524" layer="91"/>
-<label x="327.66" y="106.68" size="1.778" layer="95" rot="R180"/>
-</segment>
-<segment>
 <pinref part="PULLUP" gate="G$1" pin="1"/>
 <wire x1="35.56" y1="88.9" x2="35.56" y2="93.98" width="0.1524" layer="91"/>
 <label x="33.02" y="93.98" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="GND_SWITCH" gate="G$1" pin="OFF"/>
-<wire x1="322.58" y1="93.98" x2="322.58" y2="106.68" width="0.1524" layer="91"/>
-<label x="317.5" y="106.68" size="1.778" layer="95"/>
+<pinref part="EXTRA_GPIO" gate="1" pin="12"/>
+<wire x1="353.06" y1="99.06" x2="353.06" y2="91.44" width="0.1524" layer="91"/>
+<label x="353.06" y="91.44" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="VCC" class="0">
@@ -8824,16 +8815,6 @@ General purpose 1N400x type rectifier
 <pinref part="9V9" gate="VCC" pin="VCC"/>
 </segment>
 <segment>
-<pinref part="VCC_SWITCH" gate="G$1" pin="IN"/>
-<wire x1="388.62" y1="101.6" x2="388.62" y2="88.9" width="0.1524" layer="91"/>
-<label x="388.62" y="88.9" size="1.778" layer="95"/>
-</segment>
-<segment>
-<pinref part="VCC_SWITCH" gate="G$1" pin="OFF"/>
-<wire x1="393.7" y1="101.6" x2="393.7" y2="88.9" width="0.1524" layer="91"/>
-<label x="393.7" y="88.9" size="1.778" layer="95"/>
-</segment>
-<segment>
 <pinref part="IC1" gate="P" pin="VCC"/>
 <wire x1="-5.08" y1="30.48" x2="-5.08" y2="35.56" width="0.1524" layer="91"/>
 <pinref part="9V10" gate="VCC" pin="VCC"/>
@@ -8847,6 +8828,11 @@ General purpose 1N400x type rectifier
 <pinref part="U$2" gate="G$1" pin="VDD"/>
 <pinref part="9V12" gate="VCC" pin="VCC"/>
 <wire x1="88.9" y1="96.52" x2="88.9" y2="104.14" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="EXTRA_GPIO" gate="1" pin="2"/>
+<wire x1="365.76" y1="99.06" x2="365.76" y2="91.44" width="0.1524" layer="91"/>
+<label x="365.76" y="91.44" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="RX" class="0">
@@ -9431,22 +9417,6 @@ General purpose 1N400x type rectifier
 <wire x1="10.16" y1="96.52" x2="40.64" y2="96.52" width="0.1524" layer="91"/>
 <pinref part="FLASH" gate="G$1" pin="IN"/>
 <wire x1="40.64" y1="73.66" x2="40.64" y2="96.52" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$55" class="0">
-<segment>
-<pinref part="GND_SWITCH" gate="G$1" pin="ON"/>
-<wire x1="332.74" y1="93.98" x2="332.74" y2="99.06" width="0.1524" layer="91"/>
-<wire x1="332.74" y1="99.06" x2="353.06" y2="99.06" width="0.1524" layer="91"/>
-<pinref part="EXTRA_GPIO" gate="1" pin="12"/>
-</segment>
-</net>
-<net name="N$56" class="0">
-<segment>
-<pinref part="VCC_SWITCH" gate="G$1" pin="ON"/>
-<wire x1="383.54" y1="101.6" x2="383.54" y2="99.06" width="0.1524" layer="91"/>
-<wire x1="365.76" y1="99.06" x2="383.54" y2="99.06" width="0.1524" layer="91"/>
-<pinref part="EXTRA_GPIO" gate="1" pin="2"/>
 </segment>
 </net>
 <net name="N$57" class="0">
