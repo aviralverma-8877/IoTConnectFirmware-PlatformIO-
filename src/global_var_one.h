@@ -17,7 +17,7 @@
     #include "device_handler.h"
     //Configuring Device
     #ifndef FIRMWARE_V
-    #define FIRMWARE_V "2.1.11"                //Current firmware version. (Displayed on Device Portal)
+    #define FIRMWARE_V "2.1.12"                //Current firmware version. (Displayed on Device Portal)
     #endif
     extern WiFiClient wifiClient;
     extern HTTPClient httpAPI;

@@ -26,6 +26,16 @@ function init_socket()
             {
                 show_sensor(json);
             }
+            else if(json.action == "mqtt_out")
+            {
+                var cont = document.getElementById("consoleBoard").innerHTML;
+                document.getElementById("consoleBoard").innerHTML = "MQTT ("+json.topic+") >> "+json.payload+" <br />" + cont;
+            }
+            else if(json.action == "mqtt_in")
+            {
+                var cont = document.getElementById("consoleBoard").innerHTML;
+                document.getElementById("consoleBoard").innerHTML = "MQTT ("+json.topic+") << "+json.payload+" <br />" + cont;
+            }
         }
         catch(err)
         {
@@ -42,6 +52,26 @@ function init_socket()
     Socket.onerror = function(event){
       //  console.log("Error in websockets");
     }
+}
+
+function open_debug_console()
+{
+    document.getElementById("console_btn").innerHTML = "Close Debug Console"
+    document.getElementById("console_btn").setAttribute('onclick',"close_debug_console()");
+    document.getElementById("console").style.display="block";
+    setTimeout(function(){
+        document.getElementById("console").style.opacity=1;
+    },10)
+}
+
+function close_debug_console()
+{
+    document.getElementById("console_btn").innerHTML = "Open Debug Console"
+    document.getElementById("console_btn").setAttribute('onclick',"open_debug_console()");
+    document.getElementById("console").style.opacity=0;
+    setTimeout(function(){
+        document.getElementById("console").style.display="none";
+    },1000)
 }
 
 function httpGet(relay, value, action, options = {})

@@ -14,22 +14,21 @@
         <center>
             <h1 style="font-family: 'Fjalla One'">IoT Connect : Solutions for smart homes.</h1>
             <div class="tabset">
-                <!-- Tab 1 -->
                 <input type="radio" name="tabset" id="tab1" aria-controls="status" checked>
                 <label for="tab1">Status</label>                
-                <!-- Tab 2 -->
+                
                 <input type="radio" name="tabset" id="tab2" aria-controls="relay_control">
                 <label for="tab2">Relay</label>
-                <!-- Tab 3 -->
+                
                 <input type="radio" name="tabset" id="tab3" aria-controls="alexa">
                 <label for="tab3">Alexa</label>
-                <!-- Tab 4 -->
+                
                 <input type="radio" name="tabset" id="tab4" aria-controls="security_setup">
                 <label for="tab4">Security</label>
-                <!-- Tab 5 -->
+                
                 <input type="radio" name="tabset" id="tab5" aria-controls="wifi_setup">
                 <label for="tab5">WiFi</label>
-                <!-- Tab 5 -->
+                
                 <input type="radio" name="tabset" id="tab6" aria-controls="device_setup">
                 <label for="tab6">Device</label>
 
@@ -67,11 +66,27 @@
                             </select>
                             using reset button.
                         </div><br />
-                        <div style="font-family: 'Fjalla One'">
-                            Use the corresponding MQTT topics to toggle relay via MQTT.<br />
-                            Provide following input:<br />
-                            <span style="color: green;">Turn ON : {"action":true}</span><br />
-                            <span style="color: red;">Turn OFF : {"action":false}</span><br />
+                        <div style="font-family: 'Fjalla One'" align="center">
+                            <table>
+                                <tr>
+                                    <th style="padding: 5px;">
+                                        Use the corresponding MQTT topics<br />to toggle relay via MQTT.
+                                    </th>
+                                    <th style="padding: 5px;">
+                                        Provide following input:<br />
+                                        Turn ON : <span style="color: green;">{"action":true}</span><br />
+                                        Turn OFF : <span style="color: red;">{"action":false}</span><br />
+                                    </th>
+                                    <th style="padding: 5px;">
+                                        <button class='style_btn' id="console_btn" onclick="open_debug_console()">Open Debug Console</button>
+                                    </th>
+                                </tr>
+                            </table>
+                            <div class="console slow" id="console" align="left">
+                                <h2 style="font-family: 'Fjalla One'">Debug console</h4>
+                                <div id="consoleBoard">
+                                </div>
+                            </div>    
                         </div>
                     </section>
                     <section id="alexa" class="tab-panel">

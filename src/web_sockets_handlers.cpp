@@ -10,5 +10,6 @@ void send_websocket()
 {
     webSocket.broadcastTXT(websocket_msg);
     callback = &blank;
+    serialDisplay("Web Data", websocket_msg);
 }
  
