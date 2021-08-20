@@ -265,7 +265,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*----Meathod for sending MQTT Data-------------------------*/
 void sendToMQTT(String topic, String msg)
 {
-
   DynamicJsonDocument doc(500);
   StaticJsonDocument<200> filter;
   filter["mqtt"]["prefix"] = true;
