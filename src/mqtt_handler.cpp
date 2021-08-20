@@ -83,9 +83,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   web_payload["payload"] = p;
   String r;
   serializeJson(web_payload, r);
-  TickerForTimeOut.once_ms(100,[r](){
-    send_data_to_webSocket(r);
-  });
+  send_data_to_webSocket(r);
   web_payload.clear();
 
   String device_config = read_device_config();
@@ -287,15 +285,12 @@ void sendToMQTT(String topic, String msg)
     serialDisplay("MQTT","Published to "+prefix+topic+suffix);
     DynamicJsonDocument web_payload(500);
     mqtt.publish((prefix+topic+suffix).c_str(), 0, false, msg.c_str(), msg.length());
-
     web_payload["action"] = "mqtt_out";
     web_payload["topic"] = prefix+topic+suffix;
     web_payload["payload"] = msg;
     String r;
     serializeJson(web_payload, r);
-    TickerForTimeOut.once_ms(100,[r](){
-      send_data_to_webSocket(r);
-    });
+    send_data_to_webSocket(r);
     web_payload.clear();
   }
 }
