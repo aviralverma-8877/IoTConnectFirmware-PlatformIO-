@@ -283,15 +283,21 @@ void sendToMQTT(String topic, String msg)
     String prefix = doc["mqtt"]["prefix"];
     String suffix = doc["mqtt"]["suffix"];
     serialDisplay("MQTT","Published to "+prefix+topic+suffix);
-    DynamicJsonDocument web_payload(500);
     mqtt.publish((prefix+topic+suffix).c_str(), 0, false, msg.c_str(), msg.length());
-    web_payload["action"] = "mqtt_out";
-    web_payload["topic"] = prefix+topic+suffix;
-    web_payload["payload"] = msg;
-    String r;
-    serializeJson(web_payload, r);
-    send_data_to_webSocket(r);
-    web_payload.clear();
+    if(!comp(topic.c_str(),espraw))
+    {
+      if(!comp(topic.c_str(),espsensor.c_str()))
+      {
+        DynamicJsonDocument web_payload(500);
+        web_payload["action"] = "mqtt_out";
+        web_payload["topic"] = prefix+topic+suffix;
+        web_payload["payload"] = msg;
+        String r;
+        serializeJson(web_payload, r);
+        send_data_to_webSocket(r);
+        web_payload.clear();
+      }
+    }
   }
 }
 /*----Meathod for sending MQTT Data-------------------------*/
