@@ -76,18 +76,16 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   }
   serialDisplay("MQTT Topic",topic);
   serialDisplay("MQTT Message",p);
-  
-  DynamicJsonDocument web_payload(500);
-  web_payload["action"] = "mqtt_in";
-  web_payload["topic"] = topic;
-  web_payload["payload"] = p;
+  DynamicJsonDocument device_doc(1000);
+  device_doc["action"] = "mqtt_in";
+  device_doc["topic"] = topic;
+  device_doc["payload"] = p;
   String pl;
-  serializeJson(web_payload, pl);
+  serializeJson(device_doc, pl);
+  serialDisplay("Sending Websocket","MQTT Input");
   send_data_to_webSocket(pl);
-  web_payload.clear();
-
+  device_doc.clear();
   String device_config = read_device_config();
-  DynamicJsonDocument device_doc(500);
   DynamicJsonDocument device_filter(100);
   device_filter["mqtt"]["prefix"] = true;
   device_filter["mqtt"]["suffix"] = true;
@@ -325,8 +323,6 @@ void send_status()
     filter.clear();
     String mqtt_data = read_mqtt_config();
     filter["relay"][0]["name"] = true;
-    if(conf.save_eeprom)
-      filter["relay"][0]["status"] = true;
     filter["relay"][0]["pin"] = true;
     filter["relay"][0]["comp"] = true;
     filter["relay"][0]["topic"] = true;
@@ -340,10 +336,7 @@ void send_status()
       {
         int pin = kv["pin"];
         bool status = bool(sr.get(pin));
-        if(!conf.save_eeprom)
-        {
-          kv["status"] = status;
-        }
+        kv["status"] = status;
         String topic = kv["topic"];
         String full_topic = prefix+topic+suffix;
         kv["full_topic"] = full_topic;
@@ -355,10 +348,7 @@ void send_status()
       {
         int pin = kv["pin"];
         bool status = bool(digitalRead(pin));
-        if(!conf.save_eeprom)
-        {
-          kv["status"] = status;
-        }
+        kv["status"] = status;
         String topic = kv["topic"];
         String full_topic = prefix+topic+suffix;
         kv["full_topic"] = full_topic;
@@ -372,19 +362,16 @@ void send_status()
     doc["hasSensor"] = hasSensor;
     String r;
     serializeJson(doc, r);
-    TickerForTimeOut.once_ms(100,[r](){
-      serialDisplay("Sending Status","WebSocket");
-      send_data_to_webSocket(r);
-      serialDisplay("Sending Status","WebSocket Sent");
-      if(MQTTStatus)
-      {
-        TickerForTimeOut.once_ms(100,[r](){
-          serialDisplay("Sending Status","MQTT");
-          sendToMQTT(outtopic, r);
-          serialDisplay("Sending Status","MQTT Sent");
-        });
-      }
-    });
+    serialDisplay("Sending Status","WebSocket");
+    send_data_to_webSocket(r);
+    if(MQTTStatus)
+    {
+      TickerForTimeOut.once_ms(100,[r](){
+        serialDisplay("Sending Status","MQTT");
+        sendToMQTT(outtopic, r);
+        serialDisplay("Sending Status","MQTT Sent");
+      });
+    }
   }  
 }
 /*----Meathod for sending relay status----------------------*/
