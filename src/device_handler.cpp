@@ -21,7 +21,7 @@ void onWifiConnect(const WiFiEventStationModeGotIP& event) {
   {
     digitalWrite(indicator_led, !def_led_value);
   }
-  TickerForWebSocketStatus.attach(10,sendWebSocketStatus);
+  TickerForWebSocketStatus.attach(1,sendWebSocketStatus);
   if(reconnect_mqtt)
   {
     TickerForconnectToMqtt.detach();
