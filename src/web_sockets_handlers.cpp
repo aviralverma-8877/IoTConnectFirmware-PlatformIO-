@@ -2,13 +2,13 @@
 
 void send_data_to_webSocket(String options)
 {
-    webSocket.broadcastTXT(options);
-    serialDisplay("Websocket Data", websocket_msg);
+    callback = &send_websocket;
+    websocket_msg = options;
 }
 
 void send_websocket()
 {
     webSocket.broadcastTXT(websocket_msg);
     callback = &blank;
+    serialDisplay("Web Data", websocket_msg);
 }
- 

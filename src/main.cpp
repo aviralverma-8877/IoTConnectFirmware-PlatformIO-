@@ -81,4 +81,5 @@ void loop()
   }
   callback();
   webSocket.loop();
+  delay(1);
 }
