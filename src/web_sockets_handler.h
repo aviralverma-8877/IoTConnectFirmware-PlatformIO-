@@ -5,4 +5,7 @@
     #include"common_meathods.h"
     void send_data_to_webSocket(String options);
     void send_websocket();
+    void initWebSocket();
+    void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+             void *arg, uint8_t *data, size_t len);
 #endif

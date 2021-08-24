@@ -52,6 +52,7 @@ void setup()
     wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
   }
   setup_web_server();    //Webserver Handler
+  initWebSocket();
   serialDisplay("ap_enabled",String(ap_enabled));
   if(!ap_enabled)
   {
@@ -80,6 +81,4 @@ void loop()
     fauxmo.handle();
   }
   callback();
-  webSocket.loop();
-  delay(1);
 }

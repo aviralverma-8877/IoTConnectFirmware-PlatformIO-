@@ -17,7 +17,7 @@
     #include "device_handler.h"
     //Configuring Device
     #ifndef FIRMWARE_V
-    #define FIRMWARE_V "2.1.12"                //Current firmware version. (Displayed on Device Portal)
+    #define FIRMWARE_V "2.2.0"                //Current firmware version. (Displayed on Device Portal)
     #endif
     extern WiFiClient wifiClient;
     extern HTTPClient httpAPI;
@@ -54,6 +54,7 @@
     extern uint32_t delayMS;                  //Global variables
     extern String updateAddress;              //Global variables
     extern DNSServer dnsServer;               //Global variables
+    extern AsyncWebSocket webSocket;          //Global variables
     extern AsyncWebServer server;             //Global variables
     extern int illuminance_value;             //Global variables
     extern bool shouldReboot;                 //Global variables

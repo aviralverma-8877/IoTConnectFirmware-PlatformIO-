@@ -1,7 +1,7 @@
 #ifndef global_var_two
     #define global_var_two
     #include <Arduino.h>
-    #include <WebSocketsServer.h>
+    #include <ESPAsyncWebServer.h>
     /*--------------MQTT global Configration---------------------------*/
     #ifndef norttopic
         #define norttopic "NORTIFICATION"                //MQTT Topic for sending nortifications.
@@ -19,7 +19,6 @@
     extern unsigned long reset_btn_press_time;
     extern WiFiEventHandler wifiConnectHandler;
     extern WiFiEventHandler wifiDisconnectHandler;
-    extern WebSocketsServer webSocket;
     extern String chipid;  //Fetching ESP device ID.
     extern bool debugging;                   //Turn On or Off the serial output.
     extern String outtopic;          //MQTT Topic for sending data from ESP.

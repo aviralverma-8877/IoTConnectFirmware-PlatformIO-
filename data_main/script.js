@@ -3,7 +3,7 @@ var wifi_status=false;
 var chipid = "";
 function init_socket()
 {
-    Socket = new WebSocket('ws://'+window.location.hostname+":81/");
+    Socket = new WebSocket('ws://'+window.location.hostname+"/ws");
     Socket.onmessage = function(event){
         //console.log("Text : "+event.data);
         try

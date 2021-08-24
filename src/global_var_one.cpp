@@ -31,7 +31,8 @@ HTTPClient http;                          //Global variables
 uint32_t delayMS;                         //Global variables
 String updateAddress;                     //Update address
 DNSServer dnsServer;                      //Global variables
-AsyncWebServer server(80);             //Global variables
+AsyncWebSocket webSocket("/ws");          //Global variables
+AsyncWebServer server(80);                //Global variables
 /*----------------------------------------------------------*/
 configuration conf = {false,false,true,false,2000,"N/A","admin","admin","","",false,"N/A","N/A","N/A"};
 String IpAddress = "";                    //Global variables

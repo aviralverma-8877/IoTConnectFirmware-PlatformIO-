@@ -497,10 +497,6 @@ void setup_web_server()
   WiFi.hostname("iot-connect-"+chipid);
 
   connectToWiFi();      //Connect to Access Point or start AP depending on config
-  
-  webSocket.begin();
-  webSocket.enableHeartbeat(15000, 3000, 2);
-
 /*-------Web Server Setup-----------------------------------*/
   bool setup_flag = bool(conf.setupFlag);
   serialDisplay("Setup Flag", String(setup_flag));

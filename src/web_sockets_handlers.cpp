@@ -1,14 +1,28 @@
 #include "web_sockets_handler.h"
 
-void send_data_to_webSocket(String options)
+void send_data_to_webSocket(String msg)
 {
-    callback = &send_websocket;
-    websocket_msg = options;
+    webSocket.textAll(msg);
 }
 
-void send_websocket()
-{
-    webSocket.broadcastTXT(websocket_msg);
-    callback = &blank;
-    serialDisplay("Web Data", websocket_msg);
+void initWebSocket() {
+  webSocket.onEvent(onEvent);
+  server.addHandler(&webSocket);
+}
+
+void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+             void *arg, uint8_t *data, size_t len) {
+    switch (type) {
+      case WS_EVT_CONNECT:
+        serialDisplay("WebSocket client","Connected");
+        break;
+      case WS_EVT_DISCONNECT:
+        serialDisplay("WebSocket client","Disconnected");
+        break;
+      case WS_EVT_DATA:
+        break;
+      case WS_EVT_PONG:
+      case WS_EVT_ERROR:
+        break;
+  }
 }
