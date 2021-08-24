@@ -318,6 +318,7 @@ void send_status()
     filter.clear();
     String mqtt_data = read_mqtt_config();
     filter["relay"][0]["name"] = true;
+    filter["relay"][0]["status"] = true;
     filter["relay"][0]["pin"] = true;
     filter["relay"][0]["comp"] = true;
     filter["relay"][0]["topic"] = true;
@@ -358,15 +359,17 @@ void send_status()
     String r;
     serializeJson(doc, r);
     serialDisplay("Sending Status","WebSocket");
-    send_data_to_webSocket(r);
-    if(MQTTStatus)
-    {
-      TickerForTimeOut.once_ms(100,[r](){
-        serialDisplay("Sending Status","MQTT");
-        sendToMQTT(outtopic, r);
-        serialDisplay("Sending Status","MQTT Sent");
-      });
-    }
+    TickerForTimeOut.once_ms(10,[r](){
+      send_data_to_webSocket(r);
+      if(MQTTStatus)
+      {
+        TickerForTimeOut.once_ms(10,[r](){
+          serialDisplay("Sending Status","MQTT");
+          sendToMQTT(outtopic, r);
+          serialDisplay("Sending Status","MQTT Sent");
+        });
+      }
+    });
   }  
 }
 /*----Meathod for sending relay status----------------------*/
