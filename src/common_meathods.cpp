@@ -4,6 +4,13 @@ void (*callback)(void);
 void write_config(configuration config)
 {
   File configFile = SPIFFS.open("/config.json", "w");
+  String r = config_to_json(config);
+  Serial.println(r);
+  configFile.print(r); 
+  configFile.close();
+}
+String config_to_json(configuration config)
+{
   StaticJsonDocument<500> jsonBuffer;
   jsonBuffer["setupFlag"] = config.setupFlag;
   jsonBuffer["updateFlag"] = config.updateFlag;
@@ -21,10 +28,8 @@ void write_config(configuration config)
   jsonBuffer["fauxmo_relay_3"] = config.fauxmo_relay_3;
   String r;
   serializeJsonPretty(jsonBuffer, r);
-  configFile.print(r); 
-  configFile.close();
+  return r;
 }
-
 void write_device_config(StaticJsonDocument<1000> jsonBuffer)
 {
 
