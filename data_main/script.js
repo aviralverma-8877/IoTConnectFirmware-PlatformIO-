@@ -151,14 +151,14 @@ function show_sensor(json)
     if(json.hasOwnProperty("t"))
     {
         document.getElementById("sensor_temp").innerHTML ="<span id='sensor_temp_st' class='signal_st'></span><div id='sensor_temp_bk' class='signal_bk'><div id='sensor_temp_fk' class='signal_fk'></div></div>"
-        document.getElementById("sensor_temp_fk").style.width = json.l+"px";
-        document.getElementById("sensor_temp_st").innerHTML = json.l+" °C";
+        document.getElementById("sensor_temp_fk").style.width = json.t+"px";
+        document.getElementById("sensor_temp_st").innerHTML = json.t+" °C";
     }
     if(json.hasOwnProperty("h"))
     {
         document.getElementById("sensor_humid").innerHTML ="<span id='sensor_humid_st' class='signal_st'></span><div id='sensor_humid_bk' class='signal_bk'><div id='sensor_humid_fk' class='signal_fk'></div></div>"
-        document.getElementById("sensor_humid_fk").style.width = json.l+"px";
-        document.getElementById("sensor_humid_st").innerHTML = json.l+" %";
+        document.getElementById("sensor_humid_fk").style.width = json.h+"px";
+        document.getElementById("sensor_humid_st").innerHTML = json.h+" %";
     }
     if(json.hasOwnProperty("l"))
     {
