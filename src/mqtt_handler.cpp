@@ -359,11 +359,11 @@ void send_status()
     String r;
     serializeJson(doc, r);
     serialDisplay("Sending Status","WebSocket");
-    TickerForTimeOut.once_ms(10,[r](){
+    TickerForTimeOut.once_ms(100,[r](){
       send_data_to_webSocket(r);
       if(MQTTStatus)
       {
-        TickerForTimeOut.once_ms(10,[r](){
+        TickerForTimeOut.once_ms(100,[r](){
           serialDisplay("Sending Status","MQTT");
           sendToMQTT(outtopic, r);
           serialDisplay("Sending Status","MQTT Sent");
