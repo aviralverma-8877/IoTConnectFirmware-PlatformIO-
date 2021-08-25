@@ -2,7 +2,7 @@
 
 void send_data_to_webSocket(String msg)
 {
-    webSocket.textAll(msg);
+  webSocket.textAll(msg);
 }
 
 void initWebSocket() {
@@ -15,6 +15,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
     switch (type) {
       case WS_EVT_CONNECT:
         serialDisplay("WebSocket client","Connected");
+        send_status();
         break;
       case WS_EVT_DISCONNECT:
         serialDisplay("WebSocket client","Disconnected");

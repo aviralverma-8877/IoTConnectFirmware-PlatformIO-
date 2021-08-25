@@ -29,7 +29,6 @@ String WiFi_gateway;                      //Global variables
 uint8_t i;                                //Global variables
 HTTPClient http;                          //Global variables
 uint32_t delayMS;                         //Global variables
-String updateAddress;                     //Update address
 DNSServer dnsServer;                      //Global variables
 AsyncWebSocket webSocket("/ws");          //Global variables
 AsyncWebServer server(80);                //Global variables
@@ -38,10 +37,7 @@ configuration conf = {false,false,true,false,2000,"N/A","admin","admin","","",fa
 String IpAddress = "";                    //Global variables
 String LocalIP = "";                      //Global variables
 byte loopCount = 0;                       //Global variables
-uint8_t attempts = 0;                     //Global variables
 bool shouldReboot = false;
-String wifi_ssid = "";
-String wifi_pass = "";
 const byte DNS_PORT = 53;
 IPAddress apIP(192, 168, 4, 1);
 /*----------------------------------------------------------*/
@@ -51,8 +47,6 @@ Ticker TickerForsendSensorData;
 Ticker TickerForcheckReset;
 Ticker TickerForconnectToMqtt;
 Ticker TickerForFeedbackLED;
-Ticker TickerForSerialListner;
-Ticker TickerForUARTUpdater;
 Ticker TickerForTimeOut;
 Ticker TickerForTimeOutTwo;
 Ticker TickerForWiFiConnect;

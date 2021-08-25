@@ -48,11 +48,9 @@
     extern String Wifi_ssid;                  //Global variables
     extern String WiFi_gateway;               //Global variables
     extern byte loopCount;                    //Global variables
-    extern uint8_t attempts;                  //Global variables
     extern uint8_t i;                         //Global variables
     extern HTTPClient http;                   //Global variables
     extern uint32_t delayMS;                  //Global variables
-    extern String updateAddress;              //Global variables
     extern DNSServer dnsServer;               //Global variables
     extern AsyncWebSocket webSocket;          //Global variables
     extern AsyncWebServer server;             //Global variables
@@ -69,8 +67,6 @@
     extern Ticker TickerForcheckReset;
     extern Ticker TickerForconnectToMqtt;
     extern Ticker TickerForFeedbackLED;
-    extern Ticker TickerForSerialListner;
-    extern Ticker TickerForUARTUpdater;
     extern Ticker TickerForTimeOut;
     extern Ticker TickerForTimeOutTwo;
     extern Ticker TickerForWiFiConnect;
