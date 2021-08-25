@@ -2,7 +2,8 @@
 
 void send_data_to_webSocket(String msg)
 {
-  webSocket.textAll(msg);
+  if(ESP.getFreeHeap()>8000)
+    webSocket.textAll(msg);
 }
 
 void initWebSocket() {

@@ -281,7 +281,8 @@ void sendToMQTT(String topic, String msg)
     String suffix = doc["mqtt"]["suffix"];
     serialDisplay("MQTT","Published to "+prefix+topic+suffix);
     serialDisplay("MQTT Data",msg.c_str());
-    mqtt.publish((prefix+topic+suffix).c_str(), 0, false, msg.c_str(), msg.length());
+    if(ESP.getFreeHeap()>8000)
+      mqtt.publish((prefix+topic+suffix).c_str(), 0, false, msg.c_str(), msg.length());
     DynamicJsonDocument web_payload(msg.length()+200);
     web_payload["action"] = "mqtt_out";
     web_payload["topic"] = prefix+topic+suffix;
