@@ -204,7 +204,7 @@ function show_status(json)
             cont += "<br />MQTT Status : <b>Connected</b><br />";
         else
             cont += "<br />MQTT Status : <b>Not Connected</b><br />";
-        cont += "Signal Strength : <span id='signal_st' class='signal_st'></span><div id='signal_bk' class='signal_bk'><div id='signal_fk' class='signal_fk'></div></div><br />"
+        cont += "Signal Strength : <span id='signal_st' class='signal_st'></span><div id='signal_bk' class='signal_bk'><div id='signal_fk' class='signal_fk'></div></div>"
         cont += "Free Heap : <div id='free_heap_bk' class='signal_bk'><div id='free_heap_fk' class='signal_fk'></div></div>"
         element = document.getElementById('WiFi_Status');
         element.innerHTML = cont;
