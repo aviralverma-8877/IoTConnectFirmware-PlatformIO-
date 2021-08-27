@@ -80,17 +80,14 @@ String device_status()
 }
 void relay_action(String relay, bool value, String by)
 {
-  StaticJsonDocument<500> doc;
+  DynamicJsonDocument doc(1500);
   read_config();
   bool save_eeprom = conf.save_eeprom;
   serialDisplay("SAVE EEPROM",String(save_eeprom));
   if(save_eeprom)
   {
     String mqtt_data = read_mqtt_config();
-    StaticJsonDocument<200> filter;
-    filter["relay"][0]["name"] = true;
-    filter["relay"][0]["status"] = true;
-    DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
+    DeserializationError error = deserializeJson(doc, mqtt_data);
     if(error)
     {
       return;
