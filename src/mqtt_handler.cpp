@@ -305,7 +305,7 @@ void send_status()
   read_config();
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
-    DynamicJsonDocument doc(1300);
+    DynamicJsonDocument doc(1500);
     StaticJsonDocument<200> filter;
     filter["mqtt"]["prefix"] = true;
     filter["mqtt"]["suffix"] = true;
