@@ -32,7 +32,7 @@ void fauxmo_remove_device(const char* device_name)
 void fauxmo_remove_all_device()
 {
     String mqtt_data = read_mqtt_config();
-    DynamicJsonDocument doc(1000);
+    StaticJsonDocument<200> doc;
     StaticJsonDocument<200> filter;
     filter["relay"][0]["name"] = true;
     DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));

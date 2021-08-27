@@ -60,10 +60,11 @@ String device_status()
   bool WiFi_status = (WiFi.status() == WL_CONNECTED);
   return_doc["wifi_status"] = WiFi_status;
   return_doc["chip_id"] = chipid;
+  return_doc["ram"] = ESP.getFreeHeap();
   String device_config = read_device_config();
   StaticJsonDocument<100> filter;
   filter["init_setup_done"] = true;
-  DynamicJsonDocument doc(100);
+  StaticJsonDocument<100> doc;
   DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
   if(error)
   {}
@@ -79,14 +80,16 @@ String device_status()
 }
 void relay_action(String relay, bool value, String by)
 {
-  DynamicJsonDocument doc(1500);
+  StaticJsonDocument<300> doc;
+  StaticJsonDocument<200> filter;
+  filter["relay"][0]["name"] = true;
   read_config();
   bool save_eeprom = conf.save_eeprom;
   serialDisplay("SAVE EEPROM",String(save_eeprom));
   if(save_eeprom)
   {
     String mqtt_data = read_mqtt_config();
-    DeserializationError error = deserializeJson(doc, mqtt_data);
+    DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
     if(error)
     {
       return;
@@ -205,7 +208,7 @@ void pinging()
 /*-----Meathod for sending sensor data----------------------*/
 
 void ICACHE_RAM_ATTR handleData(float h, float t) {
-  DynamicJsonDocument doc(500);
+  StaticJsonDocument<100> doc;
   volatile float humidity = h;
   volatile float temperature = t;
   doc["action"] = "sensor";
@@ -224,7 +227,7 @@ void ICACHE_RAM_ATTR handleError(uint8_t e) {
 
 void setup_sensor()
 {
-  DynamicJsonDocument doc(500);
+  StaticJsonDocument<200> doc;
   StaticJsonDocument<200> filter;
   filter["device_config"]["dht"]["INSTALLED"] = true;
   String device_config = read_device_config();
@@ -251,7 +254,7 @@ void setup_sensor()
 
 void sendSensorData()
 {
-  DynamicJsonDocument doc(500);
+  StaticJsonDocument<200> doc;
   StaticJsonDocument<200> filter;
   filter["device_config"]["dht"]["INSTALLED"] = true;
   filter["device_config"]["light"]["INSTALLED"] = true;
@@ -501,9 +504,14 @@ String read_device_config()
 
 void generate_mqtt_topics()
 {
-  DynamicJsonDocument doc(1000);
+  StaticJsonDocument<200> doc;
+  StaticJsonDocument<200> filter;
+  filter["device_config"]["shift_out_reg"]["avail"] = true;
+  filter["device_config"]["relay"]["count"] = true;
+  filter["device_config"]["relay"]["GPIO"][0] = true;
+
   String device_config = read_device_config();
-  DeserializationError error = deserializeJson(doc, device_config);
+  DeserializationError error = deserializeJson(doc, device_config,DeserializationOption::Filter(filter));
   if(error)
     return;
 
@@ -517,7 +525,7 @@ void generate_mqtt_topics()
   {
     for(int i=0; i<8; i++)
     {
-      DynamicJsonDocument relay_object(200);
+      StaticJsonDocument<200> relay_object;
       String key = "Relay "+String(relay_count);
       String value = chipid+"/shift_out_reg/pin_"+i;
       relay_object["name"] = key;
@@ -534,7 +542,7 @@ void generate_mqtt_topics()
   {
     for(int i=0; i<relay_gpio_count; i++)
     {
-      DynamicJsonDocument relay_object(200);
+      StaticJsonDocument<200> relay_object;
       String key = "Relay "+String(relay_count);
       int pin  = doc["device_config"]["relay"]["GPIO"][i];
       String value = chipid+"/gpio_relay/pin_"+pin;

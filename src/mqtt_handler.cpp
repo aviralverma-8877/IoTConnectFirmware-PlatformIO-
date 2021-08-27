@@ -86,7 +86,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   send_data_to_webSocket(pl);
   device_doc.clear();
   String device_config = read_device_config();
-  DynamicJsonDocument device_filter(100);
+  StaticJsonDocument<100> device_filter;
   device_filter["mqtt"]["prefix"] = true;
   device_filter["mqtt"]["suffix"] = true;
   DeserializationError error_1 = deserializeJson(device_doc, device_config, DeserializationOption::Filter(device_filter));
@@ -208,7 +208,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         StaticJsonDocument<100> filter;
         filter["relay"][0]["name"] = true;
         filter["relay"][0]["topic"] = true;
-        DynamicJsonDocument doc(1000);
+        StaticJsonDocument<500> doc;
         DeserializationError error = deserializeJson(doc, mqtt_topics, DeserializationOption::Filter(filter));
         if(error)
         {
@@ -226,8 +226,12 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     const char* relay = "";
     bool action = false;
     String mqtt_data = read_mqtt_config();
-    DynamicJsonDocument doc(1500);
-    DeserializationError error_1 = deserializeJson(doc, mqtt_data);
+    StaticJsonDocument<200> filter;
+    filter["relay"][0]["name"] = true;
+    filter["relay"][0]["topic"] = true;
+    filter["relay"][0]["status"] = true;
+    StaticJsonDocument<500> doc;
+    DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
     if(error_1)
       return;
     StaticJsonDocument<200> msg;
@@ -263,7 +267,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*----Meathod for sending MQTT Data-------------------------*/
 void sendToMQTT(String topic, String msg)
 {
-  DynamicJsonDocument doc(500);
+  StaticJsonDocument<500> doc;
   StaticJsonDocument<200> filter;
   filter["mqtt"]["prefix"] = true;
   filter["mqtt"]["suffix"] = true;
@@ -281,7 +285,7 @@ void sendToMQTT(String topic, String msg)
     String suffix = doc["mqtt"]["suffix"];
     serialDisplay("MQTT","Published to "+prefix+topic+suffix);
     serialDisplay("MQTT Data",msg.c_str());
-    if(ESP.getFreeHeap()>8000)
+    if(ESP.getFreeHeap()>10000)
       mqtt.publish((prefix+topic+suffix).c_str(), 0, false, msg.c_str(), msg.length());
     DynamicJsonDocument web_payload(msg.length()+200);
     web_payload["action"] = "mqtt_out";
@@ -301,7 +305,7 @@ void send_status()
   read_config();
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
-    DynamicJsonDocument doc(1500);
+    DynamicJsonDocument doc(1300);
     StaticJsonDocument<200> filter;
     filter["mqtt"]["prefix"] = true;
     filter["mqtt"]["suffix"] = true;
@@ -396,7 +400,7 @@ void connectToMqtt()
 void subscribe_mqtt_input()
 {
   serialDisplay("MQTT","Subscribing to topics");
-  DynamicJsonDocument doc(1500);
+  StaticJsonDocument<200> doc;
   StaticJsonDocument<200> filter;
   filter["mqtt"]["prefix"] = true;
   filter["mqtt"]["suffix"] = true;
