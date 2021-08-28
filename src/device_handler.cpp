@@ -367,9 +367,9 @@ void connectToWiFi()
 {
   read_config();
   bool setup_flag = bool(conf.setupFlag);
-  serialDisplay("connectToWiFi","Setup Flag"+String(setup_flag));
+  serialDisplay("connectToWiFi","Setup Flag : "+String(setup_flag));
   bool wifi_setup_done = bool(conf.wifi_setup_done);
-  serialDisplay("connectToWiFi","WiFI setup done"+String(wifi_setup_done));
+  serialDisplay("connectToWiFi","WiFI setup done : "+String(wifi_setup_done));
   if(setup_flag)
   {
     serialDisplay("connectToWiFi","Setup Flag is true.");

@@ -306,7 +306,13 @@ function draw_table_data(json)
         on_change_val = "toggle_relay(this, '"+element.name+"')"
         pin = element.comp + "-" + element.pin;
         topic = element.topic;
-        print_table(pin, on_change_val, element.name, topic);
+        if(!table_printed)
+        {
+            print_table(pin, on_change_val, element.name, topic);
+            setTimeout(function(){
+                update_table_data(element)
+            },10);
+        }
     });
     table_printed = true;
 }
@@ -315,17 +321,17 @@ function update_table_data(ele)
 {
     pin = ele.comp + "-" + ele.pin;
     var element = document.getElementById('status-'+pin);
-    if(!ele.status)
-    {
-        document.getElementById('status-'+pin).style.color = "red";
-        document.getElementById('checkbox-'+pin).checked = false;
-        element.innerHTML = 'OFF';
-    }
-    else
+    if(ele.status)
     {
         document.getElementById('status-'+pin).style.color = "green";
         document.getElementById('checkbox-'+pin).checked = true;
         element.innerHTML = 'ON';
+    }
+    else
+    {
+        document.getElementById('status-'+pin).style.color = "red";
+        document.getElementById('checkbox-'+pin).checked = false;
+        element.innerHTML = 'OFF';
     }
 }
 function update_wifi(ssid, pass)

@@ -23,7 +23,6 @@
     void send_device_template();
     void sendToMQTT(String topic, String msg);
     void send_status(String relay, bool value);
-    void send_status();
     void connectToMqtt();
     void send_to_web_mqtt(String msg);
     void subscribe_mqtt_input();
