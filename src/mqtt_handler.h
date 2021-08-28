@@ -25,6 +25,7 @@
     void send_status(String relay, bool value);
     void send_status();
     void connectToMqtt();
+    void send_to_web_mqtt(String msg);
     void subscribe_mqtt_input();
     void connect_to_mqtt();
     void setup_mqtt();

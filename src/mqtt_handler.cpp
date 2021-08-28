@@ -274,7 +274,6 @@ void sendToMQTT(String topic, String msg)
   {
     return;
   }
-  doc.shrinkToFit();
   String service = doc["mqtt"]["service"];
   if(!comp(service.c_str(),"N/A"))
   {
@@ -361,29 +360,32 @@ void send_status()
   read_config();
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
-    DynamicJsonDocument doc(1500);
+    StaticJsonDocument<100> device_doc;
     StaticJsonDocument<100> filter;
     filter["mqtt"]["prefix"] = true;
     filter["mqtt"]["suffix"] = true;
     String device_config = read_device_config();
-    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+    DeserializationError error = deserializeJson(device_doc, device_config, DeserializationOption::Filter(filter));
     if(error)
     {
       return;
     }
-    String prefix = doc["mqtt"]["prefix"];
-    String suffix = doc["mqtt"]["suffix"];
+    String prefix = device_doc["mqtt"]["prefix"];
+    String suffix = device_doc["mqtt"]["suffix"];
     serialDisplay("send_status","MQTT Prefix : "+prefix);
     serialDisplay("send_status","MQTT Suffix : "+suffix);
-    doc.clear();
+    device_doc.clear();
     filter.clear();
+
+    DynamicJsonDocument doc(1500);
+    StaticJsonDocument<500> data;
     String mqtt_data = read_mqtt_config();
     filter["relay"][0]["pin"] = true;
     filter["relay"][0]["comp"] = true;
     error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
     if(error)
       return;
-    StaticJsonDocument<500> data;
+    doc.shrinkToFit();
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
     {
       data["esp_clip_id"] = chipid;
@@ -406,15 +408,8 @@ void send_status()
       }
       String r;
       serializeJson(data, r);
-      serialDisplay("send_status","Sending Status WebSocket");
-      send_data_to_webSocket(r);
-      if(MQTTStatus)
-      {
-        serialDisplay("send_status","Sending Status MQTT");
-        sendToMQTT(outtopic, r);
-        serialDisplay("send_status","Sending Status MQTT Sent");
-      }
       data.clear();
+      send_to_web_mqtt(r);
     }
     doc.clear();
   }  
@@ -485,15 +480,20 @@ void send_status(String relay, bool value)
       }
     }
     doc.clear();
-    serialDisplay("send_status(String relay, bool value)","Sending Status WebSocket");
-    send_data_to_webSocket(r);
-    if(MQTTStatus)
-    {
-      serialDisplay("send_status(String relay, bool value)","MQTT");
-      sendToMQTT(outtopic, r);
-      serialDisplay("send_status(String relay, bool value)","MQTT Sent");
-    }
+    send_to_web_mqtt(r);
   }  
+}
+
+void send_to_web_mqtt(String msg)
+{
+  serialDisplay("send_to_web_mqtt","Sending Status WebSocket");
+  send_data_to_webSocket(msg);
+  if(MQTTStatus)
+  {
+    serialDisplay("send_to_web_mqtt","Sending Status MQTT");
+    sendToMQTT(outtopic, msg);
+    serialDisplay("send_to_web_mqtt","Sending Status MQTT Sent");
+  }
 }
 
 /*----Meathod for sending relay status----------------------*/
