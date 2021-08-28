@@ -183,7 +183,10 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         String no = root["no"];
         bool value = root["value"];
         String by = root["by"];
-        relay_action(no, value, by);
+        root.clear();
+        TickerForTimeOut.once_ms(100,[no, value, by](){
+          relay_action(no, value, by);
+        });
         return;
       }
   /*-------Action command for controlling Relays--------------*/
@@ -257,7 +260,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       {
         relay = (const char*)kv["name"];
         action = msg["action"];
-        TickerForTimeOut.once_ms(10,[relay, action](){
+        TickerForTimeOut.once_ms(100,[relay, action](){
           perform_action(relay, action);
         });
         kv["status"] = action;
@@ -412,6 +415,7 @@ void send_status(String relay, bool value)
     }
     doc.shrinkToFit();
     String r;
+    int i=0;
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
     {
       String name = kv["name"];
@@ -424,7 +428,8 @@ void send_status(String relay, bool value)
         data["action"] = "status";
         data["pin"] = kv["pin"];
         data["comp"] = kv["comp"];
-
+        data["name"] = kv["name"];
+        data["serial"] = i;
         String com = kv["comp"];
         if(comp(com.c_str(), "shift_reg"))
         {
@@ -441,6 +446,7 @@ void send_status(String relay, bool value)
         serializeJson(data, r);
         data.clear();
       }
+      i++;
     }
     doc.clear();
     send_to_web_mqtt(r);
