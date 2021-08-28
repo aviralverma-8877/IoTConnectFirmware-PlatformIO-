@@ -6,7 +6,7 @@ void sendWebSocketStatus()
   send_data_to_webSocket(device_status());
 }
 void onMqttConnect(bool sessionPresent) {
-  serialDisplay("MQTT","MQTT is Connected");
+  serialDisplay("onMqttConnect","MQTT is Connected");
   TickerForFeedbackLED.detach();
   read_config();
   if(conf.led_enabled)
@@ -37,12 +37,10 @@ void onMqttConnect(bool sessionPresent) {
 /*-------Meathod called when connected to MQTT--------------*/
 /*-------Meathod called when subscribed to MQTT Topic-------*/
 void onMqttSubscribe(uint16_t packetId, uint8_t qos) {
-  serialDisplay("MQTT","Subscribed to MQTT");
 }
 /*-------Meathod called when subscribed to MQTT Topic-------*/
 /*-------Meathod called when unsubscribed from MQTT Topic---*/
 void onMqttUnsubscribe(uint16_t packetId) {
-  serialDisplay("MQTT","Unsubscribed from "+packetId);
 }
 /*-------Meathod called when unsubscribed from MQTT Topic---*/
 
@@ -57,7 +55,7 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
     TickerForconnectToMqtt.detach();
     TickerForconnectToMqtt.attach(5, setup_mqtt);
   }
-  serialDisplay("MQTT","MQTT is disconnected.");
+  serialDisplay("onMqttDisconnect","MQTT is disconnected.");
 }
 /*-------Meathod called when disconnected from MQTT Topic---*/
 
@@ -74,30 +72,28 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   {
     p += payload[i];
   }
-  serialDisplay("MQTT Topic",topic);
-  serialDisplay("MQTT Message",p);
-  DynamicJsonDocument device_doc(1000);
-  device_doc["action"] = "mqtt_in";
-  device_doc["topic"] = topic;
-  device_doc["payload"] = p;
+  DynamicJsonDocument root(500);
+  root["action"] = "mqtt_in";
+  root["topic"] = topic;
+  root["payload"] = p;
   String pl;
-  serializeJson(device_doc, pl);
-  serialDisplay("Sending Websocket","MQTT Input");
+  serializeJson(root, pl);
+  serialDisplay("onMqttMessage","MQTT Input");
   send_data_to_webSocket(pl);
-  device_doc.clear();
+  root.clear();
   String device_config = read_device_config();
-  StaticJsonDocument<100> device_filter;
+  StaticJsonDocument<200> device_filter;
   device_filter["mqtt"]["prefix"] = true;
   device_filter["mqtt"]["suffix"] = true;
-  DeserializationError error_1 = deserializeJson(device_doc, device_config, DeserializationOption::Filter(device_filter));
+  DeserializationError error_1 = deserializeJson(root, device_config, DeserializationOption::Filter(device_filter));
   if(error_1)
     return;
-  String prefix = device_doc["mqtt"]["prefix"];
-  String suffix = device_doc["mqtt"]["suffix"];
+  String prefix = root["mqtt"]["prefix"];
+  String suffix = root["mqtt"]["suffix"];
   if(strcmp(topic, (prefix+intopic+suffix).c_str())==0)
   {
-    StaticJsonDocument<200> root;
-    serialDisplay("MQTT",p);
+    serialDisplay("onMqttMessage","MQTT Payload : "+p);
+    root.clear();
     DeserializationError error = deserializeJson(root, p);
     if (!error) 
     {
@@ -243,7 +239,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
     {
       String config_topic = kv["topic"];
-      serialDisplay("MQTT Topics",(prefix+config_topic+suffix));
+      serialDisplay("onMqttMessage","MQTT Topics: "+(prefix+config_topic+suffix));
       if(comp(topic, (prefix+config_topic+suffix).c_str()))
       {
         relay = (const char*)kv["name"];
@@ -267,7 +263,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*----Meathod for sending MQTT Data-------------------------*/
 void sendToMQTT(String topic, String msg)
 {
-  StaticJsonDocument<500> doc;
+  DynamicJsonDocument doc(1500);
   StaticJsonDocument<200> filter;
   filter["mqtt"]["prefix"] = true;
   filter["mqtt"]["suffix"] = true;
@@ -278,30 +274,30 @@ void sendToMQTT(String topic, String msg)
   {
     return;
   }
+  doc.shrinkToFit();
   String service = doc["mqtt"]["service"];
   if(!comp(service.c_str(),"N/A"))
   {
     String prefix = doc["mqtt"]["prefix"];
     String suffix = doc["mqtt"]["suffix"];
-    serialDisplay("MQTT","Published to "+prefix+topic+suffix);
-    serialDisplay("MQTT Data",msg.c_str());
-    if(ESP.getFreeHeap()>10000)
-      mqtt.publish((prefix+topic+suffix).c_str(), 0, false, msg.c_str(), msg.length());
-    DynamicJsonDocument web_payload(msg.length()+200);
-    web_payload["action"] = "mqtt_out";
-    web_payload["topic"] = prefix+topic+suffix;
-    web_payload["payload"] = msg;
+    String fullTopic = prefix+topic+suffix;
+    doc.clear();
+    serialDisplay("onMqttMessage","Published to "+fullTopic);
+    mqtt.publish(fullTopic.c_str(), MQTT_QoS, false, msg.c_str(), msg.length());
+    doc.clear();    
+    doc["action"] = "mqtt_out";
+    doc["topic"] = fullTopic;
+    doc["payload"] = msg;
     String r;
-    serializeJson(web_payload, r);
+    serializeJson(doc, r);
     send_data_to_webSocket(r);
-    web_payload.clear();
   }
 }
 /*----Meathod for sending MQTT Data-------------------------*/
-/*----Meathod for sending relay status----------------------*/
-void send_status()
+/*----Meathod for sending device config----------------------*/
+void send_device_template()
 {
-  serialDisplay("Sending Status","START");
+  serialDisplay("send_device_template","Sending Status START");
   read_config();
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
@@ -317,13 +313,12 @@ void send_status()
     }
     String prefix = doc["mqtt"]["prefix"];
     String suffix = doc["mqtt"]["suffix"];
-    serialDisplay("MQTT Prefix",prefix);
-    serialDisplay("MQTT Suffix",suffix);
+    serialDisplay("send_device_template","MQTT Prefix: "+prefix);
+    serialDisplay("send_device_template","MQTT Suffix"+suffix);
     doc.clear();
     filter.clear();
     String mqtt_data = read_mqtt_config();
     filter["relay"][0]["name"] = true;
-    filter["relay"][0]["status"] = true;
     filter["relay"][0]["pin"] = true;
     filter["relay"][0]["comp"] = true;
     filter["relay"][0]["topic"] = true;
@@ -333,54 +328,177 @@ void send_status()
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
     {
       String com = kv["comp"];
+      String topic = kv["topic"];
+      String full_topic = prefix+topic+suffix;
+      kv["topic"] = full_topic;
+      serialDisplay("send_device_template","full_topic : "+full_topic);
+    }
+    doc["esp_clip_id"] = chipid;
+    doc["action"] = "template";
+    doc["hasSensor"] = hasSensor;
+    String r;
+    serializeJson(doc, r);
+    doc.clear();
+    serialDisplay("send_device_template","Sending Status WebSocket");
+    send_data_to_webSocket(r);
+    serialDisplay("send_device_template","WebSocket Status Sent");
+    if(MQTTStatus)
+    {
+      serialDisplay("send_device_template","Sending Status MQTT");
+      sendToMQTT(outtopic, r);
+      serialDisplay("send_device_template", "Sending Status MQTT Sent");
+    }
+    TickerForTimeOut.once_ms(100,[](){
+      send_status();
+    });
+  }
+}
+/*----Meathod for sending device config----------------------*/
+/*----Meathod for sending relay status----------------------*/
+void send_status()
+{
+  serialDisplay("send_status","Sending Status START");
+  read_config();
+  if(SPIFFS.exists("/mqtt_topics.json"))
+  {
+    DynamicJsonDocument doc(1500);
+    StaticJsonDocument<100> filter;
+    filter["mqtt"]["prefix"] = true;
+    filter["mqtt"]["suffix"] = true;
+    String device_config = read_device_config();
+    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+    if(error)
+    {
+      return;
+    }
+    String prefix = doc["mqtt"]["prefix"];
+    String suffix = doc["mqtt"]["suffix"];
+    serialDisplay("send_status","MQTT Prefix : "+prefix);
+    serialDisplay("send_status","MQTT Suffix : "+suffix);
+    doc.clear();
+    filter.clear();
+    String mqtt_data = read_mqtt_config();
+    filter["relay"][0]["pin"] = true;
+    filter["relay"][0]["comp"] = true;
+    error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
+    if(error)
+      return;
+    StaticJsonDocument<500> data;
+    for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
+    {
+      data["esp_clip_id"] = chipid;
+      data["action"] = "status";
+      data["pin"] = kv["pin"];
+      data["comp"] = kv["comp"];
+
+      String com = kv["comp"];
       if(comp(com.c_str(), "shift_reg"))
       {
         int pin = kv["pin"];
         bool status = bool(sr.get(pin));
-        kv["status"] = status;
-        String topic = kv["topic"];
-        String full_topic = prefix+topic+suffix;
-        kv["full_topic"] = full_topic;
-        serialDisplay("full_topic",full_topic);
-        serialDisplay("Pin", String(pin));
-        serialDisplay("Status", String(status));
+        data["status"] = status;
       }
       else if(comp(com.c_str(), "gpio"))
       {
         int pin = kv["pin"];
         bool status = bool(digitalRead(pin));
-        kv["status"] = status;
-        String topic = kv["topic"];
-        String full_topic = prefix+topic+suffix;
-        kv["full_topic"] = full_topic;
-        serialDisplay("full_topic",full_topic);
-        serialDisplay("Pin", String(pin));
-        serialDisplay("Status", String(status));
+        data["status"] = status;
       }
-    }
-    doc["esp_clip_id"] = chipid;
-    doc["action"] = "status";
-    doc["hasSensor"] = hasSensor;
-    String r;
-    serializeJson(doc, r);
-    serialDisplay("Sending Status","WebSocket");
-    TickerForTimeOut.once_ms(100,[r](){
+      String r;
+      serializeJson(data, r);
+      serialDisplay("send_status","Sending Status WebSocket");
       send_data_to_webSocket(r);
       if(MQTTStatus)
       {
-        TickerForTimeOut.once_ms(100,[r](){
-          serialDisplay("Sending Status","MQTT");
-          sendToMQTT(outtopic, r);
-          serialDisplay("Sending Status","MQTT Sent");
-        });
+        serialDisplay("send_status","Sending Status MQTT");
+        sendToMQTT(outtopic, r);
+        serialDisplay("send_status","Sending Status MQTT Sent");
       }
-    });
+      data.clear();
+    }
+    doc.clear();
   }  
 }
+
+void send_status(String relay, bool value)
+{
+  serialDisplay("send_status(String relay, bool value)","Sending Status START");
+  read_config();
+  if(SPIFFS.exists("/mqtt_topics.json"))
+  {
+    DynamicJsonDocument doc(1500);
+    StaticJsonDocument<200> filter;
+    filter["mqtt"]["prefix"] = true;
+    filter["mqtt"]["suffix"] = true;
+    String device_config = read_device_config();
+    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+    if(error)
+    {
+      return;
+    }
+    String prefix = doc["mqtt"]["prefix"];
+    String suffix = doc["mqtt"]["suffix"];
+    serialDisplay("send_status(String relay, bool value)","MQTT Prefix: "+prefix);
+    serialDisplay("send_status(String relay, bool value)","MQTT Suffix: "+suffix);
+    doc.clear();
+    filter.clear();
+    String mqtt_data = read_mqtt_config();
+    filter["relay"][0]["name"] = true;
+    filter["relay"][0]["pin"] = true;
+    filter["relay"][0]["comp"] = true;
+    error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
+    if(error)
+    {
+      serialDisplay("send_status(String relay, bool value)","Deserialization Error");
+      return;
+    }
+    doc.shrinkToFit();
+    String r;
+    for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
+    {
+      String name = kv["name"];
+      serialDisplay("send_status(String relay, bool value)","Relay Passed Value"+relay);
+      serialDisplay("send_status(String relay, bool value)","Relay Saved Value"+name);
+      if(comp(relay.c_str(),name.c_str()))
+      {
+        StaticJsonDocument<500> data;
+        data["esp_clip_id"] = chipid;
+        data["action"] = "status";
+        data["pin"] = kv["pin"];
+        data["comp"] = kv["comp"];
+
+        String com = kv["comp"];
+        if(comp(com.c_str(), "shift_reg"))
+        {
+          int pin = kv["pin"];
+          bool status = bool(sr.get(pin));
+          data["status"] = status;
+        }
+        else if(comp(com.c_str(), "gpio"))
+        {
+          int pin = kv["pin"];
+          bool status = bool(digitalRead(pin));
+          data["status"] = status;
+        }
+        serializeJson(data, r);
+        data.clear();
+      }
+    }
+    doc.clear();
+    serialDisplay("send_status(String relay, bool value)","Sending Status WebSocket");
+    send_data_to_webSocket(r);
+    if(MQTTStatus)
+    {
+      serialDisplay("send_status(String relay, bool value)","MQTT");
+      sendToMQTT(outtopic, r);
+      serialDisplay("send_status(String relay, bool value)","MQTT Sent");
+    }
+  }  
+}
+
 /*----Meathod for sending relay status----------------------*/
 /*----Meathod called on sending/publishing message on MQTT--*/
 void onMqttPublish(uint16_t packetId) {
-  serialDisplay("MQTT","Message sent on "+packetId);
 }
 /*----Meathod called on sending/publishing message on MQTT--*/
 
@@ -391,7 +509,7 @@ void connectToMqtt()
   {
     if(!MQTTStatus)
     {
-      serialDisplay("MQTT","Trying MQTT Connect");
+      serialDisplay("connectToMqtt","Trying MQTT Connect");
       mqtt.connect();
     }
   }
@@ -399,7 +517,7 @@ void connectToMqtt()
 
 void subscribe_mqtt_input()
 {
-  serialDisplay("MQTT","Subscribing to topics");
+  serialDisplay("subscribe_mqtt_input","Subscribing to topics");
   StaticJsonDocument<200> doc;
   StaticJsonDocument<200> filter;
   filter["mqtt"]["prefix"] = true;
@@ -427,14 +545,14 @@ void subscribe_mqtt_input()
   for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
   {
     String topic = kv["topic"];
-    serialDisplay("MQTT Topic", prefix+topic+suffix);
+    serialDisplay("subscribe_mqtt_input","MQTT Topic : "+ prefix+topic+suffix);
     mqtt.subscribe((prefix+topic+suffix).c_str(), MQTT_QoS);
   }
 }
 
 void connect_to_mqtt()
 {
-  serialDisplay("MQTT Setup","Setting up MQTT Properties");
+  serialDisplay("connect_to_mqtt","Setting up MQTT Properties");
   StaticJsonDocument<500> doc;
   StaticJsonDocument<100> filter;
   filter["mqtt"] = true;
@@ -446,15 +564,15 @@ void connect_to_mqtt()
   }
   const char* host = doc["mqtt"]["host"];
   uint16_t port = doc["mqtt"]["port"];
-  serialDisplay("MQTT Host",String(host));
-  serialDisplay("MQTT Port",String(port));
+  serialDisplay("connect_to_mqtt","MQTT Host"+String(host));
+  serialDisplay("connect_to_mqtt","MQTT Port"+String(port));
   bool auth = doc["mqtt"]["auth"];
   if(auth)
   {
     const char* uname = doc["mqtt"]["uname"];
     const char* pass = doc["mqtt"]["pass"];
-    serialDisplay("MQTT Username",String(uname));
-    serialDisplay("MQTT Password",String(pass));
+    serialDisplay("connect_to_mqtt","MQTT Username :"+String(uname));
+    serialDisplay("connect_to_mqtt","MQTT Password :"+String(pass));
     mqtt.setCredentials(uname, pass);
   }
   mqtt.setServer(host, port);
@@ -473,7 +591,7 @@ void setup_mqtt()
   String service = doc["mqtt"]["service"];
   if(!comp(service.c_str(),"N/A"))
   {
-    serialDisplay("MQTT Setup","Setting up MQTT Actions");
+    serialDisplay("setup_mqtt","Setting up MQTT Actions");
     mqtt.onConnect(onMqttConnect);
     mqtt.onDisconnect(onMqttDisconnect);
     mqtt.onSubscribe(onMqttSubscribe);

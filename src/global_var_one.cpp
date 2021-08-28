@@ -17,7 +17,7 @@ bool hasLightSensor = false;
 bool def_led_value = HIGH;
 bool def_btn_value = HIGH;
 bool ap_enabled = true;
-int MQTT_QoS = 2;
+int MQTT_QoS = 1;
 int illuminance_value = 0;
 fauxmoESP fauxmo;
 /*----------------------------------------------------------*/
@@ -54,7 +54,7 @@ Ticker TickerForWebSocketStatus;
 /*--------------Tickers for Async Meathods------------------*/
 void configure_gpio()
 {
-    serialDisplay("GPIO","Configuring GPIO");
+    serialDisplay("configure_gpio","Configuring GPIO");
     String config = read_device_config();
     DynamicJsonDocument doc(1000);
     DeserializationError error = deserializeJson(doc, config);
@@ -62,6 +62,7 @@ void configure_gpio()
     {
         return;
     }
+    doc.shrinkToFit();
     bool shift_reg_avail = doc["device_config"]["shift_out_reg"]["avail"];
     if(shift_reg_avail)
     {

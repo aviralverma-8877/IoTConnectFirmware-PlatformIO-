@@ -15,7 +15,6 @@ void fauxmo_add_device(const char* device_name)
 {
     if(!comp(device_name,"N/A"))
     {
-        serialDisplay("Fauxmo Device Added",device_name);
         fauxmo.addDevice(device_name);
     }
 }
@@ -24,7 +23,6 @@ void fauxmo_remove_device(const char* device_name)
 {
     if(!comp(device_name,"N/A"))
     {
-        serialDisplay("Fauxmo Device Removed",device_name);
         fauxmo.removeDevice(device_name);
     }
 }

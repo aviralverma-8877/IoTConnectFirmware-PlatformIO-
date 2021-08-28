@@ -2,8 +2,7 @@
 
 void send_data_to_webSocket(String msg)
 {
-  if(ESP.getFreeHeap()>8000)
-    webSocket.textAll(msg);
+  webSocket.textAll(msg);
 }
 
 void initWebSocket() {
@@ -15,11 +14,11 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
              void *arg, uint8_t *data, size_t len) {
     switch (type) {
       case WS_EVT_CONNECT:
-        serialDisplay("WebSocket client","Connected");
-        send_status();
+        serialDisplay("onEvent","WebSocket client Connected");
+        send_device_template();
         break;
       case WS_EVT_DISCONNECT:
-        serialDisplay("WebSocket client","Disconnected");
+        serialDisplay("onEvent","WebSocket client Disconnected");
         break;
       case WS_EVT_DATA:
         break;

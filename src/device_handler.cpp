@@ -9,7 +9,7 @@ void setup_tickers()
 }
 
 void onWifiConnect(const WiFiEventStationModeGotIP& event) {
-  serialDisplay("WiFi","Connected");
+  serialDisplay("onWifiConnect","WiFi Connected");
   TickerForFeedbackLED.detach();
   TickerForWiFiConnect.detach();
   read_config();
@@ -32,7 +32,7 @@ void onWifiConnect(const WiFiEventStationModeGotIP& event) {
 void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
   TickerForFeedbackLED.detach();
   TickerForFeedbackLED.attach(0.6, feedbackLED);
-  serialDisplay("WiFi","Disconnected");
+  serialDisplay("onWifiDisconnect","WiFi Disconnected");
   TickerForWebSocketStatus.detach();
   reconnect_mqtt = true;
   mqtt.disconnect();
@@ -83,7 +83,7 @@ void relay_action(String relay, bool value, String by)
   DynamicJsonDocument doc(1500);
   read_config();
   bool save_eeprom = conf.save_eeprom;
-  serialDisplay("SAVE EEPROM",String(save_eeprom));
+  serialDisplay("relay_action","SAVE EEPROM"+String(save_eeprom));
   if(save_eeprom)
   {
     String mqtt_data = read_mqtt_config();
@@ -92,6 +92,7 @@ void relay_action(String relay, bool value, String by)
     {
       return;
     }
+    doc.shrinkToFit();
     JsonArray array = doc["relay"].as<JsonArray>();
     for (JsonObject ele : array) {
       String name = ele["name"];
@@ -104,16 +105,9 @@ void relay_action(String relay, bool value, String by)
     mqtt_data = "";
     serializeJsonPretty(doc, mqtt_data);
     doc.clear();
-    write_mqtt_topics(mqtt_data);
-    perform_action();
+    write_mqtt_topics(mqtt_data);    
   }
-  else
-  {
-    TickerForTimeOut.once_ms(50,[relay, value](){
-      perform_action(relay, value);
-    });
-  }
-  
+  perform_action(relay, value);  
 //sending nortification
   if(!comp(by.c_str(),""))
   {
@@ -157,38 +151,24 @@ void reset()
     mqtt.disconnect();
     WiFi.disconnect();
   }
-  serialDisplay("Format","Formatting SPIFFS");
+  serialDisplay("reset","Formatting SPIFFS");
   SPIFFS.format();
-  serialDisplay("Format","Formatting Completed");
+  serialDisplay("reset","Formatting Completed");
   configuration newConf = {false,false,true,false,2000,"N/A","admin","admin","","",false,"N/A","N/A","N/A"};
   newConf.setupFlag = true;
-  serialDisplay("Writing","Writing Config");
+  serialDisplay("reset","Writing Config");
   write_config(newConf);
-  serialDisplay("Writing","Writing Completes");
+  serialDisplay("reset","Writing Completes");
   ESP.reset();
 
 }
 /*----Meathod for reconfiguring WiFi settings---------------*/
-/*----Meathod for sending relay status on UART--------------*/
-void send_status_uart()
-{
-  StaticJsonDocument<200> doc;
-  doc["a"] = "RS";
-  JsonArray data = doc.createNestedArray("n");
-  for(int t=0; t<8; t++)
-  {
-    data.add(sr.get(t));
-  }
-  serializeJson(doc, Serial);
-  Serial.println();
-}
-/*----Meathod for sending relay status on UART--------------*/
 /*---Meathod for pinging MQTT Server for active connection--*/
 void pinging()
 {
   if(MQTTStatus)
   {
-    serialDisplay("Ping","Pinged now");
+    serialDisplay("pinging","Pinged now");
     StaticJsonDocument<200> doc;
     doc["d"] = chipid;
     if(hasSensor)
@@ -350,12 +330,12 @@ bool comp(const char *val1,const char *val2)
 /*-----Meathod for feyching IP Address----------------------*/
 void fetchIP()
 {
-  serialDisplay("IP", "Fetching IP");
+  serialDisplay("fetchIP", "Fetching IP");
   if (WiFi.status() == WL_CONNECTED)
   {
     httpAPI.begin(wifiClient, "http://api.ipify.org/?format=json");
     int HttpCode = httpAPI.GET();
-    serialDisplay("Get IP HTTP response code", String(HttpCode));
+    serialDisplay("fetchIP", "Get IP HTTP response code"+String(HttpCode));
     if(HttpCode > 0)
     {  
       String payload = httpAPI.getString();
@@ -367,9 +347,9 @@ void fetchIP()
       IpAddress = s;
       LocalIP = IpAddress2String(WiFi.localIP());
       WiFi_gateway = WiFi.gatewayIP().toString();
-      serialDisplay("IP Address",IpAddress);
-      serialDisplay("LocalIP",LocalIP);
-      serialDisplay("Gateway",WiFi_gateway);
+      serialDisplay("fetchIP","IP Address"+IpAddress);
+      serialDisplay("fetchIP","LocalIP"+LocalIP);
+      serialDisplay("fetchIP","Gateway"+WiFi_gateway);
     }
     else
     {
@@ -379,7 +359,7 @@ void fetchIP()
     }
   }
   Wifi_ssid = WiFi.SSID();
-  serialDisplay("SSID",Wifi_ssid);
+  serialDisplay("fetchIP","SSID"+Wifi_ssid);
   callback = &blank;
 }
 /*-----Meathod for fetching IP Address----------------------*/
@@ -387,22 +367,22 @@ void connectToWiFi()
 {
   read_config();
   bool setup_flag = bool(conf.setupFlag);
-  serialDisplay("Setup Flag", String(setup_flag));
+  serialDisplay("connectToWiFi","Setup Flag"+String(setup_flag));
   bool wifi_setup_done = bool(conf.wifi_setup_done);
-  serialDisplay("WiFI setup done", String(wifi_setup_done));
+  serialDisplay("connectToWiFi","WiFI setup done"+String(wifi_setup_done));
   if(setup_flag)
   {
-    serialDisplay("Setup","Setup Flag is true.");
+    serialDisplay("connectToWiFi","Setup Flag is true.");
     enable_ap();
   }
   else if(wifi_setup_done)
   {
-    serialDisplay("WiFi","Connecting to "+conf.WiFi_SSID+".");
+    serialDisplay("connectToWiFi","Connecting to "+conf.WiFi_SSID+".");
     enable_sta();
   }
   else
   {
-    serialDisplay("Setup","Setup Flag is true.");
+    serialDisplay("connectToWiFi","Setup Flag is true.");
     enable_ap();      
   }
 }
@@ -561,39 +541,6 @@ void generate_mqtt_topics()
   ESP.reset();
 }
 
-void perform_action()
-{
-  String mqtt_data = read_mqtt_config();
-  DynamicJsonDocument doc(1000);
-  StaticJsonDocument<200> filter;
-  filter["relay"][0]["name"] = true;
-  filter["relay"][0]["status"] = true;
-  filter["relay"][0]["pin"] = true;
-  filter["relay"][0]["comp"] = true;
-  DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
-  if(error)
-    return;
-  JsonArray array = doc["relay"];
-  for( int t=0; t< array.size(); t++) 
-  {
-    DynamicJsonDocument ele = array[t];
-    String com = ele["comp"];
-    if(comp(com.c_str(), "shift_reg"))
-    {
-      int pin = ele["pin"];
-      bool value = ele["status"];
-      sr.set(pin, value);
-    }
-    if(comp(com.c_str(), "gpio"))
-    {
-      int pin = ele["pin"];
-      bool value = ele["status"];
-      digitalWrite(pin, value);
-    }
-  }
-  send_status();
-}
-
 void toggle_relay(String relay)
 {
   String mqtt_data = read_mqtt_config();
@@ -605,6 +552,7 @@ void toggle_relay(String relay)
   DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
   if(error)
     return;
+  doc.shrinkToFit();
   JsonArray array = doc["relay"];
   for( int t=0; t< array.size(); t++) 
   {
@@ -631,6 +579,39 @@ void toggle_relay(String relay)
   }
 }
 
+void perform_action()
+{
+  String mqtt_data = read_mqtt_config();
+  DynamicJsonDocument doc(1000);
+  StaticJsonDocument<200> filter;
+  filter["relay"][0]["name"] = true;
+  filter["relay"][0]["status"] = true;
+  filter["relay"][0]["pin"] = true;
+  filter["relay"][0]["comp"] = true;
+  DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
+  if(error)
+    return;
+  doc.shrinkToFit();
+  JsonArray array = doc["relay"];
+  for( int t=0; t< array.size(); t++) 
+  {
+    DynamicJsonDocument ele = array[t];
+    String com = ele["comp"];
+    if(comp(com.c_str(), "shift_reg"))
+    {
+      int pin = ele["pin"];
+      bool value = ele["status"];
+      sr.set(pin, value);
+    }
+    if(comp(com.c_str(), "gpio"))
+    {
+      int pin = ele["pin"];
+      bool value = ele["status"];
+      digitalWrite(pin, value);
+    }
+  }
+}
+
 void perform_action(String relay, bool value)
 {
   String mqtt_data = read_mqtt_config();
@@ -642,6 +623,7 @@ void perform_action(String relay, bool value)
   DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
   if(error)
     return;
+  doc.shrinkToFit();
   JsonArray array = doc["relay"];
   for( int t=0; t< array.size(); t++) 
   {
@@ -665,6 +647,6 @@ void perform_action(String relay, bool value)
       }
     }
   }
-  send_status();
+  send_status(relay, value);
 }
 

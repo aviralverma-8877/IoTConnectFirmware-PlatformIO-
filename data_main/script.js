@@ -13,10 +13,13 @@ function init_socket()
             {
                 alert(json.msg)
             }
+            else if(json.action == "template")
+            {
+                draw_table_data(json);
+            }
             else if(json.action == "status")
             {
-                if(json.relay != null)
-                    update_table_data(json);
+                update_table_data(json);
             }
             else if(json.action == "device_status")
             {
@@ -46,14 +49,13 @@ function init_socket()
         }
     }
     Socket.onopen = function(event){
-        //console.log("Connected to web sockets...")
-        httpGet(0, 0, 'get_status');
+        console.log("Connected to web sockets...")
     }
     Socket.onclose = function(event){
-       // console.log("Connection to websockets closed....")
+        console.log("Connection to websockets closed....")
     }
     Socket.onerror = function(event){
-      //  console.log("Error in websockets");
+        console.log("Error in websockets");
     }
 }
 
@@ -296,37 +298,35 @@ function update_fuxmo_list(){
     },1000)
 }
 
-function update_table_data(json)
+function draw_table_data(json)
 {
     relays = json.relay;
-    if(!table_printed)
+    relays.forEach(function(element) 
     {
-        relays.forEach(function(element) 
-        {
-            on_change_val = "toggle_relay(this, '"+element.name+"')"
-            pin = element.comp + "-" + element.pin;
-            topic = element.full_topic;
-            print_table(pin, on_change_val, element.name, topic);
-        });
-        table_printed = true;
-    }
-    relays.forEach(function(ele) 
-    {
-        pin = ele.comp + "-" + ele.pin;
-        var element = document.getElementById('status-'+pin);
-        if(!ele.status)
-        {
-            document.getElementById('status-'+pin).style.color = "red";
-            document.getElementById('checkbox-'+pin).checked = false;
-            element.innerHTML = 'OFF';
-        }
-        else
-        {
-            document.getElementById('status-'+pin).style.color = "green";
-            document.getElementById('checkbox-'+pin).checked = true;
-            element.innerHTML = 'ON';
-        }    
+        on_change_val = "toggle_relay(this, '"+element.name+"')"
+        pin = element.comp + "-" + element.pin;
+        topic = element.topic;
+        print_table(pin, on_change_val, element.name, topic);
     });
+    table_printed = true;
+}
+
+function update_table_data(ele)
+{
+    pin = ele.comp + "-" + ele.pin;
+    var element = document.getElementById('status-'+pin);
+    if(!ele.status)
+    {
+        document.getElementById('status-'+pin).style.color = "red";
+        document.getElementById('checkbox-'+pin).checked = false;
+        element.innerHTML = 'OFF';
+    }
+    else
+    {
+        document.getElementById('status-'+pin).style.color = "green";
+        document.getElementById('checkbox-'+pin).checked = true;
+        element.innerHTML = 'ON';
+    }
 }
 function update_wifi(ssid, pass)
 {

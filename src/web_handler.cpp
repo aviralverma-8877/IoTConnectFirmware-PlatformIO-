@@ -82,11 +82,11 @@ void handleWebControl(AsyncWebServerRequest *request)
   }
   request->send(200, "application/json", message);
 }
+
 void handleWebStatus(AsyncWebServerRequest *request)
 {
   String return_msg = device_status();
   request->send(200, "application/json", return_msg);
-  send_status();
 }
 void handlefauxmo(AsyncWebServerRequest *request)
 {
@@ -394,7 +394,7 @@ void enable_sta()
 {
   if(WiFi.status() != WL_CONNECTED)
   {
-    serialDisplay("WiFi","Enabling STA");
+    serialDisplay("enable_sta","Enabling STA");
     WiFi.disconnect();
     WiFi.mode(WIFI_STA);
     WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
@@ -406,7 +406,7 @@ void enable_sta()
 
 void enable_ap()
 {
-  serialDisplay("WiFi","Enabling AP");
+  serialDisplay("enable_ap","Enabling AP");
   WiFi.disconnect();
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
@@ -472,8 +472,6 @@ void setup_web_server()
   });
   server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
   server.onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
-    serialDisplay("Request Data", String((char *)data));
-    serialDisplay("Request Size", String(len));
     //fauxmo request handling
       if (fauxmo.process(request->client(), request->method() == HTTP_GET, request->url(), String((char *)data))) return;
     //fauxmo request handling
@@ -499,7 +497,7 @@ void setup_web_server()
   connectToWiFi();      //Connect to Access Point or start AP depending on config
 /*-------Web Server Setup-----------------------------------*/
   bool setup_flag = bool(conf.setupFlag);
-  serialDisplay("Setup Flag", String(setup_flag));
+  serialDisplay("setup_web_server","Setup Flag : "+ String(setup_flag));
 
   if(!ap_enabled)
   {
@@ -511,12 +509,12 @@ void setup_web_server()
       }
     }
   }
-  serialDisplay("Enabling mdns","iot-connect-"+chipid);
+  serialDisplay("setup_web_server","Enabling mdns : iot-connect-"+chipid);
   if (MDNS.begin("iot-connect-"+chipid)) {  //Start mDNS with name esp8266
     MDNS.addService("http", "tcp", 80);
-    serialDisplay("MSDN","MDNS started");
+    serialDisplay("setup_web_server","MDNS started");
   }
   else{
-    serialDisplay("MSDN","MDNS failed");
+    serialDisplay("setup_web_server","MDNS failed");
   }
 }

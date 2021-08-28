@@ -42,7 +42,7 @@ void setup()
 
   if(conf.setupFlag)
   {
-    serialDisplay("DNS Server","Enabling DNS Server");
+    serialDisplay("setup","Enabling DNS Server");
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
     dnsServer.start(DNS_PORT, "*", apIP);
   }
@@ -53,7 +53,7 @@ void setup()
   }
   setup_web_server();    //Webserver Handler
   initWebSocket();
-  serialDisplay("ap_enabled",String(ap_enabled));
+  serialDisplay("setup","ap_enabled"+String(ap_enabled));
   if(!ap_enabled)
   {
     fetchIP();             //Fetching Public and Local IP
