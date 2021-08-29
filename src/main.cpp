@@ -36,6 +36,7 @@ void setup()
   print_config();
   delayMS = conf.pingTime;
   configure_gpio();
+  TickerForcheckReset.attach_ms(10, checkReset);
   if(conf.save_eeprom)
     perform_action();
   callback = &blank;

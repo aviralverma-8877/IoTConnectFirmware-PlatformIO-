@@ -5,7 +5,6 @@ void setup_tickers()
   TickerForPinging.attach(5, pinging);
   if(hasSensor)
     TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
-  TickerForcheckReset.attach_ms(10, checkReset);
 }
 
 void onWifiConnect(const WiFiEventStationModeGotIP& event) {
