@@ -310,7 +310,6 @@ void checkReset()
       }
     }
   }
-
 }
 /*-----Meathod for checking reset button--------------------*/
 /*-----Meathod for comparing string-------------------------*/
