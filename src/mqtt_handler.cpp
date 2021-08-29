@@ -362,7 +362,7 @@ void send_device_template()
       kv["topic"] = full_topic;
       serialDisplay("send_device_template","full_topic : "+full_topic);
     }
-    doc["esp_clip_id"] = chipid;
+    doc["esp_chip_id"] = chipid;
     doc["action"] = "template";
     doc["hasSensor"] = hasSensor;
     String r;
@@ -415,7 +415,6 @@ void send_status(String relay, bool value)
     }
     doc.shrinkToFit();
     String r;
-    int i=0;
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
     {
       String name = kv["name"];
@@ -424,12 +423,11 @@ void send_status(String relay, bool value)
       if(comp(relay.c_str(),name.c_str()))
       {
         StaticJsonDocument<500> data;
-        data["esp_clip_id"] = chipid;
+        data["esp_chip_id"] = chipid;
         data["action"] = "status";
         data["pin"] = kv["pin"];
         data["comp"] = kv["comp"];
         data["name"] = kv["name"];
-        data["serial"] = i;
         String com = kv["comp"];
         if(comp(com.c_str(), "shift_reg"))
         {
@@ -446,7 +444,6 @@ void send_status(String relay, bool value)
         serializeJson(data, r);
         data.clear();
       }
-      i++;
     }
     doc.clear();
     send_to_web_mqtt(r);
