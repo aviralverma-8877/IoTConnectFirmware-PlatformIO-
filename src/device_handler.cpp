@@ -300,7 +300,8 @@ void checkReset()
       doc["count"] = reset_btn_press_count;
       String r;
       serializeJson(doc,r);
-      sendToMQTT(espaction,r);
+      if(MQTTStatus)
+        sendToMQTT(espaction,r);
       read_config();
       String relay = conf.btn_relay_act;
       if(!comp(relay.c_str(), "N/A"))
