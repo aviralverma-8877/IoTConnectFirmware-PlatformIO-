@@ -317,7 +317,7 @@ void send_device_template()
   read_config();
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
-    StaticJsonDocument<300> device_doc;
+    StaticJsonDocument<500> device_doc;
     StaticJsonDocument<200> filter;
     filter["mqtt"]["prefix"] = true;
     filter["mqtt"]["suffix"] = true;
@@ -333,7 +333,7 @@ void send_device_template()
     serialDisplay("send_device_template","MQTT Suffix"+suffix);
     device_doc.clear();
     filter.clear();
-    DynamicJsonDocument doc(1500);
+    DynamicJsonDocument doc(2000);
     String mqtt_data = read_mqtt_config();
     filter["relay"][0]["name"] = true;
     filter["relay"][0]["pin"] = true;
@@ -365,6 +365,7 @@ void send_device_template()
     doc["esp_chip_id"] = chipid;
     doc["action"] = "template";
     doc["hasSensor"] = hasSensor;
+    doc.shrinkToFit();
     String r;
     serializeJson(doc, r);
     doc.clear();
@@ -387,21 +388,22 @@ void send_status(String relay, bool value)
   read_config();
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
-    DynamicJsonDocument doc(1500);
+    StaticJsonDocument<500> device_doc;
     StaticJsonDocument<200> filter;
     filter["mqtt"]["prefix"] = true;
     filter["mqtt"]["suffix"] = true;
     String device_config = read_device_config();
-    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+    DeserializationError error = deserializeJson(device_doc, device_config, DeserializationOption::Filter(filter));
     if(error)
     {
       return;
     }
-    String prefix = doc["mqtt"]["prefix"];
-    String suffix = doc["mqtt"]["suffix"];
+    String prefix = device_doc["mqtt"]["prefix"];
+    String suffix = device_doc["mqtt"]["suffix"];
     serialDisplay("send_status(String relay, bool value)","MQTT Prefix: "+prefix);
     serialDisplay("send_status(String relay, bool value)","MQTT Suffix: "+suffix);
-    doc.clear();
+    device_doc.clear();
+    DynamicJsonDocument doc(2000);
     filter.clear();
     String mqtt_data = read_mqtt_config();
     filter["relay"][0]["name"] = true;
