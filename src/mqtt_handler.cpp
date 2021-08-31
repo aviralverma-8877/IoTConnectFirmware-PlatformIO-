@@ -299,7 +299,7 @@ void sendToMQTT(String topic, String msg)
     doc.clear();
     serialDisplay("sendToMQTT","Published to "+fullTopic);
     mqtt.publish(fullTopic.c_str(), MQTT_QoS, false, msg.c_str(), msg.length());
-    DynamicJsonDocument doc(1500);    
+    DynamicJsonDocument doc(1500);
     doc["action"] = "mqtt_out";
     doc["topic"] = fullTopic;
     doc["payload"] = msg;
@@ -333,7 +333,7 @@ void send_device_template()
     serialDisplay("send_device_template","MQTT Suffix"+suffix);
     device_doc.clear();
     filter.clear();
-    DynamicJsonDocument doc(2000);
+    DynamicJsonDocument doc(1500);
     String mqtt_data = read_mqtt_config();
     filter["relay"][0]["name"] = true;
     filter["relay"][0]["pin"] = true;
@@ -346,7 +346,6 @@ void send_device_template()
     {
       String com = kv["comp"];
       String topic = kv["topic"];
-      String full_topic = prefix+topic+suffix;
       if(comp(com.c_str(), "shift_reg"))
       {
         int pin = kv["pin"];
@@ -359,9 +358,10 @@ void send_device_template()
         bool status = bool(digitalRead(pin));
         kv["status"] = status;
       }
-      kv["topic"] = full_topic;
-      serialDisplay("send_device_template","full_topic : "+full_topic);
+      kv["topic"] = topic;
     }
+    doc["prefix"] = prefix;
+    doc["suffix"] = suffix;
     doc["esp_chip_id"] = chipid;
     doc["action"] = "template";
     doc["hasSensor"] = hasSensor;
@@ -388,28 +388,14 @@ void send_status(String relay, bool value)
   read_config();
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
-    StaticJsonDocument<500> device_doc;
     StaticJsonDocument<200> filter;
-    filter["mqtt"]["prefix"] = true;
-    filter["mqtt"]["suffix"] = true;
-    String device_config = read_device_config();
-    DeserializationError error = deserializeJson(device_doc, device_config, DeserializationOption::Filter(filter));
-    if(error)
-    {
-      return;
-    }
-    String prefix = device_doc["mqtt"]["prefix"];
-    String suffix = device_doc["mqtt"]["suffix"];
-    serialDisplay("send_status(String relay, bool value)","MQTT Prefix: "+prefix);
-    serialDisplay("send_status(String relay, bool value)","MQTT Suffix: "+suffix);
-    device_doc.clear();
     DynamicJsonDocument doc(2000);
     filter.clear();
     String mqtt_data = read_mqtt_config();
     filter["relay"][0]["name"] = true;
     filter["relay"][0]["pin"] = true;
     filter["relay"][0]["comp"] = true;
-    error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
+    DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
     if(error)
     {
       serialDisplay("send_status(String relay, bool value)","Deserialization Error");

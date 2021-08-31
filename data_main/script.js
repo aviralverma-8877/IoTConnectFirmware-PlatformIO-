@@ -301,11 +301,13 @@ function update_fuxmo_list(){
 function draw_table_data(json)
 {
     relays = json.relay;
+    prefix = json.prefix;
+    suffix = json.suffix;
     relays.forEach(function(element) 
     {
         on_change_val = "toggle_relay(this, '"+element.name+"')"
         pin = element.comp + "-" + element.pin;
-        topic = element.topic;
+        topic = prefix+element.topic+suffix;
         if(!table_printed)
         {
             print_table(pin, on_change_val, element.name, topic);
