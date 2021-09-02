@@ -301,8 +301,12 @@ function update_fuxmo_list(){
 function draw_table_data(json)
 {
     relays = json.relay;
-    prefix = json.prefix;
-    suffix = json.suffix;
+    prefix = "";
+    suffix = "";
+    if(json.prefix != undefined)
+        prefix = json.prefix;
+    if(json.suffix != undefined)
+        suffix = json.suffix;
     relays.forEach(function(element) 
     {
         on_change_val = "toggle_relay(this, '"+element.name+"')"
