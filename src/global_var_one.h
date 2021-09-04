@@ -58,7 +58,6 @@
     extern bool shouldReboot;                 //Global variables
     extern String wifi_ssid;                  //Global variables
     extern String wifi_pass;                  //Global variables
-    extern const byte DNS_PORT;               //Global variables
     extern IPAddress apIP;                    //Global variables
     /*----------------------------------------------------------*/
     /*--------------Tickers for Async Meathods------------------*/

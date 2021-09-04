@@ -16,14 +16,18 @@ class CaptiveRequestHandler : public AsyncWebHandler {
     void handleRequest(AsyncWebServerRequest *request) {
       File index = SPIFFS.open("/index.html", "r");
       if (index) {
-        if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
-        {
-          return request->requestAuthentication();
-        }
-        request->send(SPIFFS, "/index.html", "text/html");
+        AsyncResponseStream *response = request->beginResponseStream("text/html");
+        response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/index\" /><title>Captive Portal</title></head><body>", WiFi.softAPIP().toString().c_str());
+        response->printf("<p>Redirecting to <a href='http://%s/index'>this link</a><br />Please Wait.....</p>", WiFi.softAPIP().toString().c_str());
+        response->print("</body></html>");
+        request->send(response);
       }
       else{
-        request->redirect("/update");
+        AsyncResponseStream *response = request->beginResponseStream("text/html");
+        response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/update\" /><title>Captive Portal</title></head><body>", WiFi.softAPIP().toString().c_str());
+        response->printf("<p>Redirecting to <a href='http://%s/update'>this link</a><br />Please Wait.....</p>", WiFi.softAPIP().toString().c_str());
+        response->print("</body></html>");
+        request->send(response);
       }
       index.close();
     }
@@ -458,6 +462,9 @@ void disable_ap()
 /*---------Firmware Update---------------------------------*/
 void setup_web_server()
 {
+  connectToWiFi();      //Connect to Access Point or start AP depending on config
+  serialDisplay("setup","Enabling DNS Server");
+  dnsServer.start(53, "*", WiFi.softAPIP());
 /*-------Web Update Server----------------------------------*/
   firmware_web_updater();
 /*-------Web Update Server----------------------------------*/
@@ -486,16 +493,7 @@ void setup_web_server()
   server.on("/update_device_config", HTTP_GET, [](AsyncWebServerRequest *request){
     handleDeviceConfig(request);
   });
-
-  if(debugging)
-  {
-    server.serveStatic("/device_config.json", SPIFFS, "/device_config.json");
-    server.serveStatic("/config.json", SPIFFS, "/config.json");
-    server.serveStatic("/mqtt_topics.json", SPIFFS, "/mqtt_topics.json");
-  }
-  server.serveStatic("/script.js", SPIFFS, "/script.js");
-  server.serveStatic("/style.css", SPIFFS, "/style.css");
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/index", HTTP_GET, [](AsyncWebServerRequest *request){
     File index = SPIFFS.open("/index.html", "r");
     if (index) {
       if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
@@ -509,6 +507,14 @@ void setup_web_server()
     }
     index.close();
   });
+  if(debugging)
+  {
+    server.serveStatic("/device_config.json", SPIFFS, "/device_config.json");
+    server.serveStatic("/config.json", SPIFFS, "/config.json");
+    server.serveStatic("/mqtt_topics.json", SPIFFS, "/mqtt_topics.json");
+  }
+  server.serveStatic("/script.js", SPIFFS, "/script.js");
+  server.serveStatic("/style.css", SPIFFS, "/style.css");
   server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
   server.onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
     //fauxmo request handling
@@ -528,11 +534,25 @@ void setup_web_server()
       }
       request->redirect("/");
   });
-  connectToWiFi();      //Connect to Access Point or start AP depending on config
-  if(ap_enabled)
+  if(!ap_enabled)
   {
-    serialDisplay("setup","Enabling DNS Server");
-    dnsServer.start(DNS_PORT, "*", apIP);
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+      File index = SPIFFS.open("/index.html", "r");
+      if (index) {
+        if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+        {
+          return request->requestAuthentication();
+        }
+        request->send(SPIFFS, "/index.html", "text/html");
+      }
+      else{
+        request->redirect("/update");
+      }
+      index.close();
+    });
+  }
+  else
+  {
     server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
   }
   server.begin();

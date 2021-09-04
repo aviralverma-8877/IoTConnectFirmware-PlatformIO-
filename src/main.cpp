@@ -65,13 +65,8 @@ void setup()
 
 void loop() 
 {
-  if(ap_enabled)
-  {
-    dnsServer.processNextRequest();
-  }
-  else{
-    MDNS.update();
-    fauxmo.handle();
-  }
+  dnsServer.processNextRequest();
+  MDNS.update();
+  fauxmo.handle();
   callback();
 }
