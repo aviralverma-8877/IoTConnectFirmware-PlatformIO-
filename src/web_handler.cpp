@@ -24,7 +24,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       }
       else{
         AsyncResponseStream *response = request->beginResponseStream("text/html");
-        response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/update\" /><title>Captive Portal</title></head><body>", WiFi.softAPIP().toString().c_str());
+        response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/update\" /><title>Redirecting...</title></head><body>", WiFi.softAPIP().toString().c_str());
         response->printf("<p>Redirecting to <a href='http://%s/update'>this link</a><br />Please Wait.....</p>", WiFi.softAPIP().toString().c_str());
         response->print("</body></html>");
         request->send(response);
