@@ -171,11 +171,14 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
 void web_scan_wifi(AsyncWebServerRequest *request)
 {
   WiFi.scanNetworksAsync([request](int networksFound){
-    StaticJsonDocument<500> wifi_ssid;
+    StaticJsonDocument<800> wifi_ssid;
     JsonArray ssid = wifi_ssid.createNestedArray("ssid");
     for(int i=0; i<networksFound; i++)
     {
-      ssid.add(String(WiFi.SSID(i)));
+      StaticJsonDocument<200> wifi;
+      wifi["ssid"] = WiFi.SSID(i);
+      wifi["RSSI"] = String(WiFi.RSSI(i));
+      ssid.add(wifi);
     }
     String return_msg;
     serializeJson(wifi_ssid, return_msg);
