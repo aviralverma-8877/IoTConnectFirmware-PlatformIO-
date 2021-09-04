@@ -185,6 +185,13 @@ void web_scan_wifi(AsyncWebServerRequest *request)
     request->send(200, "application/json", return_msg);
   });
 }
+
+void device_template(AsyncWebServerRequest *request)
+{
+  String res = send_device_template(false);
+  request->send(200, "application/json", res);
+}
+
 void web_update_login(AsyncWebServerRequest *request)
 {
   if(request->hasParam("options"))
@@ -443,6 +450,9 @@ void setup_web_server()
   });
   server.on("/set_wifi", HTTP_GET, [](AsyncWebServerRequest *request){
     web_set_wifi(request);
+  });
+  server.on("/device_template", HTTP_GET, [](AsyncWebServerRequest *request){
+    device_template(request);
   });
   server.on("/update_login", HTTP_GET, [](AsyncWebServerRequest *request){
     web_update_login(request);

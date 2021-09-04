@@ -20,7 +20,7 @@
     void MqttBlank(AsyncMqttClientDisconnectReason reason);
     void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
     void onMqttPublish(uint16_t packetId);
-    void send_device_template();
+    String send_device_template(bool send_on_mqtt);
     void sendToMQTT(String topic, String msg);
     void send_status(String relay, bool value);
     void connectToMqtt();

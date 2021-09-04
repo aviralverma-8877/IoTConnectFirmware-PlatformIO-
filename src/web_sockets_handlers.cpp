@@ -15,9 +15,6 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
     switch (type) {
       case WS_EVT_CONNECT:
         serialDisplay("onEvent","WebSocket client Connected");
-        TickerForTimeOut.once_ms(100,[](){
-          send_device_template();
-        });
         break;
       case WS_EVT_DISCONNECT:
         serialDisplay("onEvent","WebSocket client Disconnected");

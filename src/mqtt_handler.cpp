@@ -195,7 +195,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       {
         root.clear();
         TickerForTimeOut.once_ms(100,[](){
-          send_device_template();
+          send_device_template(true);
         });
         return;
       }
@@ -311,7 +311,7 @@ void sendToMQTT(String topic, String msg)
 }
 /*----Meathod for sending MQTT Data-------------------------*/
 /*----Meathod for sending device config----------------------*/
-void send_device_template()
+String send_device_template(bool send_on_mqtt)
 {
   serialDisplay("send_device_template","Sending Status START");
   read_config();
@@ -325,7 +325,7 @@ void send_device_template()
     DeserializationError error = deserializeJson(device_doc, device_config, DeserializationOption::Filter(filter));
     if(error)
     {
-      return;
+      return "";
     }
     String prefix = device_doc["mqtt"]["prefix"];
     String suffix = device_doc["mqtt"]["suffix"];
@@ -341,7 +341,7 @@ void send_device_template()
     filter["relay"][0]["topic"] = true;
     error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
     if(error)
-      return;
+      return "";
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
     {
       String com = kv["comp"];
@@ -369,16 +369,16 @@ void send_device_template()
     String r;
     serializeJson(doc, r);
     doc.clear();
-    serialDisplay("send_device_template","Sending Status WebSocket");
-    send_data_to_webSocket(r);
-    serialDisplay("send_device_template","WebSocket Status Sent");
-    if(MQTTStatus)
-    {
-        serialDisplay("send_device_template","Sending Status MQTT");
-        sendToMQTT(outtopic, r);
-        serialDisplay("send_device_template", "Sending Status MQTT Sent");
-    }
+    if(send_on_mqtt)
+      if(MQTTStatus)
+      {
+          serialDisplay("send_device_template","Sending Status MQTT");
+          sendToMQTT(outtopic, r);
+          serialDisplay("send_device_template", "Sending Status MQTT Sent");
+      }
+    return r;
   }
+  return "";
 }
 /*----Meathod for sending device config----------------------*/
 /*----Meathod for sending relay status----------------------*/

@@ -13,10 +13,6 @@ function init_socket()
             {
                 alert(json.msg)
             }
-            else if(json.action == "template")
-            {
-                draw_table_data(json);
-            }
             else if(json.action == "status")
             {
                 update_table_data(json);
@@ -113,6 +109,10 @@ function httpGet(relay, value, action, options = {})
     {
         theUrl = '/update_device_config?options='+JSON.stringify(options);
     }
+    if(action == "device_template")
+    {
+        theUrl = "/device_template"
+    }
     try
     {
         var xmlHttp = new XMLHttpRequest();
@@ -142,6 +142,9 @@ function set_ui()
     }
     init_socket();
     show_status(json);
+    data = httpGet(0, 0, 'device_template');
+    json = JSON.parse(data);
+    draw_table_data(json);
 }
 
 function selectElement(id, valueToSelect) {    
