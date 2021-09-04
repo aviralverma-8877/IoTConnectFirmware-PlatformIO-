@@ -3,6 +3,32 @@
 extern "C" uint32_t _FS_start;
 extern "C" uint32_t _FS_end;
 
+class CaptiveRequestHandler : public AsyncWebHandler {
+  public:
+    CaptiveRequestHandler() {}
+    virtual ~CaptiveRequestHandler() {}
+
+    bool canHandle(AsyncWebServerRequest *request){
+      //request->addInterestingHeader("ANY");
+      return true;
+    }
+
+    void handleRequest(AsyncWebServerRequest *request) {
+      File index = SPIFFS.open("/index.html", "r");
+      if (index) {
+        if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+        {
+          return request->requestAuthentication();
+        }
+        request->send(SPIFFS, "/index.html", "text/html");
+      }
+      else{
+        request->redirect("/update");
+      }
+      index.close();
+    }
+};
+
 
 /*-------Web Server Controller------------------------------*/
 void handleWebControl(AsyncWebServerRequest *request)
@@ -502,12 +528,15 @@ void setup_web_server()
       }
       request->redirect("/");
   });
+  connectToWiFi();      //Connect to Access Point or start AP depending on config
+  if(ap_enabled)
+  {
+    serialDisplay("setup","Enabling DNS Server");
+    dnsServer.start(DNS_PORT, "*", apIP);
+    server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
+  }
   server.begin();
 
-  serialDisplay("Setting Hostname","iot-connect-"+chipid);
-  WiFi.hostname("iot-connect-"+chipid);
-
-  connectToWiFi();      //Connect to Access Point or start AP depending on config
 /*-------Web Server Setup-----------------------------------*/
   bool setup_flag = bool(conf.setupFlag);
   serialDisplay("setup_web_server","Setup Flag : "+ String(setup_flag));
@@ -521,13 +550,17 @@ void setup_web_server()
         delay(100);
       }
     }
-  }
-  serialDisplay("setup_web_server","Enabling mdns : iot-connect-"+chipid);
-  if (MDNS.begin("iot-connect-"+chipid)) {  //Start mDNS with name esp8266
-    MDNS.addService("http", "tcp", 80);
-    serialDisplay("setup_web_server","MDNS started");
-  }
-  else{
-    serialDisplay("setup_web_server","MDNS failed");
+
+    serialDisplay("setup_web_server","iot-connect-"+chipid);
+    WiFi.hostname("iot-connect-"+chipid);
+
+    serialDisplay("setup_web_server","Enabling mdns : iot-connect-"+chipid);
+    if (MDNS.begin("iot-connect-"+chipid)) {  //Start mDNS with name esp8266
+      MDNS.addService("http", "tcp", 80);
+      serialDisplay("setup_web_server","MDNS started");
+    }
+    else{
+      serialDisplay("setup_web_server","MDNS failed");
+    }
   }
 }

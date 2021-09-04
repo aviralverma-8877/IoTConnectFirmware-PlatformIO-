@@ -39,14 +39,7 @@ void setup()
   if(conf.save_eeprom)
     perform_action();
   callback = &blank;
-
-  if(conf.setupFlag)
-  {
-    serialDisplay("setup","Enabling DNS Server");
-    dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-    dnsServer.start(DNS_PORT, "*", apIP);
-  }
-  else
+  if(!conf.setupFlag)
   {
     wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
     wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
