@@ -367,6 +367,8 @@ function scan_wifi()
             response = httpGet(0,0,"scan_wifi");
             wifi_list = JSON.parse(response)["ssid"];
             content = "";
+            element = document.getElementById('ssid_list');
+            element.innerHTML = "";
             if(wifi_list.length > 0)
             {
                 for(i=0; i<wifi_list.length; i++)
@@ -386,7 +388,6 @@ function scan_wifi()
                                                 <span id='ssid_"+i+"_signal_st' class='signal_st'></span><div id='ssid_"+i+"_signal_bk' class='signal_bk'><div id='ssid_"+i+"_signal_fk' class='signal_fk'></div></div>\
                                             </td>\
                                         </tr>"
-                    element = document.getElementById('ssid_list');
                     element.innerHTML = element.innerHTML+content;
                     document.getElementById('ssid_'+i+'_signal_fk').style.width = quality+"px";
                 }

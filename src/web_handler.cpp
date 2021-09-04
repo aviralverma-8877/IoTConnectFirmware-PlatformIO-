@@ -17,7 +17,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       File index = SPIFFS.open("/index.html", "r");
       if (index) {
         AsyncResponseStream *response = request->beginResponseStream("text/html");
-        response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/index\" /><title>Captive Portal</title></head><body>", WiFi.softAPIP().toString().c_str());
+        response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/index\" /><title>Redirecting...</title></head><body>", WiFi.softAPIP().toString().c_str());
         response->printf("<p>Redirecting to <a href='http://%s/index'>this link</a><br />Please Wait.....</p>", WiFi.softAPIP().toString().c_str());
         response->print("</body></html>");
         request->send(response);
@@ -309,9 +309,12 @@ void web_set_wifi(AsyncWebServerRequest *request)
 void firmware_web_updater()
 {
   server.on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
-    if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+    if(!ap_enabled)
     {
-      return request->requestAuthentication();
+      if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+      {
+        return request->requestAuthentication();
+      }
     }
     String current_version = FIRMWARE_V;
     request->send(200, "text/html", "<script>\
@@ -496,9 +499,12 @@ void setup_web_server()
   server.on("/index", HTTP_GET, [](AsyncWebServerRequest *request){
     File index = SPIFFS.open("/index.html", "r");
     if (index) {
-      if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+      if(!ap_enabled)
       {
-        return request->requestAuthentication();
+        if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+        {
+          return request->requestAuthentication();
+        }
       }
       request->send(SPIFFS, "/index.html", "text/html");
     }
@@ -528,9 +534,12 @@ void setup_web_server()
       if (fauxmo.process(request->client(), request->method() == HTTP_GET, request->url(), body)) return;
     //fauxmo request handling
     //Page not found request handling
-      if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+      if(!ap_enabled)
       {
-        return request->requestAuthentication();
+        if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
+        {
+          return request->requestAuthentication();
+        }
       }
       request->redirect("/");
   });
