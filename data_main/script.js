@@ -77,6 +77,7 @@ function close_debug_console()
 
 function httpGet(relay, value, action, options = {})
 {
+    close_alert();
     if(action == "toggle_relay")
     {
         theUrl = '/control?command={"relay":\"'+relay+'\","action":'+value+'}';
@@ -145,6 +146,11 @@ function set_ui()
     data = httpGet(0, 0, 'device_template');
     json = JSON.parse(data);
     draw_table_data(json);
+}
+
+function reset_device(show_alert)
+{
+    httpGet(0,0,'device','{\'action\':\'reset\'}')
 }
 
 function selectElement(id, valueToSelect) {    
@@ -343,8 +349,11 @@ function update_table_data(ele)
         element.innerHTML = 'OFF';
     }
 }
-function update_wifi(ssid, pass)
+function update_wifi()
 {
+    ssid = document.getElementById("ssid_input").value
+    pass = document.getElementById("pass_input").value
+    close_alert();
     return new Promise (() => {
         response = httpGet(0,0,"set_wifi",{"ssid":ssid,"pass":pass});
         setTimeout(()=>
@@ -787,4 +796,26 @@ function save_config()
             alert(result.error)
         }
     }
+}
+
+function alert(msg, callback)
+{
+    document.getElementById("message").innerHTML = msg;
+    document.getElementById("customAlert").style.display = "block";
+    if(callback == undefined)
+    {
+        document.getElementById("okButton").setAttribute('onclick',"close_alert()");
+    }
+    else
+    {
+        document.getElementById("cancelButton").style.display = "block";
+        document.getElementById("cancelButton").setAttribute('onclick',"close_alert()");
+        document.getElementById("okButton").setAttribute('onclick',callback);
+    }
+}
+function close_alert()
+{
+    document.getElementById("message").innerHTML = "";
+    document.getElementById("customAlert").style.display = "none";
+    document.getElementById("cancelButton").style.display = "none";
 }

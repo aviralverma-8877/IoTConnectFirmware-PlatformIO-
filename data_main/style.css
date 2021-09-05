@@ -243,3 +243,49 @@ label{
 	color: #ccc;
   height: 34em;
 }
+
+#customAlert
+{
+  background-color: #e7eaf9;
+  display: none;
+  position: fixed;
+  max-width: 25%;
+  min-width: 250px !important;
+  min-height: 30%;
+  height: 200px;
+  left: 50%;
+  top: 50%;
+  padding: 10px;
+  box-sizing: border-box;
+  margin-left: -12.5%;
+  margin-top: -5.2%;
+  border: #ccc solid 2px;
+  border-radius: 5px;
+  z-index: 4;
+  overflow: auto;
+}   
+#message{
+  font-family: 'Fjalla One';
+  padding: 5px;
+  height: 50%;
+  font-size: 14px;
+  line-height: 20px;
+}
+#cancelButton{
+  display: none;
+}
+.confirmButton{
+  width: 95%;
+  height: 36px;
+  outline: 0;
+  border: 0;
+  background: #04B486;
+  color: white;
+  border-radius: 5px;
+  margin: 5px;
+} 
+.confirmButton:hover{
+  transition: 0.3s;
+  cursor: pointer;
+  background: lighten(#04B486, 5%);  
+}
