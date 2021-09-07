@@ -13,7 +13,7 @@
 #include "fauxmo_handler.h"
 
 //Include Global libraries
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include <DNSServer.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h> 
