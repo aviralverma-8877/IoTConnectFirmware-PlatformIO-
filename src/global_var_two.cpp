@@ -9,7 +9,7 @@ bool debugging = false;                   //Turn On or Off the serial output.
 String websocket_msg = "";
 /*--------------MQTT Configration---------------------------*/
 bool MQTTStatus = false;
-String chipid = String(ESP.getChipId());  //Fetching ESP device ID.
+String chipid = String(ESP.getEfuseMac());  //Fetching ESP device ID.
 String outtopic = chipid+"/RESPONSE";          //MQTT Topic for sending data from ESP.
 String intopic = chipid+"/COMMAND";
 String espsensor = "ESP_SENSOR";           //MQTT Topic for sending sensor status data.
