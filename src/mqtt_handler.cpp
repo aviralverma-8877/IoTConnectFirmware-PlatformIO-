@@ -171,7 +171,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         serializeJson(doc, r);
         sendToMQTT(outtopic, r);
         TickerForTimeOut.once(2,[](){
-          ESP.reset();
+          ESP.restart();
         });
         return;
       }
@@ -184,9 +184,17 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         bool value = root["value"];
         String by = root["by"];
         root.clear();
-        TickerForTimeOut.once_ms(100,[no, value, by](){
-          relay_action(no, value, by);
-        });
+        struct tmp{
+          String no; 
+          bool value; 
+          String by;
+        }t;
+        t.by = by;
+        t.no = no;
+        t.value = value;
+        TickerForTimeOut.once_ms<tmp>(100,[](tmp t){
+          relay_action(t.no, t.value, t.by);
+        }, t);
         return;
       }
   /*-------Action command for controlling Relays--------------*/
@@ -260,9 +268,15 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       {
         relay = (const char*)kv["name"];
         action = msg["action"];
-        TickerForTimeOut.once_ms(100,[relay, action](){
-          perform_action(relay, action);
-        });
+        struct tmp{
+          const char *relay;
+          bool action;
+        }t;
+        t.action = action;
+        t.relay = relay;
+        TickerForTimeOut.once_ms<tmp>(100,[](tmp t){
+          perform_action(t.relay, t.action);
+        }, t);
         kv["status"] = action;
       }
     }

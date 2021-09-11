@@ -17,8 +17,6 @@
     extern bool reset_btn_status;
     extern byte reset_btn_press_count;
     extern unsigned long reset_btn_press_time;
-    extern WiFiEventHandler wifiConnectHandler;
-    extern WiFiEventHandler wifiDisconnectHandler;
     extern String chipid;  //Fetching ESP device ID.
     extern bool debugging;                   //Turn On or Off the serial output.
     extern String outtopic;          //MQTT Topic for sending data from ESP.
@@ -27,4 +25,5 @@
     extern String intopic;
     extern String espsensor;
     extern String websocket_msg;
+    String getMacAddress();
 #endif

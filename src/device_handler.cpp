@@ -1,14 +1,13 @@
 #include "device_handler.h"
-#include "web_handler.h"
 void setup_tickers()
 {
   TickerForPinging.attach(5, pinging);
   if(hasSensor)
-    TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
-  TickerForcheckReset.attach_ms(10, checkReset);
+    TickerForsendSensorData.attach(delayMS/1000, sendSensorData);
+  TickerForcheckReset.attach(10/1000, checkReset);
 }
 
-void onWifiConnect(const WiFiEventStationModeGotIP& event) {
+void onWifiConnect(WiFiEvent_t event, WiFiEventInfo_t info) {
   serialDisplay("onWifiConnect","WiFi Connected");
   TickerForFeedbackLED.detach();
   TickerForWiFiConnect.detach();
@@ -29,7 +28,7 @@ void onWifiConnect(const WiFiEventStationModeGotIP& event) {
   }
 }
 
-void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
+void onWifiDisconnect(WiFiEvent_t event, WiFiEventInfo_t info) {
   TickerForFeedbackLED.detach();
   TickerForFeedbackLED.attach(0.6, feedbackLED);
   serialDisplay("onWifiDisconnect","WiFi Disconnected");
@@ -120,9 +119,9 @@ void relay_action(String relay, bool value, String by)
 
   String r = "";
   serializeJson(doc, r);
-  TickerForTimeOutTwo.once_ms(100,[r](){
+  TickerForTimeOutTwo.once_ms<String>(100,[](String r){
     sendToMQTT(norttopic, r);
-  });
+  }, r);
 }
 /*-------feedbackLED----------------------------------------*/
 void feedbackLED()
@@ -159,7 +158,7 @@ void reset()
   serialDisplay("reset","Writing Config");
   write_config(newConf);
   serialDisplay("reset","Writing Completes");
-  ESP.reset();
+  ESP.restart();
 
 }
 /*----Meathod for reconfiguring WiFi settings---------------*/
@@ -538,7 +537,7 @@ void generate_mqtt_topics()
   serializeJsonPretty(topic_doc, r);
   topicFile.print(r);
   topicFile.close();
-  ESP.reset();
+  ESP.restart();
 }
 
 void toggle_relay(String relay)

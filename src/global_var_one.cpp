@@ -51,6 +51,7 @@ Ticker TickerForTimeOutTwo;
 Ticker TickerForWiFiConnect;
 Ticker TickerForWebSocketStatus;
 /*--------------Tickers for Async Meathods------------------*/
+TaskHandle_t Task;
 void configure_gpio()
 {
     serialDisplay("configure_gpio","Configuring GPIO");

@@ -2,18 +2,22 @@
     #define device_handler
     #include<Arduino.h>
     #include<ArduinoJson.h>
-    #include <ESP8266mDNS.h> 
+    #include <ESPmDNS.h> 
     #include <DHT.h>
+    #include <Ticker.h>
+    #include "FS.h"
+    #include "SPIFFS.h"
     #include "mqtt_handler.h"
     #include "global_var_one.h"
     #include "global_var_two.h"
     #include "common_meathods.h"
     #include "web_sockets_handler.h"
     #include "mqtt_handler.h"
+    #include "web_handler.h"
 
     void setup_tickers();
-    void onWifiConnect(const WiFiEventStationModeGotIP& event);
-    void onWifiDisconnect(const WiFiEventStationModeDisconnected& event);
+    void onWifiConnect(WiFiEvent_t event, WiFiEventInfo_t info);
+    void onWifiDisconnect(WiFiEvent_t event, WiFiEventInfo_t info);
     String device_status();
     String read_mqtt_config();  
     void relay_action(String relay, bool value, String by);

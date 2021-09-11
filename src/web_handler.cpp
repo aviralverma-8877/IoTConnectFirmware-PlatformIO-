@@ -82,7 +82,7 @@ void handleWebControl(AsyncWebServerRequest *request)
     if(comp(action.c_str(),"reset"))
       reset();
     if(comp(action.c_str(),"reboot"))
-      ESP.reset();
+      ESP.restart();
     if(comp(action.c_str(),"toggle_onb"))
     {
       bool status = doc["status"];
@@ -143,7 +143,7 @@ void handlefauxmo(AsyncWebServerRequest *request)
     conf.fauxmo_relay_3 = doc["relay_3"].as<String>();
     write_config(conf);
     TickerForTimeOut.once(1, [](){
-      ESP.reset();
+      ESP.restart();
     });
   }
 }
@@ -180,11 +180,9 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
       doc["mqtt"]["qos"] = MQTT_QoS;
       doc["mqtt"]["auth"] = true;
     }
-    TickerForTimeOut.once_ms(10,[doc]{
-      write_device_config(doc);
-      TickerForTimeOut.once_ms(10,[doc]{
-        generate_mqtt_topics();
-      });
+    write_device_config(doc);
+    TickerForTimeOut.once_ms(10,[](){
+      generate_mqtt_topics();
     });
   }
   else
@@ -281,7 +279,7 @@ void web_set_wifi(AsyncWebServerRequest *request)
     request->send(200, "application/json", return_msg);
 
     WiFi.disconnect();
-    TickerForTimeOut.once(1,[request](){
+    TickerForTimeOut.once<AsyncWebServerRequest*>(1,[](AsyncWebServerRequest *request){
       WiFi.mode(WIFI_STA);
       WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
       TickerForTimeOut.once(15,[](){
@@ -291,10 +289,10 @@ void web_set_wifi(AsyncWebServerRequest *request)
         }
         else
         {
-          ESP.reset();
+          ESP.restart();
         }        
       });
-    });
+    }, request);
 
   }
   else
@@ -380,7 +378,7 @@ void firmware_web_updater()
         if(debugging)
           Serial.printf("Update Success: %uB\n", index+len);
         TickerForTimeOut.once(1,[](){
-          ESP.reset();
+          ESP.restart();
         });
       } else {
         if(debugging)
@@ -424,7 +422,7 @@ void firmware_web_updater()
         if(debugging)
           Serial.printf("Update Success: %uB\n", index+len);
         TickerForTimeOut.once(1,[](){
-          ESP.reset();
+          ESP.restart();
         });
       } else {
         if(debugging)

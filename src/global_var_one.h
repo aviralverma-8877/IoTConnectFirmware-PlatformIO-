@@ -5,13 +5,13 @@
     #include <AsyncMqttClient.h>              //Async MQTT Library
     #include <Ticker.h>                       //Ticker for running multithread
     #include <ArduinoJson.h>                  //Encoading and Decoding JSON
-    #include <ESP8266httpUpdate.h>            //ESP Update Library.
+    #include <Update.h>                       //ESP Update Library.
     #include <ShiftRegister74HC595.h>         //For controlling Relays from 74HC595 shift register
-    #include <DNSServer.h>            //For redirecting the user on connecting to device WiFi
-    #include <ESPAsyncTCP.h>
+    #include <DNSServer.h>                    //For redirecting the user on connecting to device WiFi
     #include <ESPAsyncWebServer.h>
     #include <DHT.h>
     #include <WiFiClient.h>
+    #include <HTTPClient.h>
     #include "fauxmoESP.h"
     #include "structures.h"
     #include "device_handler.h"
@@ -71,5 +71,6 @@
     extern Ticker TickerForWiFiConnect;
     extern Ticker TickerForWebSocketStatus;
     /*--------------Tickers for Async Meathods------------------*/
-     void configure_gpio();
+    extern TaskHandle_t Task;
+    void configure_gpio();
 #endif

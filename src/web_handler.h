@@ -1,12 +1,12 @@
 #ifndef web_handler
     #define web_handler
     #include <Arduino.h>
-    #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>
-    #include <ESP8266mDNS.h>        // Include the mDNS library
+    #include <ESPmDNS.h>        // Include the mDNS library
     #include <Ticker.h>                       //Ticker for running multithread
     #include <ArduinoJson.h>                  //Encoading and Decoding JSON
-    #include <ESP8266HTTPClient.h>            //HTTP Client library.
+    #include "FS.h"
+    #include "SPIFFS.h"
     #include "global_var_one.h"
     #include "global_var_two.h"
     #include "device_handler.h"

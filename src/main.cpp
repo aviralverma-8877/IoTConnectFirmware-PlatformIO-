@@ -15,9 +15,10 @@
 //Include Global libraries
 #include <WiFi.h>
 #include <DNSServer.h>
-#include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h> 
-#include <ESP8266mDNS.h>
+#include <ESPmDNS.h>
+#include "FS.h"
+#include "SPIFFS.h"
 
 void setup() 
 {
@@ -41,8 +42,8 @@ void setup()
   callback = &blank;
   if(!conf.setupFlag)
   {
-    wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
-    wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
+    WiFi.onEvent(onWifiConnect, SYSTEM_EVENT_STA_CONNECTED);
+    WiFi.onEvent(onWifiDisconnect, SYSTEN_EVENT_STA_DISCONNECTED);
   }
   setup_web_server();    //Webserver Handler
   initWebSocket();

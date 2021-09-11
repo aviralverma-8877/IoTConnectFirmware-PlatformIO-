@@ -3,8 +3,9 @@
     #include <Arduino.h>
     #include "structures.h"
     #include <Arduino.h>
-    #include <FS.h>
     #include <ArduinoJson.h>
+    #include "FS.h"
+    #include "SPIFFS.h"
     #include "mqtt_handler.h"
     #include "global_var_two.h"
     #include "global_var_one.h"

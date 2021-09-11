@@ -39,7 +39,7 @@ void write_device_config(StaticJsonDocument<1000> jsonBuffer)
   configFile.print(r); 
   configFile.close();
   TickerForTimeOut.once(1,[](){
-    ESP.reset();
+    ESP.restart();
   });
 }
 

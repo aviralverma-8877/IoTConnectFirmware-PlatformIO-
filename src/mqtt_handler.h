@@ -4,6 +4,8 @@
     #include <AsyncMqttClient.h>              //Async MQTT Library
     #include <Ticker.h>                       //Ticker for running multithread
     #include <ArduinoJson.h>                  //Encoading and Decoding JSON
+    #include "FS.h"
+    #include "SPIFFS.h"
     #include "global_var_one.h"
     #include "global_var_two.h"
     #include "device_handler.h"
