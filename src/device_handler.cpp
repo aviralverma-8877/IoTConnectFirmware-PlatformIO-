@@ -119,9 +119,9 @@ void relay_action(String relay, bool value, String by)
 
   String r = "";
   serializeJson(doc, r);
-  TickerForTimeOutTwo.once_ms<String>(100,[](String r){
-    sendToMQTT(norttopic, r);
-  }, r);
+  TickerForTimeOutTwo.once_ms<String*>(100,[](String *r){
+    sendToMQTT(norttopic, *r);
+  }, &r);
 }
 /*-------feedbackLED----------------------------------------*/
 void feedbackLED()

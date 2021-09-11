@@ -192,9 +192,9 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         t.by = by;
         t.no = no;
         t.value = value;
-        TickerForTimeOut.once_ms<tmp>(100,[](tmp t){
-          relay_action(t.no, t.value, t.by);
-        }, t);
+        TickerForTimeOut.once_ms<tmp*>(100,[](tmp *t){
+          relay_action(t->no, t->value, t->by);
+        }, &t);
         return;
       }
   /*-------Action command for controlling Relays--------------*/
@@ -274,9 +274,9 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         }t;
         t.action = action;
         t.relay = relay;
-        TickerForTimeOut.once_ms<tmp>(100,[](tmp t){
-          perform_action(t.relay, t.action);
-        }, t);
+        TickerForTimeOut.once_ms<tmp*>(100,[](tmp *t){
+          perform_action(t->relay, t->action);
+        }, &t);
         kv["status"] = action;
       }
     }

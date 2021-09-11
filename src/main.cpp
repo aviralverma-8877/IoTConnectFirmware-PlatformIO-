@@ -43,7 +43,7 @@ void setup()
   if(!conf.setupFlag)
   {
     WiFi.onEvent(onWifiConnect, SYSTEM_EVENT_STA_CONNECTED);
-    WiFi.onEvent(onWifiDisconnect, SYSTEN_EVENT_STA_DISCONNECTED);
+    WiFi.onEvent(onWifiDisconnect, SYSTEM_EVENT_STA_DISCONNECTED);
   }
   setup_web_server();    //Webserver Handler
   initWebSocket();
@@ -67,7 +67,6 @@ void setup()
 void loop() 
 {
   dnsServer.processNextRequest();
-  MDNS.update();
   fauxmo.handle();
   callback();
 }
