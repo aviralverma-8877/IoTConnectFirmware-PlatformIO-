@@ -198,20 +198,19 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
 }
 void web_scan_wifi(AsyncWebServerRequest *request)
 {
-  WiFi.scanNetworksAsync([request](int networksFound){
-    StaticJsonDocument<800> wifi_ssid;
-    JsonArray ssid = wifi_ssid.createNestedArray("ssid");
-    for(int i=0; i<networksFound; i++)
-    {
-      StaticJsonDocument<200> wifi;
-      wifi["ssid"] = WiFi.SSID(i);
-      wifi["RSSI"] = String(WiFi.RSSI(i));
-      ssid.add(wifi);
-    }
-    String return_msg;
-    serializeJson(wifi_ssid, return_msg);
-    request->send(200, "application/json", return_msg);
-  });
+  int networksFound = WiFi.scanNetworks();
+  StaticJsonDocument<800> wifi_ssid;
+  JsonArray ssid = wifi_ssid.createNestedArray("ssid");
+  for(int i=0; i<networksFound; i++)
+  {
+    StaticJsonDocument<200> wifi;
+    wifi["ssid"] = WiFi.SSID(i);
+    wifi["RSSI"] = String(WiFi.RSSI(i));
+    ssid.add(wifi);
+  }
+  String return_msg;
+  serializeJson(wifi_ssid, return_msg);
+  request->send(200, "application/json", return_msg);
 }
 
 void device_template(AsyncWebServerRequest *request)
@@ -281,7 +280,7 @@ void web_set_wifi(AsyncWebServerRequest *request)
     WiFi.disconnect();
     TickerForTimeOut.once<AsyncWebServerRequest*>(1,[](AsyncWebServerRequest *request){
       WiFi.mode(WIFI_STA);
-      WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
+      WiFi.begin(conf.WiFi_SSID.c_str(),conf.WiFi_PASS.c_str());
       TickerForTimeOut.once(15,[](){
         if(WiFi.status() != WL_CONNECTED)
         {
@@ -362,7 +361,6 @@ void firmware_web_updater()
     if(!index){
       if(debugging)
         Serial.printf("Update Start: %s\n", filename.c_str());
-      Update.runAsync(true);
       if(!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000, U_FLASH)){
         Update.printError(Serial);
       }
@@ -404,9 +402,7 @@ void firmware_web_updater()
     if(!index){
       if(debugging)
         Serial.printf("Update Start: %s\n", filename.c_str());
-      Update.runAsync(true);
       size_t fsSize = ((size_t) &_FS_end - (size_t) &_FS_start);
-      close_all_fs();
       if (!Update.begin(fsSize, U_FS)){//start with max available size
         Update.printError(Serial);
       }
