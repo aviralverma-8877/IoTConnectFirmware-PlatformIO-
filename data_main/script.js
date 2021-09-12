@@ -35,6 +35,10 @@ function init_socket()
                 var cont = document.getElementById("consoleBoard").innerHTML;
                 document.getElementById("consoleBoard").innerHTML = "MQTT ("+json.topic+") << "+json.payload+" <br />" + cont;
             }
+            else if(json.action == "scan_wifi")
+            {
+                show_wifi(json);
+            }
             else{
                 console.log(json)
             }
@@ -373,36 +377,40 @@ function scan_wifi()
     </tr>";
     setTimeout(function(){
         return new Promise (() => {
-            response = httpGet(0,0,"scan_wifi");
-            wifi_list = JSON.parse(response)["ssid"];
-            content = "";
-            element = document.getElementById('ssid_list');
-            element.innerHTML = "";
-            if(wifi_list.length > 0)
-            {
-                for(i=0; i<wifi_list.length; i++)
-                {
-                    ssid_name = wifi_list[i]["ssid"]
-                    ssid_rssi = wifi_list[i]["RSSI"]
-                    quality = (2 * (parseInt(ssid_rssi) + 100))
-                    if(quality > 100)
-                    {
-                        quality = 100;
-                    }
-                    content = "<tr>\
-                                            <td style=\"font-family: 'Fjalla One'\">\
-                                                <a href='#ssid_input' onclick='ssid_input.value=\""+ssid_name+"\"'><b>"+ssid_name+"</b></a>\
-                                            </td>\
-                                            <td>\
-                                                <span id='ssid_"+i+"_signal_st' class='signal_st'></span><div id='ssid_"+i+"_signal_bk' class='signal_bk'><div id='ssid_"+i+"_signal_fk' class='signal_fk'></div></div>\
-                                            </td>\
-                                        </tr>"
-                    element.innerHTML = element.innerHTML+content;
-                    document.getElementById('ssid_'+i+'_signal_fk').style.width = quality+"px";
-                }
-            }
+            httpGet(0,0,"scan_wifi");
         });
     },10);
+}
+
+function show_wifi(response)
+{
+    wifi_list = response["ssid"];
+    content = "";
+    element = document.getElementById('ssid_list');
+    element.innerHTML = "";
+    if(wifi_list.length > 0)
+    {
+        for(i=0; i<wifi_list.length; i++)
+        {
+            ssid_name = wifi_list[i]["ssid"]
+            ssid_rssi = wifi_list[i]["RSSI"]
+            quality = (2 * (parseInt(ssid_rssi) + 100))
+            if(quality > 100)
+            {
+                quality = 100;
+            }
+            content = "<tr>\
+                                    <td style=\"font-family: 'Fjalla One'\">\
+                                        <a href='#ssid_input' onclick='ssid_input.value=\""+ssid_name+"\"'><b>"+ssid_name+"</b></a>\
+                                    </td>\
+                                    <td>\
+                                        <span id='ssid_"+i+"_signal_st' class='signal_st'></span><div id='ssid_"+i+"_signal_bk' class='signal_bk'><div id='ssid_"+i+"_signal_fk' class='signal_fk'></div></div>\
+                                    </td>\
+                                </tr>"
+            element.innerHTML = element.innerHTML+content;
+            document.getElementById('ssid_'+i+'_signal_fk').style.width = quality+"px";
+        }
+    }
 }
 
 function update_login(login_uname_input, login_pass_input, login_confirm_pass_input)

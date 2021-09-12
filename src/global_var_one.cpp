@@ -31,6 +31,7 @@ HTTPClient http;                          //Global variables
 uint32_t delayMS;                         //Global variables
 DNSServer dnsServer;                      //Global variables
 AsyncWebSocket webSocket("/ws");          //Global variables
+AsyncEventSource events("/events");       //Global variables
 AsyncWebServer server(80);                //Global variables
 /*----------------------------------------------------------*/
 configuration conf = {false,false,true,false,2000,"N/A","admin","admin","","",false,"N/A","N/A","N/A"};

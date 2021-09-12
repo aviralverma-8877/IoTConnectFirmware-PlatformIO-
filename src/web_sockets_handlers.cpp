@@ -6,8 +6,10 @@ void send_data_to_webSocket(String msg)
 }
 
 void initWebSocket() {
+  serialDisplay("initWebSocket","Initilizing Websockets");
   webSocket.onEvent(onEvent);
   server.addHandler(&webSocket);
+  server.addHandler(&events);
 }
 
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,

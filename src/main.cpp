@@ -55,8 +55,8 @@ void setup()
     WiFi.onEvent(onWifiConnect, SYSTEM_EVENT_STA_GOT_IP);
     WiFi.onEvent(onWifiDisconnect, SYSTEM_EVENT_STA_DISCONNECTED);
   }
-  setup_web_server();    //Webserver Handler
   initWebSocket();
+  setup_web_server();    //Webserver Handler
   serialDisplay("setup","ap_enabled "+String(ap_enabled));
   serialDisplay("setup","Current Core : " + String(xPortGetCoreID()));
   if(!ap_enabled)
