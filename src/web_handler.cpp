@@ -197,19 +197,22 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
 }
 void web_scan_wifi(AsyncWebServerRequest *request)
 {
-  int networksFound = WiFi.scanNetworks();
-  StaticJsonDocument<800> wifi_ssid;
-  JsonArray ssid = wifi_ssid.createNestedArray("ssid");
-  for(int i=0; i<networksFound; i++)
-  {
-    StaticJsonDocument<200> wifi;
-    wifi["ssid"] = WiFi.SSID(i);
-    wifi["RSSI"] = String(WiFi.RSSI(i));
-    ssid.add(wifi);
-  }
-  String return_msg;
-  serializeJson(wifi_ssid, return_msg);
-  request->send(200, "application/json", return_msg);
+  WiFi.scanNetworks(true);
+  TickerForTimeOut.once<AsyncWebServerRequest *>(2,[](AsyncWebServerRequest *request){
+    int networksFound = WiFi.scanComplete();
+    StaticJsonDocument<800> wifi_ssid;
+    JsonArray ssid = wifi_ssid.createNestedArray("ssid");
+    for(int i=0; i<networksFound; i++)
+    {
+      StaticJsonDocument<200> wifi;
+      wifi["ssid"] = WiFi.SSID(i);
+      wifi["RSSI"] = String(WiFi.RSSI(i));
+      ssid.add(wifi);
+    }
+    String return_msg;
+    serializeJson(wifi_ssid, return_msg);
+    request->send(200, "application/json", return_msg);
+  }, request);
 }
 
 void device_template(AsyncWebServerRequest *request)
