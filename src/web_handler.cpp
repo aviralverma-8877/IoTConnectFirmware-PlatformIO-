@@ -41,7 +41,6 @@ void handleWebControl(AsyncWebServerRequest *request)
 {
   String message;
   StaticJsonDocument<200> doc;
-  int params = request->params();
   if(request->hasParam("command"))
   {
     String command = request->arg("command");
@@ -122,7 +121,6 @@ void handleWebStatus(AsyncWebServerRequest *request)
 }
 void handlefauxmo(AsyncWebServerRequest *request)
 {
-  int params = request->params();
   if(request->hasParam("options"))
   {
     String fauxmo_relay = request->arg("options");
@@ -152,7 +150,6 @@ void handlefauxmo(AsyncWebServerRequest *request)
 void handleDeviceConfig(AsyncWebServerRequest *request)
 {
   String return_msg;
-  int params = request->params();
   if(request->hasParam("options"))
   {
     String device_config = request->arg("options");
@@ -364,7 +361,7 @@ void firmware_web_updater()
     if(!index){
       if(debugging)
         Serial.printf("Update Start: %s\n", filename.c_str());
-      if(!Update.begin(len, U_FLASH)){
+      if(!Update.begin(UPDATE_SIZE_UNKNOWN, U_FLASH)){
         Update.printError(Serial);
       }
     }
@@ -405,7 +402,7 @@ void firmware_web_updater()
     if(!index){
       if(debugging)
         Serial.printf("Update Start: %s\n", filename.c_str());
-      if (!Update.begin(len, U_SPIFFS)){
+      if (!Update.begin(UPDATE_SIZE_UNKNOWN, U_SPIFFS)){
         Update.printError(Serial);
       }
     }
