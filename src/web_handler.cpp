@@ -198,7 +198,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
 void web_scan_wifi(AsyncWebServerRequest *request)
 {
   WiFi.scanNetworks(true);
-  TickerForTimeOut.once<AsyncWebServerRequest *>(2,[](AsyncWebServerRequest *request){
+  TickerForTimeOut.once<AsyncWebServerRequest *>(5,[](AsyncWebServerRequest *request){
     int networksFound = WiFi.scanComplete();
     StaticJsonDocument<800> wifi_ssid;
     JsonArray ssid = wifi_ssid.createNestedArray("ssid");
