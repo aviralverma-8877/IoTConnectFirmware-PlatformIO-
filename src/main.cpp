@@ -80,4 +80,5 @@ void loop()
   dnsServer.processNextRequest();
   fauxmo.handle();
   callback();
+  delay(10);
 }
