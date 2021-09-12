@@ -23,8 +23,7 @@ void onWifiConnect(WiFiEvent_t event, WiFiEventInfo_t info) {
   TickerForWebSocketStatus.attach(5,sendWebSocketStatus);
   if(reconnect_mqtt)
   {
-    TickerForconnectToMqtt.detach();
-    TickerForconnectToMqtt.attach(5, setup_mqtt);
+    setup_mqtt();
   }
 }
 

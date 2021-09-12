@@ -473,13 +473,10 @@ void onMqttPublish(uint16_t packetId) {
 
 void connectToMqtt()
 {
-  if (WiFi.status() == WL_CONNECTED)
+  if(!MQTTStatus)
   {
-    if(!MQTTStatus)
-    {
-      serialDisplay("connectToMqtt","Trying MQTT Connect");
-      mqtt.connect();
-    }
+    serialDisplay("connectToMqtt","Trying MQTT Connect");
+    mqtt.connect();
   }
 }
 

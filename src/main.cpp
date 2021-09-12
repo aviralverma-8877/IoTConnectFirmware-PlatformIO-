@@ -52,7 +52,7 @@ void setup()
   callback = &blank;
   if(!conf.setupFlag)
   {
-    WiFi.onEvent(onWifiConnect, SYSTEM_EVENT_STA_CONNECTED);
+    WiFi.onEvent(onWifiConnect, SYSTEM_EVENT_STA_GOT_IP);
     WiFi.onEvent(onWifiDisconnect, SYSTEM_EVENT_STA_DISCONNECTED);
   }
   setup_web_server();    //Webserver Handler
