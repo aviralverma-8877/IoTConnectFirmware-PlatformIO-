@@ -420,8 +420,8 @@ void send_status(String relay, bool value)
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
     {
       String name = kv["name"];
-      serialDisplay("send_status(String relay, bool value)","Relay Passed Value"+relay);
-      serialDisplay("send_status(String relay, bool value)","Relay Saved Value"+name);
+      serialDisplay("send_status(String relay, bool value)","Relay Passed Value "+relay);
+      serialDisplay("send_status(String relay, bool value)","Relay Saved Value "+name);
       if(comp(relay.c_str(),name.c_str()))
       {
         StaticJsonDocument<500> data;

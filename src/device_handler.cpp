@@ -81,7 +81,7 @@ void relay_action(String relay, bool value, String by)
   DynamicJsonDocument doc(1500);
   read_config();
   bool save_eeprom = conf.save_eeprom;
-  serialDisplay("relay_action","SAVE EEPROM"+String(save_eeprom));
+  serialDisplay("relay_action","SAVE EEPROM "+String(save_eeprom));
   if(save_eeprom)
   {
     String mqtt_data = read_mqtt_config();
@@ -118,9 +118,7 @@ void relay_action(String relay, bool value, String by)
 
   String r = "";
   serializeJson(doc, r);
-  TickerForTimeOutTwo.once_ms<String*>(100,[](String *r){
-    sendToMQTT(norttopic, *r);
-  }, &r);
+  sendToMQTT(norttopic, r);
 }
 /*-------feedbackLED----------------------------------------*/
 void feedbackLED()

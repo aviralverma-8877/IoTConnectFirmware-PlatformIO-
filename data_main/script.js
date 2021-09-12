@@ -142,7 +142,7 @@ function set_ui()
         chipid = json.chip_id;
         document.getElementById("hostname").innerHTML = "http://iot-connect-"+json.chip_id+".local";
         document.getElementById("hostname").setAttribute('href', "http://iot-connect-"+json.chip_id+".local");
-        document.getElementById("pair_btn").setAttribute('onclick',"pair_device("+chipid+")");
+        document.getElementById("pair_btn").setAttribute('onclick',"pair_device('"+chipid+"')");
         document.getElementById("pair_btn").style.display = "block";
     }
     init_socket();
