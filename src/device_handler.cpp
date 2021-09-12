@@ -354,9 +354,7 @@ void fetchIP()
     }
     else
     {
-      TickerForTimeOut.once(1,[](){
-        fetchIP();
-      });
+      fetchIP();
     }
   }
   Wifi_ssid = WiFi.SSID();

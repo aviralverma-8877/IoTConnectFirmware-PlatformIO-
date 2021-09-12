@@ -176,9 +176,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
       doc["mqtt"]["auth"] = true;
     }
     write_device_config(doc);
-    TickerForTimeOut.once_ms(10,[](){
-      generate_mqtt_topics();
-    });
+    generate_mqtt_topics();
   }
   else
   {

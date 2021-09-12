@@ -184,17 +184,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         bool value = root["value"];
         String by = root["by"];
         root.clear();
-        struct tmp{
-          String no; 
-          bool value; 
-          String by;
-        }t;
-        t.by = by;
-        t.no = no;
-        t.value = value;
-        TickerForTimeOut.once_ms<tmp*>(100,[](tmp *t){
-          relay_action(t->no, t->value, t->by);
-        }, &t);
+        relay_action(no, value, by);
         return;
       }
   /*-------Action command for controlling Relays--------------*/
@@ -202,9 +192,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       else if(comp(action,"STATUS"))
       {
         root.clear();
-        TickerForTimeOut.once_ms(100,[](){
-          send_device_template(true);
-        });
+        send_device_template(true);
         return;
       }
   /*-------Action command for getting Relays status-----------*/
@@ -268,15 +256,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       {
         relay = (const char*)kv["name"];
         action = msg["action"];
-        struct tmp{
-          const char *relay;
-          bool action;
-        }t;
-        t.action = action;
-        t.relay = relay;
-        TickerForTimeOut.once_ms<tmp*>(100,[](tmp *t){
-          perform_action(t->relay, t->action);
-        }, &t);
+        perform_action(relay, action);
         kv["status"] = action;
       }
     }
@@ -406,7 +386,7 @@ void send_status(String relay, bool value)
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
     StaticJsonDocument<200> filter;
-    DynamicJsonDocument doc(2000);
+    DynamicJsonDocument doc(1000);
     filter.clear();
     String mqtt_data = read_mqtt_config();
     filter["relay"][0]["name"] = true;
@@ -461,9 +441,17 @@ void send_to_web_mqtt(String msg)
   send_data_to_webSocket(msg);
   if(MQTTStatus)
   {
-    serialDisplay("send_to_web_mqtt","Sending Status MQTT");
-    sendToMQTT(outtopic, msg);
-    serialDisplay("send_to_web_mqtt","Sending Status MQTT Sent");
+    struct tmp{
+      String outtopic;
+      String msg;
+    }t;
+    t.outtopic = outtopic;
+    t.msg = msg;
+    TickerForTimeOut.once_ms<tmp *>(10,[](tmp *t){
+      serialDisplay("send_to_web_mqtt","Sending Status MQTT");
+      sendToMQTT(t->outtopic, t->msg);
+      serialDisplay("send_to_web_mqtt","Sending Status MQTT Sent");
+    }, &t);
   }
 }
 
