@@ -14,18 +14,20 @@ class CaptiveRequestHandler : public AsyncWebHandler {
     }
 
     void handleRequest(AsyncWebServerRequest *request) {
-      File index = SPIFFS.open("/index.html", "r");
-      if (index) {
+      File index = SPIFFS.open("/index.html");
+      if (!index || index.isDirectory()) {
+        serialDisplay("handleRequest","Update");
         AsyncResponseStream *response = request->beginResponseStream("text/html");
-        response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/index\" /><title>Redirecting...</title></head><body>", WiFi.softAPIP().toString().c_str());
-        response->printf("<p>Redirecting to <a href='http://%s/index'>this link</a><br />Please Wait.....</p>", WiFi.softAPIP().toString().c_str());
+        response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/update\" /><title>Redirecting...</title></head><body>", WiFi.softAPIP().toString().c_str());
+        response->printf("<p>Redirecting to <a href='http://%s/update'>this link</a><br />Please Wait.....</p>", WiFi.softAPIP().toString().c_str());
         response->print("</body></html>");
         request->send(response);
       }
       else{
+        serialDisplay("handleRequest","Index");
         AsyncResponseStream *response = request->beginResponseStream("text/html");
-        response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/update\" /><title>Redirecting...</title></head><body>", WiFi.softAPIP().toString().c_str());
-        response->printf("<p>Redirecting to <a href='http://%s/update'>this link</a><br />Please Wait.....</p>", WiFi.softAPIP().toString().c_str());
+        response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/index\" /><title>Redirecting...</title></head><body>", WiFi.softAPIP().toString().c_str());
+        response->printf("<p>Redirecting to <a href='http://%s/index'>this link</a><br />Please Wait.....</p>", WiFi.softAPIP().toString().c_str());
         response->print("</body></html>");
         request->send(response);
       }
@@ -39,6 +41,7 @@ void handleWebControl(AsyncWebServerRequest *request)
 {
   String message;
   StaticJsonDocument<200> doc;
+  int params = request->params();
   if(request->hasParam("command"))
   {
     String command = request->arg("command");
@@ -119,6 +122,7 @@ void handleWebStatus(AsyncWebServerRequest *request)
 }
 void handlefauxmo(AsyncWebServerRequest *request)
 {
+  int params = request->params();
   if(request->hasParam("options"))
   {
     String fauxmo_relay = request->arg("options");
@@ -148,6 +152,7 @@ void handlefauxmo(AsyncWebServerRequest *request)
 void handleDeviceConfig(AsyncWebServerRequest *request)
 {
   String return_msg;
+  int params = request->params();
   if(request->hasParam("options"))
   {
     String device_config = request->arg("options");
@@ -311,6 +316,7 @@ void firmware_web_updater()
       }
     }
     String current_version = FIRMWARE_V;
+    serialDisplay("firmware_web_updater","Update Page called");
     request->send(200, "text/html", "<script>\
     function httpGet(action, options = {})\
     {\
@@ -399,7 +405,7 @@ void firmware_web_updater()
     if(!index){
       if(debugging)
         Serial.printf("Update Start: %s\n", filename.c_str());
-      if (!Update.begin(len, U_SPIFFS)){//start with max available size
+      if (!Update.begin(len, U_SPIFFS)){
         Update.printError(Serial);
       }
     }
@@ -456,7 +462,7 @@ void disable_ap()
 void setup_web_server()
 {
   connectToWiFi();      //Connect to Access Point or start AP depending on config
-  serialDisplay("setup","Enabling DNS Server");
+  serialDisplay("setup_web_server","Enabling DNS Server");
   dnsServer.start(53, "*", WiFi.softAPIP());
 /*-------Web Update Server----------------------------------*/
   firmware_web_updater();
@@ -487,7 +493,7 @@ void setup_web_server()
     handleDeviceConfig(request);
   });
   server.on("/index", HTTP_GET, [](AsyncWebServerRequest *request){
-    File index = SPIFFS.open("/index.html", "r");
+    File index = SPIFFS.open("/index.html");
     if (index) {
       if(!ap_enabled)
       {
@@ -536,7 +542,7 @@ void setup_web_server()
   if(!ap_enabled)
   {
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-      File index = SPIFFS.open("/index.html", "r");
+      File index = SPIFFS.open("/index.html");
       if (index) {
         if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
         {

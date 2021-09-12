@@ -12,6 +12,8 @@ String outtopic = chipid+"/RESPONSE";          //MQTT Topic for sending data fro
 String intopic = chipid+"/COMMAND";
 String espsensor = "ESP_SENSOR";           //MQTT Topic for sending sensor status data.
 String hostname = "iot-connect-"+chipid;
+TaskHandle_t core_0;
+TaskHandle_t core_1;
 /*--------------MQTT Configration---------------------------*/
 String getMacAddress() {
     uint8_t baseMac[6];

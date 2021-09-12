@@ -151,7 +151,12 @@ void reset()
     WiFi.disconnect();
   }
   serialDisplay("reset","Formatting SPIFFS");
-  SPIFFS.format();
+  bool formatted = SPIFFS.format();
+  if(formatted){
+    serialDisplay("reset","Success formatting");
+  }else{
+    serialDisplay("reset","Error formatting");
+  }
   serialDisplay("reset","Formatting Completed");
   configuration newConf = {false,false,true,false,2000,"N/A","admin","admin","","",false,"N/A","N/A","N/A"};
   newConf.setupFlag = true;
@@ -390,7 +395,7 @@ void print_config(){
   {
     if (SPIFFS.exists("/config.json")) 
     {
-      File configFile = SPIFFS.open("/config.json", "r");
+      File configFile = SPIFFS.open("/config.json");
       if (configFile) 
       {
         size_t size = configFile.size();
@@ -407,7 +412,7 @@ void print_config(){
 void read_config()
 {
   if (SPIFFS.exists("/config.json")) {
-    File configFile = SPIFFS.open("/config.json", "r");
+    File configFile = SPIFFS.open("/config.json");
     if (configFile) {
       size_t size = configFile.size();
       // Allocate a buffer to store contents of the file.
@@ -448,7 +453,7 @@ void read_config()
 String read_mqtt_config()
 {
   if (SPIFFS.exists("/mqtt_topics.json")) {
-    File configFile = SPIFFS.open("/mqtt_topics.json", "r");
+    File configFile = SPIFFS.open("/mqtt_topics.json");
     if (configFile) {
       size_t size = configFile.size();
       // Allocate a buffer to store contents of the file.
@@ -465,7 +470,7 @@ String read_mqtt_config()
 String read_device_config()
 {
   if (SPIFFS.exists("/device_config.json")) {
-    File configFile = SPIFFS.open("/device_config.json", "r");
+    File configFile = SPIFFS.open("/device_config.json");
     if (configFile) {
       size_t size = configFile.size();
       // Allocate a buffer to store contents of the file.
@@ -532,7 +537,7 @@ void generate_mqtt_topics()
       relay_count++;
     }
   }
-  File topicFile = SPIFFS.open("/mqtt_topics.json", "w");
+  File topicFile = SPIFFS.open("/mqtt_topics.json", FILE_WRITE);
   String r;
   serializeJsonPretty(topic_doc, r);
   topicFile.print(r);

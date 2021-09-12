@@ -19,6 +19,13 @@
 #include <ESPmDNS.h>
 #include "FS.h"
 #include "SPIFFS.h"
+void core_zero_task(void * parameter)
+{
+}
+
+void core_one_task(void * parameter)
+{
+}
 
 void setup() 
 {
@@ -43,14 +50,15 @@ void setup()
   if(conf.save_eeprom)
     perform_action();
   callback = &blank;
-  if(!conf.setupFlag)
+  if(!ap_enabled)
   {
     WiFi.onEvent(onWifiConnect, SYSTEM_EVENT_STA_CONNECTED);
     WiFi.onEvent(onWifiDisconnect, SYSTEM_EVENT_STA_DISCONNECTED);
   }
   setup_web_server();    //Webserver Handler
   initWebSocket();
-  serialDisplay("setup","ap_enabled"+String(ap_enabled));
+  serialDisplay("setup","ap_enabled "+String(ap_enabled));
+  serialDisplay("setup","Current Core : " + String(xPortGetCoreID()));
   if(!ap_enabled)
   {
     fetchIP();             //Fetching Public and Local IP
