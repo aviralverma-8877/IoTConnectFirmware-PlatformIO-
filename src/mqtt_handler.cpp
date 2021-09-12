@@ -293,6 +293,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*----Meathod for sending MQTT Data-------------------------*/
 void sendToMQTT(String topic, String msg)
 {
+  serialDisplay("sendToMQTT", "Send to MQTT Start");
   StaticJsonDocument<200> doc;
   StaticJsonDocument<200> filter;
   filter["mqtt"]["prefix"] = true;
@@ -300,11 +301,13 @@ void sendToMQTT(String topic, String msg)
   filter["mqtt"]["service"] = true;
   String device_config = read_device_config();
   DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+  serialDisplay("sendToMQTT", "Send to MQTT Start");
   if(error)
   {
     return;
   }
   String service = doc["mqtt"]["service"];
+  serialDisplay("sendToMQTT", "Send to MQTT Start");
   if(!comp(service.c_str(),"N/A"))
   {
     String prefix = doc["mqtt"]["prefix"];
@@ -320,6 +323,7 @@ void sendToMQTT(String topic, String msg)
     String r;
     serializeJson(doc, r);
     doc.clear();
+    serialDisplay("sendToMQTT", "Send to MQTT Completed");
     send_data_to_webSocket(r);
   }
 }
@@ -399,7 +403,6 @@ String send_device_template(bool send_on_mqtt)
 void send_status(String relay, bool value)
 {
   serialDisplay("send_status(String relay, bool value)","Sending Status START");
-  read_config();
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
     StaticJsonDocument<200> filter;

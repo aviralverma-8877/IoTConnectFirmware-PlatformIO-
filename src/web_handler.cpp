@@ -14,24 +14,20 @@ class CaptiveRequestHandler : public AsyncWebHandler {
     }
 
     void handleRequest(AsyncWebServerRequest *request) {
-      File index = SPIFFS.open("/index.html");
-      if (!index || index.isDirectory()) {
-        serialDisplay("handleRequest","Update");
-        AsyncResponseStream *response = request->beginResponseStream("text/html");
+      AsyncResponseStream *response = request->beginResponseStream("text/html");
+      File index = SPIFFS.open("/index.html", FILE_READ);
+      if(!index || index.isDirectory()) {
         response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/update\" /><title>Redirecting...</title></head><body>", WiFi.softAPIP().toString().c_str());
         response->printf("<p>Redirecting to <a href='http://%s/update'>this link</a><br />Please Wait.....</p>", WiFi.softAPIP().toString().c_str());
         response->print("</body></html>");
-        request->send(response);
       }
       else{
-        serialDisplay("handleRequest","Index");
-        AsyncResponseStream *response = request->beginResponseStream("text/html");
         response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/index\" /><title>Redirecting...</title></head><body>", WiFi.softAPIP().toString().c_str());
         response->printf("<p>Redirecting to <a href='http://%s/index'>this link</a><br />Please Wait.....</p>", WiFi.softAPIP().toString().c_str());
         response->print("</body></html>");
-        request->send(response);
       }
       index.close();
+      request->send(response);
     }
 };
 
@@ -471,10 +467,8 @@ void setup_web_server()
 {
   connectToWiFi();      //Connect to Access Point or start AP depending on config
   serialDisplay("setup_web_server","Enabling DNS Server");
+  dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(53, "*", WiFi.softAPIP());
-/*-------Web Update Server----------------------------------*/
-  firmware_web_updater();
-/*-------Web Update Server----------------------------------*/
 /*-------Web Server Setup-----------------------------------*/
   server.on("/control", HTTP_GET, [](AsyncWebServerRequest *request){
     handleWebControl(request);
@@ -517,6 +511,7 @@ void setup_web_server()
     }
     index.close();
   });
+  firmware_web_updater();
   if(debugging)
   {
     server.serveStatic("/device_config.json", SPIFFS, "/device_config.json");
