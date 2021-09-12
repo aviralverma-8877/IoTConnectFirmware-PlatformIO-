@@ -354,9 +354,7 @@ void fetchIP()
     }
     else
     {
-      TickerForTimeOut.once(1,[](){
-        fetchIP();
-      });
+      fetchIP();
     }
   }
   Wifi_ssid = WiFi.SSID();
@@ -561,22 +559,23 @@ void toggle_relay(String relay)
     String com = ele["comp"];
     String name = ele["name"];
     byte pin = ele["pin"];
+    bool status;
     if(comp(com.c_str(), "shift_reg"))
     {
       if(comp(name.c_str(), relay.c_str()))
       {
-        bool status = sr.get(pin);
-        relay_action(relay,!status,"");
+        status = sr.get(pin);
       }          
     }
     if(comp(com.c_str(), "gpio"))
     {
       if(comp(name.c_str(), relay.c_str()))
       {
-        bool status = digitalRead(pin);
-        relay_action(relay,!status,"");
+        status = digitalRead(pin);
       }
     }
+    serialDisplay("toggle_relay","Performing action");
+    relay_action(relay,!status,"");
   }
 }
 
