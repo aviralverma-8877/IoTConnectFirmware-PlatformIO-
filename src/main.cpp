@@ -50,7 +50,7 @@ void setup()
   if(conf.save_eeprom)
     perform_action();
   callback = &blank;
-  if(!ap_enabled)
+  if(!conf.setupFlag)
   {
     WiFi.onEvent(onWifiConnect, SYSTEM_EVENT_STA_CONNECTED);
     WiFi.onEvent(onWifiDisconnect, SYSTEM_EVENT_STA_DISCONNECTED);
