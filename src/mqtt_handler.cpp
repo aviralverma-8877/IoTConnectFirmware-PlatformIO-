@@ -252,7 +252,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     filter["relay"][0]["status"] = true;
     StaticJsonDocument<500> doc;
     DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
-    if(error_1)
+    if(error)
       return;
     StaticJsonDocument<200> msg;
     DeserializationError error_2 = deserializeJson(msg, p);

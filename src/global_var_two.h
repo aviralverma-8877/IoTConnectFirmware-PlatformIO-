@@ -12,6 +12,7 @@
     #ifndef espaction
         #define espaction "ESP_ACTION"           //MQTT Topic for sending sensor status data.
     #endif
+    #define FORMAT_SPIFFS_IF_FAILED true
     /*--------------MQTT global Configration---------------------------*/
     extern bool reconnect_mqtt;
     extern bool reset_btn_status;
@@ -25,5 +26,6 @@
     extern String intopic;
     extern String espsensor;
     extern String websocket_msg;
+    extern String hostname;
     String getMacAddress();
 #endif

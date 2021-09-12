@@ -39,7 +39,6 @@ void handleWebControl(AsyncWebServerRequest *request)
 {
   String message;
   StaticJsonDocument<200> doc;
-  int params = request->params();
   if(request->hasParam("command"))
   {
     String command = request->arg("command");
@@ -120,7 +119,6 @@ void handleWebStatus(AsyncWebServerRequest *request)
 }
 void handlefauxmo(AsyncWebServerRequest *request)
 {
-  int params = request->params();
   if(request->hasParam("options"))
   {
     String fauxmo_relay = request->arg("options");
@@ -150,7 +148,6 @@ void handlefauxmo(AsyncWebServerRequest *request)
 void handleDeviceConfig(AsyncWebServerRequest *request)
 {
   String return_msg;
-  int params = request->params();
   if(request->hasParam("options"))
   {
     String device_config = request->arg("options");
@@ -361,7 +358,7 @@ void firmware_web_updater()
     if(!index){
       if(debugging)
         Serial.printf("Update Start: %s\n", filename.c_str());
-      if(!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000, U_FLASH)){
+      if(!Update.begin(len, U_FLASH)){
         Update.printError(Serial);
       }
     }
@@ -402,8 +399,7 @@ void firmware_web_updater()
     if(!index){
       if(debugging)
         Serial.printf("Update Start: %s\n", filename.c_str());
-      size_t fsSize = ((size_t) &_FS_end - (size_t) &_FS_start);
-      if (!Update.begin(fsSize, U_FS)){//start with max available size
+      if (!Update.begin(len, U_SPIFFS)){//start with max available size
         Update.printError(Serial);
       }
     }
@@ -434,7 +430,7 @@ void enable_sta()
     serialDisplay("enable_sta","Enabling STA");
     WiFi.disconnect();
     WiFi.mode(WIFI_STA);
-    WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
+    WiFi.begin(conf.WiFi_SSID.c_str(),conf.WiFi_PASS.c_str());
     WiFi.setAutoReconnect(true);
     WiFi.persistent(true);
   }
@@ -573,12 +569,11 @@ void setup_web_server()
         delay(100);
       }
     }
-
     serialDisplay("setup_web_server","iot-connect-"+chipid);
-    WiFi.hostname("iot-connect-"+chipid);
+    WiFi.hostname(hostname);
 
     serialDisplay("setup_web_server","Enabling mdns : iot-connect-"+chipid);
-    if (MDNS.begin("iot-connect-"+chipid)) {  //Start mDNS with name esp8266
+    if (MDNS.begin(hostname.c_str())) {  //Start mDNS with name esp8266
       MDNS.addService("http", "tcp", 80);
       serialDisplay("setup_web_server","MDNS started");
     }

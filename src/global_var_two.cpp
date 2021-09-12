@@ -3,7 +3,7 @@ bool reconnect_mqtt = true;
 bool reset_btn_status = false;
 byte reset_btn_press_count = 0;
 unsigned long reset_btn_press_time = 0;
-bool debugging = false;                   //Turn On or Off the serial output.
+bool debugging = true;                   //Turn On or Off the serial output.
 String websocket_msg = "";
 /*--------------MQTT Configration---------------------------*/
 bool MQTTStatus = false;
@@ -11,6 +11,7 @@ String chipid = getMacAddress();  //Fetching ESP device ID.
 String outtopic = chipid+"/RESPONSE";          //MQTT Topic for sending data from ESP.
 String intopic = chipid+"/COMMAND";
 String espsensor = "ESP_SENSOR";           //MQTT Topic for sending sensor status data.
+String hostname = "iot-connect-"+chipid;
 /*--------------MQTT Configration---------------------------*/
 String getMacAddress() {
     uint8_t baseMac[6];

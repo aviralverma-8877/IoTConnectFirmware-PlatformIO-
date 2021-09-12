@@ -24,7 +24,10 @@ void setup()
 {
   if(debugging)
     Serial.begin(115200);
-  SPIFFS.begin();
+  if(!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)){
+    serialDisplay("setup","SPIFFS Mount Failed");
+    return;
+  }
   if (!SPIFFS.exists("/config.json")) 
   {
     configuration newConfig = {false,false,true,false,2000,"N/A","admin","admin","","",false,"N/A","N/A","N/A"};
