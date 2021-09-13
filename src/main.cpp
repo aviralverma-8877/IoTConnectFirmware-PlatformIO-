@@ -44,8 +44,8 @@ void setup()
     wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
     wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
   }
-  setup_web_server();    //Webserver Handler
   initWebSocket();
+  setup_web_server();    //Webserver Handler
   serialDisplay("setup","ap_enabled"+String(ap_enabled));
   if(!ap_enabled)
   {
