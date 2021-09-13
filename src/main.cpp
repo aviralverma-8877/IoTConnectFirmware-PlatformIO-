@@ -20,6 +20,9 @@
 #include "FS.h"
 #include "SPIFFS.h"
 
+void dns_loop(void *parameter);
+void fauxmo_loop(void *paramter);
+void callback_loop(void *parameter);
 
 void setup() 
 {
@@ -67,11 +70,38 @@ void setup()
       TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
     }
   }
+  xTaskCreate(dns_loop, "dns_loop", 10000, NULL, 0, NULL);
+  xTaskCreate(fauxmo_loop, "fauxmo_loop", 10000, NULL, 0, NULL);
+  xTaskCreate(callback_loop, "callback_loop", 10000, NULL, 0, NULL);
 }
 
+void dns_loop(void *parameter)
+{
+  for(;;)
+  {
+    dnsServer.processNextRequest();
+    delay(10);
+  }
+}
+
+void fauxmo_loop(void *paramter)
+{
+  for(;;)
+  {
+    fauxmo.handle();
+    delay(10);
+  }
+}
+
+void callback_loop(void *parameter)
+{
+  for(;;)
+  {
+    callback();
+    delay(10);
+  }
+}
 void loop() 
 {
-//  dnsServer.processNextRequest();
-  fauxmo.handle();
-  callback();
+  vTaskDelete(NULL);
 }

@@ -19,6 +19,7 @@
     void handleWebStatus(AsyncWebServerRequest *request);
     void handleDeviceConfig(AsyncWebServerRequest *request);
     void web_set_wifi(AsyncWebServerRequest *request);
+    void scan_wifi(void *parameter);
     void web_scan_wifi(AsyncWebServerRequest *request);
     void web_update_login(AsyncWebServerRequest *request);
     void device_template(AsyncWebServerRequest *request);
