@@ -15,18 +15,16 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 
     void handleRequest(AsyncWebServerRequest *request) {
       AsyncResponseStream *response = request->beginResponseStream("text/html");
-      File index = SPIFFS.open("/index.html");
-      if(!index || index.isDirectory()) {
-        response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/update\" /><title>Redirecting...</title></head><body>", WiFi.softAPIP().toString().c_str());
-        response->printf("<p>Redirecting to <a href='http://%s/update'>this link</a><br />Please Wait.....</p>", WiFi.softAPIP().toString().c_str());
-        response->print("</body></html>");
-      }
-      else{
+      if(SPIFFS.exists("/index.html")) {
         response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/index\" /><title>Redirecting...</title></head><body>", WiFi.softAPIP().toString().c_str());
         response->printf("<p>Redirecting to <a href='http://%s/index'>this link</a><br />Please Wait.....</p>", WiFi.softAPIP().toString().c_str());
         response->print("</body></html>");
       }
-      index.close();
+      else{
+        response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/update\" /><title>Redirecting...</title></head><body>", WiFi.softAPIP().toString().c_str());
+        response->printf("<p>Redirecting to <a href='http://%s/update'>this link</a><br />Please Wait.....</p>", WiFi.softAPIP().toString().c_str());
+        response->print("</body></html>");
+      }
       request->send(response);
     }
 };
@@ -189,32 +187,38 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
   
 
 }
+
+void scan_wifi(void *parameter)
+{
+  serialDisplay("scan_wifi","Scanning WiFi networks");
+  int networksFound = WiFi.scanNetworks();
+  serialDisplay("scan_wifi","Scan completed");
+  serialDisplay("scan_wifi","Total "+String(networksFound)+" network found");
+  StaticJsonDocument<800> wifi_ssid;
+  wifi_ssid["action"] = "scan_wifi";
+  JsonArray ssid = wifi_ssid.createNestedArray("ssid");
+  for(int i=0; i<networksFound; i++)
+  {
+    StaticJsonDocument<200> wifi;
+    wifi["ssid"] = WiFi.SSID(i);
+    wifi["RSSI"] = String(WiFi.RSSI(i));
+    ssid.add(wifi);
+  }
+  String return_msg;
+  serializeJson(wifi_ssid, return_msg);
+  serialDisplay("scan_wifi","Sending WiFi Scans to websocket");
+  send_data_to_webSocket(return_msg);
+  vTaskDelete(NULL);
+}
+
 void web_scan_wifi(AsyncWebServerRequest *request)
 {
-  WiFi.scanNetworks(true);
-  TickerForTimeOut.once(5,[](){
-    int networksFound = WiFi.scanComplete();
-    StaticJsonDocument<800> wifi_ssid;
-    wifi_ssid["action"] = "scan_wifi";
-    JsonArray ssid = wifi_ssid.createNestedArray("ssid");
-    for(int i=0; i<networksFound; i++)
-    {
-      StaticJsonDocument<200> wifi;
-      wifi["ssid"] = WiFi.SSID(i);
-      wifi["RSSI"] = String(WiFi.RSSI(i));
-      ssid.add(wifi);
-    }
-    String return_msg;
-    serializeJson(wifi_ssid, return_msg);
-    send_data_to_webSocket(return_msg);
-    WiFi.scanDelete();
-  });
-
   String return_msg = "";
   StaticJsonDocument<200> return_doc;
   return_doc["done"] = true;
   serializeJson(return_doc, return_msg);
   request->send(200, "application/json", return_msg); 
+  xTaskCreate(scan_wifi, "scan_wifi", 10000, NULL, 0, NULL);
 }
 
 void device_template(AsyncWebServerRequest *request)
