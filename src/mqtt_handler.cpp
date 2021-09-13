@@ -277,9 +277,9 @@ void sendToMQTT(String topic, String msg)
   t.msg = msg;
   t.topic = topic;
   xTaskCreate([](void *p){
-    mqtt_template *t = (mqtt_template*)p;
-    String msg = t->msg;
-    String topic = t->topic;
+    mqtt_template t = *(mqtt_template*)p;
+    String msg = t.msg;
+    String topic = t.topic;
     serialDisplay("sendToMQTT", "Send to MQTT Start");
     StaticJsonDocument<200> doc;
     StaticJsonDocument<200> filter;
