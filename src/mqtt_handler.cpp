@@ -314,7 +314,7 @@ void sendToMQTT(String topic, String msg)
       send_data_to_webSocket(r);
     }
     vTaskDelete(NULL);
-  }, "sendToMQTT", 10000, (void *)&t, 0, NULL);
+  }, "sendToMQTT", 10000, &t, 0, NULL);
 }
 
 
