@@ -281,8 +281,8 @@ void sendToMQTT(String topic, String msg)
   }
   mt.msg = msg;
   mt.topic = topic;
+  mqtt_sent = false;
   xTaskCreate([](void *p){
-    mqtt_sent = false;
     mqtt_template t = *(mqtt_template*)p;
     String msg = t.msg;
     String topic = t.topic;
