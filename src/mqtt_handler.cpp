@@ -271,12 +271,18 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 }
 /*-------Meathod called on reciving message from MQTT-------*/
 /*----Meathod for sending MQTT Data-------------------------*/
+mqtt_template mt;
+bool mqtt_sent = true;
 void sendToMQTT(String topic, String msg)
 {
-  static mqtt_template t;
-  t.msg = msg;
-  t.topic = topic;
+  while(!mqtt_sent)
+  {
+    delay(10);
+  }
+  mt.msg = msg;
+  mt.topic = topic;
   xTaskCreate([](void *p){
+    mqtt_sent = false;
     mqtt_template t = *(mqtt_template*)p;
     String msg = t.msg;
     String topic = t.topic;
@@ -313,8 +319,9 @@ void sendToMQTT(String topic, String msg)
       serialDisplay("sendToMQTT", "Send to MQTT Completed");
       send_data_to_webSocket(r);
     }
+    mqtt_sent = true;
     vTaskDelete(NULL);
-  }, "sendToMQTT", 10000, &t, 0, NULL);
+  }, "sendToMQTT", 20000, &mt, 0, NULL);
 }
 
 
