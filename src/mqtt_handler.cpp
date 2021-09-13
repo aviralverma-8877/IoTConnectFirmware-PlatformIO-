@@ -372,9 +372,9 @@ String send_device_template(bool send_on_mqtt)
     if(send_on_mqtt)
       if(MQTTStatus)
       {
-          serialDisplay("send_device_template","Sending Status MQTT");
-          sendToMQTT(outtopic, r);
-          serialDisplay("send_device_template", "Sending Status MQTT Sent");
+        serialDisplay("send_device_template","Sending Status MQTT");
+        sendToMQTT(outtopic, r);
+        serialDisplay("send_device_template", "Sending Status MQTT Sent");
       }
     return r;
   }
@@ -444,7 +444,11 @@ void send_to_web_mqtt(String msg)
   if(MQTTStatus)
   {
     serialDisplay("send_to_web_mqtt","Sending Status MQTT");
-    sendToMQTT(outtopic, msg);
+    xTaskCreate([](void *p){
+      String msg = *(String *)p;
+      sendToMQTT(outtopic, msg);
+      vTaskDelete(NULL);
+    }, "sendToMQTT", 10000, &msg, 0, NULL);
     serialDisplay("send_to_web_mqtt","Sending Status MQTT Sent");
   }
 }
