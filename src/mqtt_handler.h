@@ -24,6 +24,7 @@
     void onMqttPublish(uint16_t packetId);
     String send_device_template(bool send_on_mqtt);
     void sendToMQTT(String topic, String msg);
+    void sendToMQTT(void *parameter);
     void send_status(String relay, bool value);
     void connectToMqtt();
     void send_to_web_mqtt(String msg);

@@ -220,7 +220,6 @@ function show_status(json)
         else
             cont += "<br />MQTT Status : <b>Not Connected</b><br />";
         cont += "Signal Strength : <span id='signal_st' class='signal_st'></span><div id='signal_bk' class='signal_bk'><div id='signal_fk' class='signal_fk'></div></div>"
-        cont += "Free Heap : <div id='free_heap_bk' class='signal_bk'><div id='free_heap_fk' class='signal_fk'></div></div>"
         element = document.getElementById('WiFi_Status');
         element.innerHTML = cont;
         dBm = json["wifi_rssi"];
@@ -231,9 +230,6 @@ function show_status(json)
         }
         document.getElementById("signal_fk").style.width = quality+"px";
         document.getElementById("signal_st").innerHTML = quality+" %";
-        free_heap = json["ram"];
-        free_heap_per = ((free_heap/(64*1024))*100)
-        document.getElementById("free_heap_fk").style.width = free_heap_per+"px";
         document.getElementById("firmware_version").innerHTML = json["firmware_version"];
     }
 }

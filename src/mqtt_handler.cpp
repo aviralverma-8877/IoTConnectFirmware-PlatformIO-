@@ -271,8 +271,23 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 }
 /*-------Meathod called on reciving message from MQTT-------*/
 /*----Meathod for sending MQTT Data-------------------------*/
+
+struct mqtt_struct{
+  String topic;
+  String msg;
+}t;
+
 void sendToMQTT(String topic, String msg)
 {
+  t.msg = msg;
+  t.topic = topic;
+  xTaskCreate(sendToMQTT, "sendToMQTT", 10000, NULL, 0, NULL);
+}
+
+void sendToMQTT(void *parameter)
+{
+  String msg = t.msg;
+  String topic = t.topic; 
   serialDisplay("sendToMQTT", "Send to MQTT Start");
   StaticJsonDocument<200> doc;
   StaticJsonDocument<200> filter;
@@ -306,7 +321,9 @@ void sendToMQTT(String topic, String msg)
     serialDisplay("sendToMQTT", "Send to MQTT Completed");
     send_data_to_webSocket(r);
   }
+  vTaskDelete(NULL);
 }
+
 /*----Meathod for sending MQTT Data-------------------------*/
 /*----Meathod for sending device config----------------------*/
 String send_device_template(bool send_on_mqtt)
@@ -441,17 +458,9 @@ void send_to_web_mqtt(String msg)
   send_data_to_webSocket(msg);
   if(MQTTStatus)
   {
-    struct tmp{
-      String outtopic;
-      String msg;
-    }t;
-    t.outtopic = outtopic;
-    t.msg = msg;
-    TickerForTimeOut.once_ms<tmp *>(10,[](tmp *t){
-      serialDisplay("send_to_web_mqtt","Sending Status MQTT");
-      sendToMQTT(t->outtopic, t->msg);
-      serialDisplay("send_to_web_mqtt","Sending Status MQTT Sent");
-    }, &t);
+    serialDisplay("send_to_web_mqtt","Sending Status MQTT");
+    sendToMQTT(outtopic, msg);
+    serialDisplay("send_to_web_mqtt","Sending Status MQTT Sent");
   }
 }
 

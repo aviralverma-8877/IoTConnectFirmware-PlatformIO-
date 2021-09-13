@@ -19,13 +19,7 @@
 #include <ESPmDNS.h>
 #include "FS.h"
 #include "SPIFFS.h"
-void core_zero_task(void * parameter)
-{
-}
 
-void core_one_task(void * parameter)
-{
-}
 
 void setup() 
 {
