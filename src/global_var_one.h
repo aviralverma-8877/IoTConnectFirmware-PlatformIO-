@@ -73,6 +73,5 @@
     extern Ticker TickerForWebSocketStatus;
     /*--------------Tickers for Async Meathods------------------*/
     extern TaskHandle_t core_0;
-    extern TaskHandle_t core_1;
     void configure_gpio();
 #endif
