@@ -77,7 +77,7 @@ void setup()
 
 void loop() 
 {
-  dnsServer.processNextRequest();
+//  dnsServer.processNextRequest();
   fauxmo.handle();
   callback();
 }
