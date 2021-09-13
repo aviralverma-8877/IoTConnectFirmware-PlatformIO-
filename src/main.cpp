@@ -101,6 +101,7 @@ void callback_loop(void *parameter)
     delay(10);
   }
 }
+
 void loop() 
 {
   vTaskDelete(NULL);
