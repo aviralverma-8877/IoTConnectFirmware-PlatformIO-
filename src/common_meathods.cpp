@@ -30,7 +30,7 @@ String config_to_json(configuration config)
   serializeJsonPretty(jsonBuffer, r);
   return r;
 }
-void write_device_config(StaticJsonDocument<1000> jsonBuffer)
+void write_device_config(DynamicJsonDocument jsonBuffer)
 {
 
   File configFile = SPIFFS.open("/device_config.json", FILE_WRITE);

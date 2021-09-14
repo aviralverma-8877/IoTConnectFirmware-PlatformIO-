@@ -86,7 +86,7 @@ void dns_loop(void *parameter)
   for(;;)
   {
     dnsServer.processNextRequest();
-    delay(10);
+    delay(100);
   }
   vTaskDelete(NULL);
 }

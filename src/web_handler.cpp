@@ -148,7 +148,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
   if(request->hasParam("options"))
   {
     String device_config = request->arg("options");
-    StaticJsonDocument<1000> doc;
+    DynamicJsonDocument doc(5000);
     DeserializationError error = deserializeJson(doc, device_config);
     if (error) 
     {
@@ -174,6 +174,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
       doc["mqtt"]["qos"] = MQTT_QoS;
       doc["mqtt"]["auth"] = true;
     }
+    doc.shrinkToFit();
     write_device_config(doc);
     generate_mqtt_topics();
   }
