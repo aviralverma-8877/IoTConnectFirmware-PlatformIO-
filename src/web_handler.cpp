@@ -186,8 +186,6 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
     serializeJson(return_doc, return_msg);
     request->send(200, "application/json", return_msg);
   }
-  
-
 }
 
 void scan_wifi(void *parameter)
