@@ -70,9 +70,9 @@ void setup()
       TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
     }
   }
-  xTaskCreate(dns_loop, "dns_loop", 10000, NULL, 2, NULL);
-  xTaskCreate(fauxmo_loop, "fauxmo_loop", 10000, NULL, 2, NULL);
-  xTaskCreate(callback_loop, "callback_loop", 10000, NULL, 2, NULL);
+  xTaskCreatePinnedToCore(dns_loop, "dns_loop", 10000, NULL, 2, &core_0, 0);
+  xTaskCreate(fauxmo_loop, "fauxmo_loop", 10000, NULL, 3, NULL);
+  xTaskCreate(callback_loop, "callback_loop", 10000, NULL, 4, NULL);
 }
 
 void dns_loop(void *parameter)
