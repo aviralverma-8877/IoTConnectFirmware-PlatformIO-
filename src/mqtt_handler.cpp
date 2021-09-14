@@ -282,7 +282,7 @@ void sendToMQTT(String topic, String msg)
   mt.msg = msg;
   mt.topic = topic;
   mqtt_sent = false;
-  xTaskCreate([](void *p){
+  xTaskCreatePinnedToCore([](void *p){
     mqtt_template t = *(mqtt_template*)p;
     String msg = t.msg;
     String topic = t.topic;
@@ -321,7 +321,7 @@ void sendToMQTT(String topic, String msg)
     }
     mqtt_sent = true;
     vTaskDelete(NULL);
-  }, "sendToMQTT", 20000, &mt, 0, NULL);
+  }, "sendToMQTT", 20000, &mt, 0, &mqtt_task, 0);
 }
 
 

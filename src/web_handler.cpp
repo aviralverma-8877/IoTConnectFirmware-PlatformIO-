@@ -469,7 +469,8 @@ void setup_web_server()
 {
   connectToWiFi();      //Connect to Access Point or start AP depending on config
   serialDisplay("setup_web_server","Enabling DNS Server");
-  dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+  dnsServer.setTTL(300);
+  dnsServer.setErrorReplyCode(DNSReplyCode::ServerFailure);
   dnsServer.start(53, "*", WiFi.softAPIP());
 /*-------Web Server Setup-----------------------------------*/
   server.on("/control", HTTP_GET, [](AsyncWebServerRequest *request){

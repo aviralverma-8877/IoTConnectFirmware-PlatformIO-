@@ -28,5 +28,6 @@
     extern String websocket_msg;
     extern String hostname;
     extern TaskHandle_t loop_run;
+    extern TaskHandle_t mqtt_task;
     String getMacAddress();
 #endif
