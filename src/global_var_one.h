@@ -72,6 +72,5 @@
     extern Ticker TickerForWiFiConnect;
     extern Ticker TickerForWebSocketStatus;
     /*--------------Tickers for Async Meathods------------------*/
-    extern TaskHandle_t core_0;
     void configure_gpio();
 #endif

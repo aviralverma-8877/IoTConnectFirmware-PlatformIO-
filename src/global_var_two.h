@@ -27,5 +27,6 @@
     extern String espsensor;
     extern String websocket_msg;
     extern String hostname;
+    extern TaskHandle_t loop_run;
     String getMacAddress();
 #endif
