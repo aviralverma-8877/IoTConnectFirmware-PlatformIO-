@@ -20,7 +20,7 @@
 #include "FS.h"
 #include "SPIFFS.h"
 
-void core_0_loop(void *parameter);
+void core_1_loop(void *parameter);
 void dns_loop(void *parameter);
 void fauxmo_loop(void *paramter);
 void callback_loop(void *parameter);
@@ -71,10 +71,10 @@ void setup()
       TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
     }
   }
-  xTaskCreatePinnedToCore(core_0_loop, "core_0_loop", 10000, NULL, 1, &loop_run, 0);
+  xTaskCreatePinnedToCore(core_1_loop, "core_1_loop", 10000, NULL, 1, &loop_run, 1);
 
 }
-void core_0_loop(void *parameter)
+void core_1_loop(void *parameter)
 {
   xTaskCreate(dns_loop, "dns_loop", 10000, NULL, 2, NULL);
   xTaskCreate(fauxmo_loop, "fauxmo_loop", 10000, NULL, 3, NULL);
@@ -86,9 +86,8 @@ void dns_loop(void *parameter)
   for(;;)
   {
     dnsServer.processNextRequest();
-    delay(100);
+    vTaskDelay(1);
   }
-  vTaskDelete(NULL);
 }
 
 void fauxmo_loop(void *paramter)
@@ -96,9 +95,8 @@ void fauxmo_loop(void *paramter)
   for(;;)
   {
     fauxmo.handle();
-    delay(10);
+    vTaskDelay(1);
   }
-  vTaskDelete(NULL);
 }
 
 void callback_loop(void *parameter)
@@ -106,12 +104,11 @@ void callback_loop(void *parameter)
   for(;;)
   {
     callback();
-    delay(10);
+    vTaskDelay(1);
   }
-  vTaskDelete(NULL);
 }
 
 void loop() 
 {
-  vTaskDelete(NULL);
+  vTaskDelay(1);
 }
