@@ -49,13 +49,13 @@ void handleWebControl(AsyncWebServerRequest *request)
       request->send(200, "application/json", return_msg);
       return;
     }
+    doc["done"] = 1;
+    serializeJson(doc, message);
+    request->send(200, "application/json", message);
 
     String relay = doc["relay"];
     bool action = doc["action"];
     relay_action(relay, action, "");
-
-    doc["done"] = 1;
-    serializeJson(doc, message);
   }
   if(request->hasParam("device"))
   {
@@ -74,6 +74,8 @@ void handleWebControl(AsyncWebServerRequest *request)
     String action = doc["action"];
     doc["done"] = 1;
     serializeJson(doc, message);
+    request->send(200, "application/json", message);
+
     if(comp(action.c_str(),"reset"))
       reset();
     if(comp(action.c_str(),"reboot"))
@@ -105,7 +107,6 @@ void handleWebControl(AsyncWebServerRequest *request)
       write_config(conf);
     }
   }
-  request->send(200, "application/json", message);
 }
 
 void handleWebStatus(AsyncWebServerRequest *request)
