@@ -1,6 +1,8 @@
 #ifndef global_var_two
     #define global_var_two
     #include <Arduino.h>
+    #include <WiFi.h>
+    #include <AsyncTCP.h>
     #include <ESPAsyncWebServer.h>
     /*--------------MQTT global Configration---------------------------*/
     #ifndef norttopic
@@ -25,9 +27,8 @@
     extern bool MQTTStatus;
     extern String intopic;
     extern String espsensor;
-    extern String websocket_msg;
     extern String hostname;
     extern TaskHandle_t loop_run;
-    extern TaskHandle_t mqtt_task;
+    extern TaskHandle_t dbg_task;
     String getMacAddress();
 #endif

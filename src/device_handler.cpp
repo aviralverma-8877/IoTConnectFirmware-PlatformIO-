@@ -360,7 +360,6 @@ void fetchIP()
   }
   Wifi_ssid = WiFi.SSID();
   serialDisplay("fetchIP","SSID"+Wifi_ssid);
-  callback = &blank;
 }
 /*-----Meathod for fetching IP Address----------------------*/
 void connectToWiFi()

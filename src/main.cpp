@@ -14,7 +14,9 @@
 
 //Include Global libraries
 #include <WiFi.h>
+#include <AsyncTCP.h>
 #include <DNSServer.h>
+#include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h> 
 #include <ESPmDNS.h>
 #include "FS.h"
@@ -23,7 +25,6 @@
 void core_0_loop(void *parameter);
 void dns_loop(void *parameter);
 void fauxmo_loop(void *paramter);
-void callback_loop(void *parameter);
 
 void setup() 
 {
@@ -47,7 +48,6 @@ void setup()
   configure_gpio();
   if(conf.save_eeprom)
     perform_action();
-  callback = &blank;
   if(!conf.setupFlag)
   {
     WiFi.onEvent(onWifiConnect, SYSTEM_EVENT_STA_GOT_IP);
@@ -78,7 +78,6 @@ void core_0_loop(void *parameter)
 {
   xTaskCreate(dns_loop, "dns_loop", 10000, NULL, 5, NULL);
   xTaskCreate(fauxmo_loop, "fauxmo_loop", 10000, NULL, 3, NULL);
-  xTaskCreate(callback_loop, "callback_loop", 10000, NULL, 4, NULL);
   vTaskDelete(NULL);
 }
 void dns_loop(void *parameter)
@@ -86,7 +85,7 @@ void dns_loop(void *parameter)
   for(;;)
   {
     dnsServer.processNextRequest();
-    vTaskDelay(10);
+    vTaskDelay(100);
   }
 }
 
@@ -95,15 +94,6 @@ void fauxmo_loop(void *paramter)
   for(;;)
   {
     fauxmo.handle();
-    vTaskDelay(1);
-  }
-}
-
-void callback_loop(void *parameter)
-{
-  for(;;)
-  {
-    callback();
     vTaskDelay(1);
   }
 }

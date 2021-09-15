@@ -2,6 +2,7 @@
     #define fauxmo_handler
     #include <Arduino.h>
     #include <WiFi.h>
+    #include <AsyncTCP.h>
     #include <ESPAsyncWebServer.h>
     #include "fauxmoESP.h"
     #include "global_var_one.h"

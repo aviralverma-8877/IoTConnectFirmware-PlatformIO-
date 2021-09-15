@@ -1,6 +1,5 @@
 #include "common_meathods.h"
 
-void (*callback)(void);
 void write_config(configuration config)
 {
   File configFile = SPIFFS.open("/config.json", FILE_WRITE);
@@ -52,17 +51,33 @@ void write_mqtt_topics(String r)
 
 
 /*-------Meathod for displaying serial data in JSON---------*/
+debug_msg dbg_msg;
+bool dbg_free = true;
 void serialDisplay(String head,String body)
 {
   if(debugging)
   {
-    StaticJsonDocument<200> doc;
-    doc["action"] = "display";
-    doc["head"] = head;
-    doc["body"] = body;
-    String c;
-    serializeJson(doc, c);
-    Serial.println(c);
+    while(!dbg_free)
+    {
+      delay(10);
+    }
+    dbg_msg.head = head;
+    dbg_msg.body = body;
+    dbg_free = false;
+    xTaskCreatePinnedToCore([](void *p){
+      debug_msg dbg_msg = *(debug_msg*)p;
+      String head = dbg_msg.head;
+      String body = dbg_msg.body;
+      StaticJsonDocument<200> doc;
+      doc["action"] = "display";
+      doc["head"] = head;
+      doc["body"] = body;
+      String c;
+      serializeJson(doc, c);
+      Serial.println(c);
+      dbg_free = true;
+      vTaskDelete(NULL);
+    },"Debugger",10000,&dbg_msg,0,&dbg_task,1);
   }
 }
 /*-------Meathod for displaying serial data in JSON---------*/

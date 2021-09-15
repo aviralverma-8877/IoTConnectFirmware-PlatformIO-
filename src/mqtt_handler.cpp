@@ -108,7 +108,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
         String r;
         serializeJson(doc, r);
         sendToMQTT(outtopic, r);
-        callback = &reset;
+        reset();
         return;
       }
   /*-------Action command for reconfigring WiFi---------------*/
@@ -271,57 +271,41 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 }
 /*-------Meathod called on reciving message from MQTT-------*/
 /*----Meathod for sending MQTT Data-------------------------*/
-mqtt_template mt;
-bool mqtt_sent = true;
 void sendToMQTT(String topic, String msg)
 {
-  while(!mqtt_sent)
+  serialDisplay("sendToMQTT", "Send to MQTT Start");
+  StaticJsonDocument<200> doc;
+  StaticJsonDocument<200> filter;
+  filter["mqtt"]["prefix"] = true;
+  filter["mqtt"]["suffix"] = true;
+  filter["mqtt"]["service"] = true;
+  String device_config = read_device_config();
+  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+  serialDisplay("sendToMQTT", "Send to MQTT Start");
+  if(error)
   {
-    delay(10);
+    return;
   }
-  mt.msg = msg;
-  mt.topic = topic;
-  mqtt_sent = false;
-  xTaskCreatePinnedToCore([](void *p){
-    mqtt_template t = *(mqtt_template*)p;
-    String msg = t.msg;
-    String topic = t.topic;
-    serialDisplay("sendToMQTT", "Send to MQTT Start");
-    StaticJsonDocument<200> doc;
-    StaticJsonDocument<200> filter;
-    filter["mqtt"]["prefix"] = true;
-    filter["mqtt"]["suffix"] = true;
-    filter["mqtt"]["service"] = true;
-    String device_config = read_device_config();
-    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
-    serialDisplay("sendToMQTT", "Send to MQTT Start");
-    if(error)
-    {
-      return;
-    }
-    String service = doc["mqtt"]["service"];
-    serialDisplay("sendToMQTT", "Send to MQTT Start");
-    if(!comp(service.c_str(),"N/A"))
-    {
-      String prefix = doc["mqtt"]["prefix"];
-      String suffix = doc["mqtt"]["suffix"];
-      String fullTopic = prefix+topic+suffix;
-      doc.clear();
-      serialDisplay("sendToMQTT","Published to "+fullTopic);
-      mqtt.publish(fullTopic.c_str(), MQTT_QoS, false, msg.c_str(), msg.length());
-      DynamicJsonDocument doc(1500);
-      doc["action"] = "mqtt_out";
-      doc["topic"] = fullTopic;
-      doc["payload"] = msg;
-      String r;
-      serializeJson(doc, r);
-      doc.clear();
-      serialDisplay("sendToMQTT", "Send to MQTT Completed");
-      send_data_to_webSocket(r);
-    }
-    mqtt_sent = true;
-    vTaskDelete(NULL);
-  }, "sendToMQTT", 20000, &mt, 0, &mqtt_task, 0);
+  String service = doc["mqtt"]["service"];
+  serialDisplay("sendToMQTT", "Send to MQTT Start");
+  if(!comp(service.c_str(),"N/A"))
+  {
+    String prefix = doc["mqtt"]["prefix"];
+    String suffix = doc["mqtt"]["suffix"];
+    String fullTopic = prefix+topic+suffix;
+    doc.clear();
+    serialDisplay("sendToMQTT","Published to "+fullTopic);
+    mqtt.publish(fullTopic.c_str(), MQTT_QoS, false, msg.c_str(), msg.length());
+    DynamicJsonDocument doc(1500);
+    doc["action"] = "mqtt_out";
+    doc["topic"] = fullTopic;
+    doc["payload"] = msg;
+    String r;
+    serializeJson(doc, r);
+    doc.clear();
+    serialDisplay("sendToMQTT", "Send to MQTT Completed");
+    send_data_to_webSocket(r);
+  }
 }
 
 

@@ -8,6 +8,7 @@
     #include <Update.h>                       //ESP Update Library.
     #include <ShiftRegister74HC595.h>         //For controlling Relays from 74HC595 shift register
     #include <DNSServer.h>                    //For redirecting the user on connecting to device WiFi
+    #include <AsyncTCP.h>
     #include <ESPAsyncWebServer.h>
     #include <DHT.h>
     #include <WiFiClient.h>

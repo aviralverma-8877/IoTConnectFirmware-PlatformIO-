@@ -1,8 +1,7 @@
 #include "web_sockets_handler.h"
-
 void send_data_to_webSocket(String msg)
 {
-  webSocket.textAll(msg);
+    webSocket.textAll(msg);
 }
 
 void initWebSocket() {

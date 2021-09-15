@@ -1,6 +1,8 @@
 #ifndef web_handler
     #define web_handler
     #include <Arduino.h>
+    #include <WiFi.h>
+    #include <AsyncTCP.h>
     #include <ESPAsyncWebServer.h>
     #include <ESPmDNS.h>        // Include the mDNS library
     #include <Ticker.h>                       //Ticker for running multithread

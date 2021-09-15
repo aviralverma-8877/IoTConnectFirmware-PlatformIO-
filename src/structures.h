@@ -18,8 +18,8 @@
     String fauxmo_relay_2;
     String fauxmo_relay_3;
   };
-  struct mqtt_template{
-    String topic;
-    String msg;
+  struct debug_msg{
+    String head;
+    String body;
   };
 #endif
