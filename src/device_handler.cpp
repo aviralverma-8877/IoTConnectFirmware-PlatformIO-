@@ -23,8 +23,7 @@ void onWifiConnect(const WiFiEventStationModeGotIP& event) {
   TickerForWebSocketStatus.attach(5,sendWebSocketStatus);
   if(reconnect_mqtt)
   {
-    TickerForconnectToMqtt.detach();
-    TickerForconnectToMqtt.attach(5, setup_mqtt);
+    setup_mqtt();
   }
 }
 
@@ -144,7 +143,6 @@ void feedbackLED()
 /*----Meathod for reconfiguring WiFi settings---------------*/
 void reset()
 {
-  TickerForconnectToMqtt.detach();
   if (WiFi.status() == WL_CONNECTED) {
     mqtt.onDisconnect(MqttBlank);
     mqtt.disconnect();
