@@ -19,7 +19,7 @@ void onWifiConnect(WiFiEvent_t event, WiFiEventInfo_t info) {
   {
     digitalWrite(indicator_led, !def_led_value);
   }
-  TickerForWebSocketStatus.attach(5,sendWebSocketStatus);
+  TickerForWebSocketStatus.attach(1,sendWebSocketStatus);
   if(reconnect_mqtt)
   {
     serialDisplay("onWifiConnect","setup_mqtt");
