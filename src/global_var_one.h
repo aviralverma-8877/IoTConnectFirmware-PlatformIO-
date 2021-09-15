@@ -63,12 +63,9 @@
     extern IPAddress apIP;                    //Global variables
     /*----------------------------------------------------------*/
     /*--------------Tickers for Async Meathods------------------*/
-    extern Ticker TickerForPinging;
     extern Ticker TickerForsendSensorData;
     extern Ticker TickerForFeedbackLED;
     extern Ticker TickerForTimeOut;
-    extern Ticker TickerForTimeOutTwo;
-    extern Ticker TickerForWiFiConnect;
     extern Ticker TickerForWebSocketStatus;
     /*--------------Tickers for Async Meathods------------------*/
     void configure_gpio();
