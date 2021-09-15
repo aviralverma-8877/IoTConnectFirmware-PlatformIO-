@@ -154,7 +154,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
   if(request->hasParam("options"))
   {
     String device_config = request->arg("options");
-    StaticJsonDocument<1000> doc;
+    DynamicJsonDocument doc(2000);
     DeserializationError error = deserializeJson(doc, device_config);
     if (error) 
     {
@@ -165,6 +165,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
       request->send(200, "application/json", return_msg);
       return;
     }
+    doc.shrinkToFit();
     StaticJsonDocument<200> return_doc;
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);

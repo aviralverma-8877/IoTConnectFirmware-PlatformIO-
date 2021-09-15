@@ -481,7 +481,7 @@ String read_device_config()
 
 void generate_mqtt_topics()
 {
-  StaticJsonDocument<200> doc;
+  DynamicJsonDocument doc(2000);
   StaticJsonDocument<200> filter;
   filter["device_config"]["shift_out_reg"]["avail"] = true;
   filter["device_config"]["relay"]["count"] = true;
@@ -491,7 +491,7 @@ void generate_mqtt_topics()
   DeserializationError error = deserializeJson(doc, device_config,DeserializationOption::Filter(filter));
   if(error)
     return;
-
+  doc.shrinkToFit();
   int relay_count = 1;
   bool has_shift_reg = doc["device_config"]["shift_out_reg"]["avail"];
 
