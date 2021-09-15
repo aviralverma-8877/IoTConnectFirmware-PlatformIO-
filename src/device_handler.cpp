@@ -1,7 +1,13 @@
 #include "device_handler.h"
 void setup_tickers()
 {
-  TickerForPinging.attach(5, pinging);
+  xTaskCreate([](void *p){
+    for(;;)
+    {
+      pinging();
+      delay(5000);
+    }
+  },"Mqtt Ping",10000,NULL,1,NULL);
   if(hasSensor)
     TickerForsendSensorData.attach(delayMS/1000, sendSensorData);
 }
@@ -9,7 +15,6 @@ void setup_tickers()
 void onWifiConnect(WiFiEvent_t event, WiFiEventInfo_t info) {
   serialDisplay("onWifiConnect","WiFi Connected");
   TickerForFeedbackLED.detach();
-//  TickerForWiFiConnect.detach();
   read_config();
   if(conf.led_enabled)
   {

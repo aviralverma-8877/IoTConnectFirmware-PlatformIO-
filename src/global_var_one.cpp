@@ -42,12 +42,9 @@ bool shouldReboot = false;
 IPAddress apIP(192, 168, 4, 1);
 /*----------------------------------------------------------*/
 /*--------------Tickers for Async Meathods------------------*/
-Ticker TickerForPinging;
 Ticker TickerForsendSensorData;
 Ticker TickerForFeedbackLED;
 Ticker TickerForTimeOut;
-Ticker TickerForTimeOutTwo;
-Ticker TickerForWiFiConnect;
 Ticker TickerForWebSocketStatus;
 /*--------------Tickers for Async Meathods------------------*/
 void configure_gpio()
