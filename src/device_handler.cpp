@@ -11,7 +11,6 @@ void setup_tickers()
 void onWifiConnect(const WiFiEventStationModeGotIP& event) {
   serialDisplay("onWifiConnect","WiFi Connected");
   TickerForFeedbackLED.detach();
-  TickerForWiFiConnect.detach();
   read_config();
   if(conf.led_enabled)
   {
