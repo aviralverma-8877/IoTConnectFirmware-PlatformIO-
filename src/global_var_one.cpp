@@ -48,7 +48,6 @@ Ticker TickerForconnectToMqtt;
 Ticker TickerForFeedbackLED;
 Ticker TickerForTimeOut;
 Ticker TickerForTimeOutTwo;
-Ticker TickerForWiFiConnect;
 Ticker TickerForWebSocketStatus;
 /*--------------Tickers for Async Meathods------------------*/
 void configure_gpio()
