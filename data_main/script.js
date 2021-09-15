@@ -440,7 +440,7 @@ function update_login(login_uname_input, login_pass_input, login_confirm_pass_in
         alert('Password and confirm password not matching.');
 }
 
-var avail_GPIO = [0,1,2,3,4,5,12,13,14,15,16]
+var avail_GPIO = [0,1,2,3,4,5,12,13,14,15,16,17,18,19,21,22,23,25,26,27,33,34,35,36,39]
 var ele_list = [
     "sr_dpin",
     "sr_cpin",
@@ -452,6 +452,9 @@ var ele_list = [
     "rly_3",
     "rly_4",
     "rly_5",
+    "rly_6",
+    "rly_7",
+    "rly_8",
     "sen_pin"
 ]
 
@@ -685,46 +688,15 @@ function save_config()
             service = document.getElementById("mqtt_broker").value;
             config.mqtt.service = service;
         }
-        if(document.getElementById("device_type").value == "IoT Connect Board Rev 1")
-        {
-            config.device_config.shift_out_reg.avail = true;
-            config.device_config.shift_out_reg.serialDataPin = 16;
-            config.device_config.shift_out_reg.clockPin = 14;
-            config.device_config.shift_out_reg.latchPin = 12;
-            config.device_config.status_led.led_pin = 13;
-            config.device_config.status_led.def = true;
-            config.device_config.reset_btn.btn_pin = 4;
-            config.device_config.reset_btn.def = true;
-            config.device_config.relay.count = 0;
-            config.device_config.dht.INSTALLED = false;
-            config.device_config.light.INSTALLED = false;
-        }
-        if(document.getElementById("device_type").value == "IoT Connect Board Rev 2")
-        {
-            config.device_config.shift_out_reg.avail = true;
-            config.device_config.shift_out_reg.serialDataPin = 16;
-            config.device_config.shift_out_reg.clockPin = 14;
-            config.device_config.shift_out_reg.latchPin = 12;
-            config.device_config.status_led.led_pin = 13;
-            config.device_config.status_led.def = true;
-            config.device_config.reset_btn.btn_pin = 4;
-            config.device_config.reset_btn.def = true;
-            config.device_config.relay.count = 0;
-            config.device_config.dht.INSTALLED = true;
-            config.device_config.dht.TYPE = "dht11"
-            config.device_config.dht.GPIO = 2
-            config.device_config.light.INSTALLED = true;
-            config.device_config.light.GPIO = "A0"
-        }
-        if(document.getElementById("device_type").value == "Sonoff Basics")
+        if(document.getElementById("device_type").value == "ESP32 Devkit v1")
         {
             config.device_config.shift_out_reg.avail = false;
-            config.device_config.status_led.led_pin = 13;
-            config.device_config.status_led.def = false;
+            config.device_config.status_led.led_pin = 2;
+            config.device_config.status_led.def = true;
             config.device_config.reset_btn.btn_pin = 0;
             config.device_config.reset_btn.def = false;
-            config.device_config.relay.count = 1;
-            config.device_config.relay.GPIO = [12]
+            config.device_config.relay.count = 8;
+            config.device_config.relay.GPIO = [13,12,14,27,26,25,33,32]
             config.device_config.dht.INSTALLED = false;
             config.device_config.light.INSTALLED = false;
         }
