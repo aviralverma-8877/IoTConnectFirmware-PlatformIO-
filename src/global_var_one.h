@@ -66,7 +66,6 @@
     extern Ticker TickerForPinging;
     extern Ticker TickerForsendSensorData;
     extern Ticker TickerForcheckReset;
-    extern Ticker TickerForconnectToMqtt;
     extern Ticker TickerForFeedbackLED;
     extern Ticker TickerForTimeOut;
     extern Ticker TickerForTimeOutTwo;

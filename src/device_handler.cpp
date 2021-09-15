@@ -10,7 +10,7 @@ void setup_tickers()
 void onWifiConnect(WiFiEvent_t event, WiFiEventInfo_t info) {
   serialDisplay("onWifiConnect","WiFi Connected");
   TickerForFeedbackLED.detach();
-  TickerForWiFiConnect.detach();
+//  TickerForWiFiConnect.detach();
   read_config();
   if(conf.led_enabled)
   {
@@ -23,6 +23,7 @@ void onWifiConnect(WiFiEvent_t event, WiFiEventInfo_t info) {
   TickerForWebSocketStatus.attach(5,sendWebSocketStatus);
   if(reconnect_mqtt)
   {
+    serialDisplay("onWifiConnect","setup_mqtt");
     setup_mqtt();
   }
 }
@@ -142,7 +143,6 @@ void feedbackLED()
 /*----Meathod for reconfiguring WiFi settings---------------*/
 void reset()
 {
-  TickerForconnectToMqtt.detach();
   if (WiFi.status() == WL_CONNECTED) {
     mqtt.onDisconnect(MqttBlank);
     mqtt.disconnect();

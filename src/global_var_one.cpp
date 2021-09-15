@@ -45,7 +45,6 @@ IPAddress apIP(192, 168, 4, 1);
 Ticker TickerForPinging;
 Ticker TickerForsendSensorData;
 Ticker TickerForcheckReset;
-Ticker TickerForconnectToMqtt;
 Ticker TickerForFeedbackLED;
 Ticker TickerForTimeOut;
 Ticker TickerForTimeOutTwo;
