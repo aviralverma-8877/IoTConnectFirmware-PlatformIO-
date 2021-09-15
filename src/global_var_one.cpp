@@ -44,7 +44,6 @@ IPAddress apIP(192, 168, 4, 1);
 /*--------------Tickers for Async Meathods------------------*/
 Ticker TickerForPinging;
 Ticker TickerForsendSensorData;
-Ticker TickerForcheckReset;
 Ticker TickerForFeedbackLED;
 Ticker TickerForTimeOut;
 Ticker TickerForTimeOutTwo;

@@ -4,7 +4,6 @@ void setup_tickers()
   TickerForPinging.attach(5, pinging);
   if(hasSensor)
     TickerForsendSensorData.attach(delayMS/1000, sendSensorData);
-  TickerForcheckReset.attach(10/1000, checkReset);
 }
 
 void onWifiConnect(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -270,6 +269,7 @@ void checkReset()
     {
       reset_btn_status = true;
       reset_btn_press_time = millis();
+      serialDisplay("checkReset","Button Pressed");
     }
     else
     {
@@ -291,10 +291,11 @@ void checkReset()
       }
     }
   }
-  if(digitalRead(reset_btn) == !def_btn_value)
+  if(digitalRead(reset_btn) != def_btn_value)
   {
     if(reset_btn_status)
     {
+      serialDisplay("checkReset","Button Released");
       reset_btn_status = false;
       reset_btn_press_count++;
       StaticJsonDocument<200> doc;
@@ -309,6 +310,7 @@ void checkReset()
       String relay = conf.btn_relay_act;
       if(!comp(relay.c_str(), "N/A"))
       {
+        serialDisplay("checkReset","Toggling Relay");
         toggle_relay(relay);
       }
     }
@@ -565,6 +567,9 @@ void toggle_relay(String relay)
       if(comp(name.c_str(), relay.c_str()))
       {
         status = sr.get(pin);
+        serialDisplay("toggle_relay","Performing action");
+        relay_action(relay,!status,"");
+        return;
       }          
     }
     if(comp(com.c_str(), "gpio"))
@@ -572,10 +577,11 @@ void toggle_relay(String relay)
       if(comp(name.c_str(), relay.c_str()))
       {
         status = digitalRead(pin);
+        serialDisplay("toggle_relay","Performing action");
+        relay_action(relay,!status,"");
+        return;
       }
     }
-    serialDisplay("toggle_relay","Performing action");
-    relay_action(relay,!status,"");
   }
 }
 

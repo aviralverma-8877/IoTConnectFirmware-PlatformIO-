@@ -64,20 +64,35 @@ void serialDisplay(String head,String body)
     dbg_msg.head = head;
     dbg_msg.body = body;
     dbg_free = false;
-    xTaskCreatePinnedToCore([](void *p){
+    xTaskCreate([](void *p){
       debug_msg dbg_msg = *(debug_msg*)p;
       String head = dbg_msg.head;
       String body = dbg_msg.body;
       StaticJsonDocument<200> doc;
-      doc["action"] = "display";
-      doc["head"] = head;
-      doc["body"] = body;
-      String c;
-      serializeJson(doc, c);
-      Serial.println(c);
+      if(comp(debug_meathod.c_str(),""))
+      {
+        doc["action"] = "display";
+        doc["head"] = head;
+        doc["body"] = body;
+        String c;
+        serializeJson(doc, c);
+        Serial.println(c);
+      }
+      else
+      {
+        if(comp(head.c_str(),debug_meathod.c_str()))
+        {
+          doc["action"] = "display";
+          doc["head"] = head;
+          doc["body"] = body;
+          String c;
+          serializeJson(doc, c);
+          Serial.println(c);
+        }
+      }
       dbg_free = true;
       vTaskDelete(NULL);
-    },"Debugger",10000,&dbg_msg,0,&dbg_task,0);
+    },"Debugger",10000,&dbg_msg,1,&dbg_task);
   }
 }
 /*-------Meathod for displaying serial data in JSON---------*/

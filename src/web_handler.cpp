@@ -218,7 +218,7 @@ void web_scan_wifi(AsyncWebServerRequest *request)
   return_doc["done"] = true;
   serializeJson(return_doc, return_msg);
   request->send(200, "application/json", return_msg); 
-  xTaskCreate(scan_wifi, "scan_wifi", 10000, NULL, 1, NULL);
+  xTaskCreate(scan_wifi, "scan_wifi", 10000, NULL, 5, NULL);
 }
 
 void device_template(AsyncWebServerRequest *request)

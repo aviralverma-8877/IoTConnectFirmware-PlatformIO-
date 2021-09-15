@@ -3,7 +3,8 @@ bool reconnect_mqtt = true;
 bool reset_btn_status = false;
 byte reset_btn_press_count = 0;
 unsigned long reset_btn_press_time = 0;
-bool debugging = true;                   //Turn On or Off the serial output.
+bool debugging = false;                   //Turn On or Off the serial output.
+String debug_meathod = "toggle_relay";
 /*--------------MQTT Configration---------------------------*/
 bool MQTTStatus = false;
 String chipid = getMacAddress();  //Fetching ESP device ID.

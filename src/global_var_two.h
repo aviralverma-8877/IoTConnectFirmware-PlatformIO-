@@ -22,6 +22,7 @@
     extern unsigned long reset_btn_press_time;
     extern String chipid;  //Fetching ESP device ID.
     extern bool debugging;                   //Turn On or Off the serial output.
+    extern String debug_meathod;
     extern String outtopic;          //MQTT Topic for sending data from ESP.
     extern String intopic;            //MQTT Topic for reciving data to ESP.
     extern bool MQTTStatus;

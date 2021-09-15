@@ -22,14 +22,17 @@
 #include "FS.h"
 #include "SPIFFS.h"
 
-void core_0_loop(void *parameter);
+void loopTask();
 void dns_loop(void *parameter);
-void fauxmo_loop(void *paramter);
+void fauxmo_loop(void *parameter);
+void checkReset_loop(void *parameter);
 
 void setup() 
 {
   if(debugging)
+  {
     Serial.begin(115200);
+  }
   if(!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)){
     serialDisplay("setup","SPIFFS Mount Failed");
     return;
@@ -71,14 +74,13 @@ void setup()
       TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
     }
   }
-  xTaskCreatePinnedToCore(core_0_loop, "core_0_loop", 10000, NULL, 2, &loop_run, 0);
-
+  loopTask();
 }
-void core_0_loop(void *parameter)
+void loopTask()
 {
-  xTaskCreate(dns_loop, "dns_loop", 10000, NULL, 5, NULL);
+  xTaskCreate(dns_loop, "dns_loop", 10000, NULL, 2, NULL);
   xTaskCreate(fauxmo_loop, "fauxmo_loop", 10000, NULL, 3, NULL);
-  vTaskDelete(NULL);
+  xTaskCreate(checkReset_loop, "checkReset_loop", 10000, NULL, 4, NULL);
 }
 void dns_loop(void *parameter)
 {
@@ -89,12 +91,22 @@ void dns_loop(void *parameter)
   }
 }
 
-void fauxmo_loop(void *paramter)
+void fauxmo_loop(void *parameter)
 {
   for(;;)
   {
     fauxmo.handle();
-    vTaskDelay(1);
+    vTaskDelay(50);
+  }
+}
+
+void checkReset_loop(void *parameter)
+{
+  for(;;)
+  {
+    if(!conf.setupFlag)
+      checkReset();
+    vTaskDelay(10);
   }
 }
 
