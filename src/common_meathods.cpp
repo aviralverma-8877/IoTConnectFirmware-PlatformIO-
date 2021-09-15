@@ -77,7 +77,7 @@ void serialDisplay(String head,String body)
       Serial.println(c);
       dbg_free = true;
       vTaskDelete(NULL);
-    },"Debugger",10000,&dbg_msg,0,&dbg_task,1);
+    },"Debugger",10000,&dbg_msg,0,&dbg_task,0);
   }
 }
 /*-------Meathod for displaying serial data in JSON---------*/
