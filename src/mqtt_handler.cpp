@@ -19,6 +19,7 @@ void onMqttConnect(bool sessionPresent) {
   }
   MQTTStatus = true;
   reconnect_mqtt = false;
+  TickerForconnectToMqtt.detach();
   if (SPIFFS.exists("/mqtt_topics.json")) 
   {
     StaticJsonDocument<1000> doc;
@@ -51,6 +52,8 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
     reconnect_mqtt = true;
     mqtt.disconnect();
     mqtt.setCleanSession(true);
+    TickerForconnectToMqtt.detach();
+    TickerForconnectToMqtt.attach(5, setup_mqtt);
   }
   serialDisplay("onMqttDisconnect","MQTT is disconnected.");
 }
