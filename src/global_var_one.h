@@ -13,6 +13,10 @@
     #include <DHT.h>
     #include <WiFiClient.h>
     #include <HTTPClient.h>
+    extern "C" {
+        #include "freertos/FreeRTOS.h"
+        #include "freertos/ringbuf.h"
+    }
     #include "fauxmoESP.h"
     #include "structures.h"
     #include "device_handler.h"
@@ -68,5 +72,8 @@
     extern Ticker TickerForTimeOut;
     extern Ticker TickerForWebSocketStatus;
     /*--------------Tickers for Async Meathods------------------*/
+    extern String config_queue;
+    extern String device_config_queue;
+    extern String mqtt_topic_queue;
     void configure_gpio();
 #endif

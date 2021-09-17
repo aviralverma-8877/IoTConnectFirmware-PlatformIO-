@@ -6,6 +6,7 @@
     #include <DHT.h>
     #include <Ticker.h>
     #include "FS.h"
+    #include "freertos/ringbuf.h"
     #include "SPIFFS.h"
     #include "mqtt_handler.h"
     #include "global_var_one.h"
@@ -34,7 +35,7 @@
     void connectToWiFi();
     void print_config();
     void read_config();
-    void generate_mqtt_topics();
+    void generate_mqtt_topics(DynamicJsonDocument doc);
     String read_device_config();
     void toggle_relay(String relay);
     void perform_action();

@@ -144,9 +144,11 @@ void handlefauxmo(AsyncWebServerRequest *request)
 }
 void handleDeviceConfig(AsyncWebServerRequest *request)
 {
+  serialDisplay("handleDeviceConfig","Step 0");
   String return_msg;
   if(request->hasParam("options"))
   {
+    serialDisplay("handleDeviceConfig","Step 1");
     String device_config = request->arg("options");
     DynamicJsonDocument doc(5000);
     DeserializationError error = deserializeJson(doc, device_config);
@@ -163,6 +165,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);
     request->send(200, "application/json", return_msg);
+    serialDisplay("handleDeviceConfig","Step 2");
     String service = doc["mqtt"]["service"];
     if(comp(service.c_str(),"IoT Connect"))
     {
@@ -176,7 +179,8 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
     }
     doc.shrinkToFit();
     write_device_config(doc);
-    generate_mqtt_topics();
+    generate_mqtt_topics(doc);
+    serialDisplay("handleDeviceConfig","Step 3");
   }
   else
   {

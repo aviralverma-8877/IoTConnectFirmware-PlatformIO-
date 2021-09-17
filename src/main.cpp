@@ -29,13 +29,14 @@ void checkReset_loop(void *parameter);
 
 void setup() 
 {
+  if(!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED))
+  {
+    serialDisplay("setup","SPIFFS Mount Failed");
+    return;
+  }
   if(debugging)
   {
     Serial.begin(115200);
-  }
-  if(!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)){
-    serialDisplay("setup","SPIFFS Mount Failed");
-    return;
   }
   if (!SPIFFS.exists("/config.json")) 
   {
@@ -44,7 +45,6 @@ void setup()
     newConfig.wifi_setup_done = false;
     write_config(newConfig);
   }
-  delay(100);
   read_config();
   print_config();
   delayMS = conf.pingTime;

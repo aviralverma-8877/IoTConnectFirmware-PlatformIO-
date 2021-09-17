@@ -165,8 +165,8 @@ void reset()
   serialDisplay("reset","Writing Config");
   write_config(newConf);
   serialDisplay("reset","Writing Completes");
+  delay(100);
   ESP.restart();
-
 }
 /*----Meathod for reconfiguring WiFi settings---------------*/
 /*---Meathod for pinging MQTT Server for active connection--*/
@@ -486,19 +486,8 @@ String read_device_config()
   return "";
 }
 
-void generate_mqtt_topics()
+void generate_mqtt_topics(DynamicJsonDocument doc)
 {
-  DynamicJsonDocument doc(1000);
-  StaticJsonDocument<200> filter;
-  filter["device_config"]["shift_out_reg"]["avail"] = true;
-  filter["device_config"]["relay"]["count"] = true;
-  filter["device_config"]["relay"]["GPIO"][0] = true;
-
-  String device_config = read_device_config();
-  DeserializationError error = deserializeJson(doc, device_config,DeserializationOption::Filter(filter));
-  if(error)
-    return;
-  doc.shrinkToFit();
   int relay_count = 1;
   bool has_shift_reg = doc["device_config"]["shift_out_reg"]["avail"];
 
@@ -539,12 +528,16 @@ void generate_mqtt_topics()
       relay_count++;
     }
   }
-  File topicFile = SPIFFS.open("/mqtt_topics.json", FILE_WRITE);
   String r;
   serializeJsonPretty(topic_doc, r);
-  topicFile.print(r);
-  topicFile.close();
-  ESP.restart();
+  mqtt_topic_queue = r;
+  xTaskCreate([](void *p){
+    String r = mqtt_topic_queue;
+    File topicFile = SPIFFS.open("/mqtt_topics.json", FILE_WRITE);
+    topicFile.print(r);
+    topicFile.close();
+    vTaskDelete(NULL);
+  },"Config write",10000,NULL,13,NULL);
 }
 
 void toggle_relay(String relay)

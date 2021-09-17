@@ -1,7 +1,6 @@
 #ifndef structures
   #define structures
   #include <Arduino.h>
-
   struct configuration{
     bool setupFlag;
     bool updateFlag;
@@ -18,8 +17,9 @@
     String fauxmo_relay_2;
     String fauxmo_relay_3;
   };
-  struct debug_msg{
-    String head;
-    String body;
+  template <typename T>
+  struct queue_element{
+    void (*ptr)();
+    T *argument;
   };
 #endif

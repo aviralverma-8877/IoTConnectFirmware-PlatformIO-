@@ -47,6 +47,9 @@ Ticker TickerForFeedbackLED;
 Ticker TickerForTimeOut;
 Ticker TickerForWebSocketStatus;
 /*--------------Tickers for Async Meathods------------------*/
+String config_queue;
+String device_config_queue;
+String mqtt_topic_queue;
 void configure_gpio()
 {
     serialDisplay("configure_gpio","Configuring GPIO");
