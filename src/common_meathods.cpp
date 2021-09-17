@@ -14,7 +14,7 @@ void write_config(configuration config)
 }
 String config_to_json(configuration config)
 {
-  StaticJsonDocument<500> jsonBuffer;
+  StaticJsonDocument<800> jsonBuffer;
   jsonBuffer["setupFlag"] = config.setupFlag;
   jsonBuffer["updateFlag"] = config.updateFlag;
   jsonBuffer["led_enabled"] = config.led_enabled;
