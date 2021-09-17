@@ -39,7 +39,7 @@ void write_device_config(DynamicJsonDocument jsonBuffer)
   serializeJsonPretty(jsonBuffer, r);
   device_config_queue = r;
   xTaskCreate([](void *p){
-    String r = device_config_queue;
+    String r = read_device_config();
     File configFile = SPIFFS.open("/device_config.json", FILE_WRITE);
     configFile.print(r); 
     configFile.close();

@@ -454,7 +454,11 @@ void read_config()
 
 String read_mqtt_config()
 {
-  if (SPIFFS.exists("/mqtt_topics.json")) {
+  if(!comp(mqtt_topic_queue.c_str(),""))
+  {
+    return mqtt_topic_queue;
+  }
+  else if (SPIFFS.exists("/mqtt_topics.json")) {
     File configFile = SPIFFS.open("/mqtt_topics.json");
     if (configFile) {
       size_t size = configFile.size();
@@ -471,7 +475,11 @@ String read_mqtt_config()
 
 String read_device_config()
 {
-  if (SPIFFS.exists("/device_config.json")) {
+  if(!comp(device_config_queue.c_str(),""))
+  {
+    return device_config_queue;
+  }
+  else if (SPIFFS.exists("/device_config.json")) {
     File configFile = SPIFFS.open("/device_config.json");
     if (configFile) {
       size_t size = configFile.size();
