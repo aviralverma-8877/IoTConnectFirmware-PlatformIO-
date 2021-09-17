@@ -413,7 +413,36 @@ void print_config(){
 }
 void read_config()
 {
-  if (SPIFFS.exists("/config.json")) {
+  if(!comp(config_queue.c_str(),""))
+  {
+    StaticJsonDocument<500> jsonBuffer;
+    DeserializationError error = deserializeJson(jsonBuffer, config_queue);
+    if(error)
+      return;
+    conf.led_enabled = jsonBuffer["led_enabled"];
+    conf.save_eeprom = jsonBuffer["save_eeprom"];
+    conf.pingTime = jsonBuffer["pingTime"];
+    conf.setupFlag = jsonBuffer["setupFlag"];
+    conf.updateFlag = jsonBuffer["updateFlag"];
+    conf.wifi_setup_done = jsonBuffer["wifi_setup_done"];
+    String relay = jsonBuffer["btn_relay_act"];
+    conf.btn_relay_act = relay;
+    String http_username = jsonBuffer["http_username"];      
+    conf.http_username = http_username;
+    String http_password = jsonBuffer["http_password"];
+    conf.http_password = http_password;
+    String ssid = jsonBuffer["WiFi_SSID"];
+    conf.WiFi_SSID = ssid;
+    String pass = jsonBuffer["WiFi_PASS"];
+    conf.WiFi_PASS = pass; 
+    String fauxmo_relay_1 = jsonBuffer["fauxmo_relay_1"];
+    conf.fauxmo_relay_1 = fauxmo_relay_1;
+    String fauxmo_relay_2 = jsonBuffer["fauxmo_relay_2"];
+    conf.fauxmo_relay_2 = fauxmo_relay_2;
+    String fauxmo_relay_3 = jsonBuffer["fauxmo_relay_3"];
+    conf.fauxmo_relay_3 = fauxmo_relay_3;
+  }
+  else if (SPIFFS.exists("/config.json")) {
     File configFile = SPIFFS.open("/config.json");
     if (configFile) {
       size_t size = configFile.size();

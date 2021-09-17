@@ -87,7 +87,7 @@ void dns_loop(void *parameter)
   for(;;)
   {
     dnsServer.processNextRequest();
-    vTaskDelay(100);
+    vTaskDelay(10);
   }
 }
 
@@ -96,7 +96,7 @@ void fauxmo_loop(void *parameter)
   for(;;)
   {
     fauxmo.handle();
-    vTaskDelay(50);
+    vTaskDelay(10);
   }
 }
 
