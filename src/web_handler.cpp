@@ -181,6 +181,9 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
     write_device_config(doc);
     generate_mqtt_topics(doc);
     serialDisplay("handleDeviceConfig","Step 3");
+    TickerForTimeOut.once(1,[](){
+      ESP.restart();
+    });
   }
   else
   {
