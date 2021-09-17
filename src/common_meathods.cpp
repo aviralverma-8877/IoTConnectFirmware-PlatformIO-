@@ -2,11 +2,15 @@
 
 void write_config(configuration config)
 {
-  File configFile = SPIFFS.open("/config.json", FILE_WRITE);
   String r = config_to_json(config);
-  Serial.println(r);
-  configFile.print(r); 
-  configFile.close();
+  config_queue = r;
+  xTaskCreate([](void *p){
+    String r = config_queue;
+    File configFile = SPIFFS.open("/config.json", FILE_WRITE);
+    configFile.print(r); 
+    configFile.close();
+    vTaskDelete(NULL);
+  },"Config write",10000,NULL,10,NULL);
 }
 String config_to_json(configuration config)
 {
@@ -31,45 +35,49 @@ String config_to_json(configuration config)
 }
 void write_device_config(DynamicJsonDocument jsonBuffer)
 {
-
-  File configFile = SPIFFS.open("/device_config.json", FILE_WRITE);
   String r;
   serializeJsonPretty(jsonBuffer, r);
-  configFile.print(r); 
-  configFile.close();
-  TickerForTimeOut.once(1,[](){
-    ESP.restart();
-  });
+  device_config_queue = r;
+  xTaskCreate([](void *p){
+    String r = device_config_queue;
+    File configFile = SPIFFS.open("/device_config.json", FILE_WRITE);
+    configFile.print(r); 
+    configFile.close();
+    vTaskDelete(NULL);
+  },"Device Config Write",20000,NULL,11,NULL);
 }
 
 void write_mqtt_topics(String r)
 {
-  File configFile = SPIFFS.open("/mqtt_topics.json", FILE_WRITE);
-  configFile.print(r); 
-  configFile.close();
+  mqtt_topic_queue = r;
+  xTaskCreate([](void *p){
+    String r = mqtt_topic_queue;
+    File configFile = SPIFFS.open("/mqtt_topics.json", FILE_WRITE);
+    configFile.print(r); 
+    configFile.close();
+    vTaskDelete(NULL);
+  },"MQTT Topic write",10000,NULL,12,NULL);
 }
 
 
 /*-------Meathod for displaying serial data in JSON---------*/
-debug_msg dbg_msg;
-bool dbg_free = true;
 void serialDisplay(String head,String body)
 {
   if(debugging)
   {
-    while(!dbg_free)
+    StaticJsonDocument<200> doc;
+    if(comp(debug_meathod.c_str(),""))
     {
-      delay(10);
+      doc["action"] = "display";
+      doc["head"] = head;
+      doc["body"] = body;
+      String c;
+      serializeJson(doc, c);
+      Serial.println(c);
     }
-    dbg_msg.head = head;
-    dbg_msg.body = body;
-    dbg_free = false;
-    xTaskCreate([](void *p){
-      debug_msg dbg_msg = *(debug_msg*)p;
-      String head = dbg_msg.head;
-      String body = dbg_msg.body;
-      StaticJsonDocument<200> doc;
-      if(comp(debug_meathod.c_str(),""))
+    else
+    {
+      if(comp(head.c_str(),debug_meathod.c_str()))
       {
         doc["action"] = "display";
         doc["head"] = head;
@@ -78,21 +86,7 @@ void serialDisplay(String head,String body)
         serializeJson(doc, c);
         Serial.println(c);
       }
-      else
-      {
-        if(comp(head.c_str(),debug_meathod.c_str()))
-        {
-          doc["action"] = "display";
-          doc["head"] = head;
-          doc["body"] = body;
-          String c;
-          serializeJson(doc, c);
-          Serial.println(c);
-        }
-      }
-      dbg_free = true;
-      vTaskDelete(NULL);
-    },"Debugger",10000,&dbg_msg,1,&dbg_task);
+    }
   }
 }
 /*-------Meathod for displaying serial data in JSON---------*/
