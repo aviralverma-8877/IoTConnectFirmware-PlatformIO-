@@ -283,28 +283,30 @@ void web_set_wifi(AsyncWebServerRequest *request)
     conf.wifi_setup_done = true;
     conf.setupFlag = false;
     write_config(conf);
+    serialDisplay("web_set_wifi","new config saved");    
     String return_msg = "";
     StaticJsonDocument<200> return_doc;
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);
     request->send(200, "application/json", return_msg);
-
     WiFi.disconnect();
-    TickerForTimeOut.once<AsyncWebServerRequest*>(1,[](AsyncWebServerRequest *request){
+    xTaskCreate([](void *p){
       WiFi.mode(WIFI_STA);
       WiFi.begin(conf.WiFi_SSID.c_str(),conf.WiFi_PASS.c_str());
-      TickerForTimeOut.once(15,[](){
-        if(WiFi.status() != WL_CONNECTED)
+      int time = millis();      
+      while(WiFi.status() != WL_CONNECTED)
+      {
+        if(millis()>(time+10000))
         {
+          serialDisplay("web_set_wifi","Unable to set WiFi");
           reset();
         }
-        else
-        {
-          ESP.restart();
-        }        
-      });
-    }, request);
-
+        delay(10);
+      }
+      serialDisplay("web_set_wifi","Connected to WiFi");
+      ESP.restart();
+      vTaskDelete(NULL);
+    },"WiFi Connect",10000,NULL,11,NULL);
   }
   else
   {
