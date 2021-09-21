@@ -49,6 +49,10 @@ function init_socket()
     }
     Socket.onclose = function(event){
         console.log("Connection to websockets closed....")
+        setTimeout(function(){
+            console.log("Reconnecting....")
+            init_socket();
+        },1000);
     }
     Socket.onerror = function(event){
         console.log("Error in websockets");
