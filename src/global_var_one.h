@@ -68,7 +68,6 @@
     extern Ticker TickerForFeedbackLED;
     extern Ticker TickerForTimeOut;
     extern Ticker TickerForTimeOutTwo;
-    extern Ticker TickerForWiFiConnect;
     extern Ticker TickerForWebSocketStatus;
     /*--------------Tickers for Async Meathods------------------*/
      void configure_gpio();
