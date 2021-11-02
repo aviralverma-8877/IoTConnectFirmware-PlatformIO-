@@ -238,15 +238,16 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     const char* relay = "";
     bool action = false;
     String mqtt_data = read_mqtt_config();
-    StaticJsonDocument<200> filter;
+    StaticJsonDocument<500> filter;
     filter["relay"][0]["name"] = true;
     filter["relay"][0]["topic"] = true;
     filter["relay"][0]["status"] = true;
-    StaticJsonDocument<500> doc;
+    DynamicJsonDocument doc(2000);
     DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
-    if(error_1)
+    if(error)
       return;
-    StaticJsonDocument<200> msg;
+    doc.shrinkToFit();
+    StaticJsonDocument<500> msg;
     DeserializationError error_2 = deserializeJson(msg, p);
     if(error_2)
       return;
@@ -472,7 +473,7 @@ void connectToMqtt()
 void subscribe_mqtt_input()
 {
   serialDisplay("subscribe_mqtt_input","Subscribing to topics");
-  StaticJsonDocument<200> doc;
+  DynamicJsonDocument doc(2000);
   StaticJsonDocument<200> filter;
   filter["mqtt"]["prefix"] = true;
   filter["mqtt"]["suffix"] = true;
@@ -496,6 +497,7 @@ void subscribe_mqtt_input()
   {
     return;
   }
+  doc.shrinkToFit();
   for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
   {
     String topic = kv["topic"];
