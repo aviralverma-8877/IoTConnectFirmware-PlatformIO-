@@ -267,7 +267,7 @@ function print_table(relay_count, on_change_val, name, topic)
     </tr>";
     table.innerHTML += content;
     cont = document.getElementById("relay_select").innerHTML;
-    cont += "<option value='"+name+"'>"+name+"</option>";
+    cont += "<option value='"+topic+"'>"+name+"</option>";
     document.getElementById("relay_select").innerHTML = cont;
     document.getElementById("fauxmo_select_1").innerHTML = cont;
     document.getElementById("fauxmo_select_2").innerHTML = cont;
