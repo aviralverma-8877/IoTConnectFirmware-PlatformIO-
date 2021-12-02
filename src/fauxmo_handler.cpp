@@ -1,13 +1,30 @@
 #include "fauxmo_handler.h"
 void setup_fauxmo()
 {
+    fauxmo_add_device();
     fauxmo.createServer(false);
     fauxmo.setPort(80);
     fauxmo.enable(true);
     fauxmo_remove_all_device();
-    fauxmo_add_device();
     fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
-        relay_action(device_name, state, "");
+        serialDisplay("setup_fauxmo","Fauxmo called "+String(device_name));
+        DynamicJsonDocument doc(1500);
+        String mqtt_data = read_mqtt_config();
+        DeserializationError error = deserializeJson(doc, mqtt_data);
+        if(error)
+        {
+            return;
+        }
+        doc.shrinkToFit();
+        JsonArray array = doc["relay"].as<JsonArray>();
+        for (JsonObject ele : array) {
+            String topic = ele["topic"];
+            if(comp(topic.c_str(), device_name))
+            {
+                relay_action(ele["name"], state, "");
+                break;
+            }
+        }
     });
 }
 
