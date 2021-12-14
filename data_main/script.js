@@ -262,7 +262,7 @@ function print_table(relay_count, on_change_val, name, topic)
             </label>\
         </th>\
         <th style=\"font-family: 'Fjalla One'; font-size:10px\">\
-            Alexa : <input type=\"checkbox\" value=\""+relay_count+"\" class=\"fauxmo_control\" id=\"fauxmo_control_"+relay_count+"\" onchange=\"update_fauxmo_list()\" />\
+            Alexa : <input type=\"checkbox\" value=\""+topic+"\" class=\"fauxmo_control\" id=\"fauxmo_control_"+relay_count+"\" onchange=\"update_fauxmo_list()\" />\
         </th>\
         <th style=\"font-family: 'Fjalla One'; font-size:10px\">\
             Mqtt Topic : "+topic+"\
