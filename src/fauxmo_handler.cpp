@@ -1,11 +1,11 @@
 #include "fauxmo_handler.h"
 void setup_fauxmo()
 {
+    fauxmo_remove_all_device();
     fauxmo_add_device();
     fauxmo.createServer(false);
     fauxmo.setPort(80);
     fauxmo.enable(true);
-    fauxmo_remove_all_device();
     fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
         serialDisplay("setup_fauxmo","Fauxmo called "+String(device_name));
         DynamicJsonDocument doc(1500);
