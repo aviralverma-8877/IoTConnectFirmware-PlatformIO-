@@ -1,11 +1,11 @@
 #include "fauxmo_handler.h"
 void setup_fauxmo()
 {
+    fauxmo_remove_all_device();
     fauxmo_add_device();
     fauxmo.createServer(false);
     fauxmo.setPort(80);
     fauxmo.enable(true);
-    fauxmo_remove_all_device();
     fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
         serialDisplay("setup_fauxmo","Fauxmo called "+String(device_name));
         DynamicJsonDocument doc(1500);
@@ -52,7 +52,7 @@ void fauxmo_remove_all_device()
     filter["relay"][0]["name"] = true;
     DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
     if(error)
-    return;
+        return;
     for( JsonObject kv : doc["relay"].as<JsonArray>())
     {
         const char* device_name = kv["name"];
@@ -63,7 +63,23 @@ void fauxmo_remove_all_device()
 void fauxmo_add_device()
 {
     read_config();
-    fauxmo_add_device(conf.fauxmo_relay_1.c_str());
-    fauxmo_add_device(conf.fauxmo_relay_2.c_str());
-    fauxmo_add_device(conf.fauxmo_relay_3.c_str());
+    String fauxmo_relay = conf.fauxmo_relay;
+    StaticJsonDocument<500> doc;
+    DeserializationError error = deserializeJson(doc, fauxmo_relay);
+    if(error)
+        return;
+    for( JsonPair kv : doc.as<JsonObject>())
+    {
+        bool value = kv.value();
+        const char *key = kv.key().c_str();
+        if(value)
+        {
+            serialDisplay("fauxmo_add_device", "Adding Device : " + String(key));
+            fauxmo_add_device(key);
+        }
+        else{
+            serialDisplay("fauxmo_add_device", "Removing Device : " + String(key));            
+            fauxmo_remove_device(key);
+        }
+    }
 }

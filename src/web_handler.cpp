@@ -124,12 +124,6 @@ void handlefauxmo(AsyncWebServerRequest *request)
   if(request->hasParam("options"))
   {
     String fauxmo_relay = request->arg("options");
-    StaticJsonDocument<500> doc;
-    DeserializationError error = deserializeJson(doc, fauxmo_relay);
-    if(error)
-    {
-      return;
-    }
 
     StaticJsonDocument<200> return_doc;
     String return_msg;
@@ -138,9 +132,7 @@ void handlefauxmo(AsyncWebServerRequest *request)
     request->send(200, "application/json", return_msg);
 
     read_config();
-    conf.fauxmo_relay_1 = doc["relay_1"].as<String>();
-    conf.fauxmo_relay_2 = doc["relay_2"].as<String>();
-    conf.fauxmo_relay_3 = doc["relay_3"].as<String>();
+    conf.fauxmo_relay = fauxmo_relay;
     write_config(conf);
     TickerForTimeOut.once(1, [](){
       ESP.reset();

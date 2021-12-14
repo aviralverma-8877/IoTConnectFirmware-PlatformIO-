@@ -11,7 +11,7 @@ void write_config(configuration config)
 }
 String config_to_json(configuration config)
 {
-  StaticJsonDocument<500> jsonBuffer;
+  DynamicJsonDocument jsonBuffer(2000);
   jsonBuffer["setupFlag"] = config.setupFlag;
   jsonBuffer["updateFlag"] = config.updateFlag;
   jsonBuffer["led_enabled"] = config.led_enabled;
@@ -23,9 +23,8 @@ String config_to_json(configuration config)
   jsonBuffer["WiFi_SSID"] = config.WiFi_SSID;
   jsonBuffer["WiFi_PASS"] = config.WiFi_PASS;
   jsonBuffer["wifi_setup_done"] = config.wifi_setup_done;
-  jsonBuffer["fauxmo_relay_1"] = config.fauxmo_relay_1;
-  jsonBuffer["fauxmo_relay_2"] = config.fauxmo_relay_2;
-  jsonBuffer["fauxmo_relay_3"] = config.fauxmo_relay_3;
+  jsonBuffer["fauxmo_relay"] = config.fauxmo_relay;
+  jsonBuffer.shrinkToFit();
   String r;
   serializeJsonPretty(jsonBuffer, r);
   return r;
