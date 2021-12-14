@@ -306,7 +306,23 @@ void checkReset()
       String relay = conf.btn_relay_act;
       if(!comp(relay.c_str(), "N/A"))
       {
-        toggle_relay(relay);
+        DynamicJsonDocument new_doc(1500);
+        String mqtt_data = read_mqtt_config();
+        DeserializationError error = deserializeJson(new_doc, mqtt_data);
+        if(error)
+        {
+            return;
+        }
+        new_doc.shrinkToFit();
+        JsonArray array = new_doc["relay"].as<JsonArray>();
+        for (JsonObject ele : array) {
+            String topic = ele["topic"];
+            if(comp(topic.c_str(), relay.c_str()))
+            {
+              toggle_relay(ele["name"]);
+              break;
+            }
+        }
       }
     }
   }
