@@ -533,6 +533,7 @@ void setup_web_server()
   server.serveStatic("/script.js", SPIFFS, "/script.js");
   server.serveStatic("/style.css", SPIFFS, "/style.css");
   server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
+  server.serveStatic("/bk_img.png", SPIFFS, "/bk_img.png");
   server.onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
     //fauxmo request handling
       if (fauxmo.process(request->client(), request->method() == HTTP_GET, request->url(), String((char *)data))) return;
