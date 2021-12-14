@@ -264,48 +264,23 @@ function print_table(relay_count, on_change_val, name, topic)
         <th style=\"font-family: 'Fjalla One'; font-size:10px\">\
             Mqtt Topic : "+topic+"\
         </th>\
+        <th style=\"font-family: 'Fjalla One'; font-size:10px\">\
+            Alexa : <input type=\"checkbox\" value=\""+relay_count+"\" class=\"fauxmo_control\" id=\"fauxmo_control_"+relay_count+"\" onchange=\"update_fuxmo_list()\" />\
+        </th>\
     </tr>";
     table.innerHTML += content;
     cont = document.getElementById("relay_select").innerHTML;
     cont += "<option value='"+topic+"'>"+name+"</option>";
     document.getElementById("relay_select").innerHTML = cont;
-    document.getElementById("fauxmo_select_1").innerHTML = cont;
-    document.getElementById("fauxmo_select_2").innerHTML = cont;
-    document.getElementById("fauxmo_select_3").innerHTML = cont;
 }
 function update_fuxmo_list(){
-    relay_1 = document.getElementById("fauxmo_select_1").value;
-    relay_2 = document.getElementById("fauxmo_select_2").value;
-    relay_3 = document.getElementById("fauxmo_select_3").value;
-    if(relay_1 != "N/A")
+    relays = document.getElementsByClassName("fauxmo_control");
+    relay_data = {}
+    for(i=0; i<relays.length(); i++)
     {
-        if(relay_1 == relay_2 || relay_1 == relay_3)
-        {
-            alert(relay_1+" is selected more than once.");
-            return;
-        }
+        relay_data[relays[i].value] = relays[i].checked()
     }
-    if(relay_2 != "N/A")
-    {
-        if(relay_2 == relay_1 || relay_2 == relay_3)
-        {
-            alert(relay_2+" is selected more than once.");
-            return;
-        }
-    }
-    if(relay_3 != "N/A")
-    {
-        if(relay_3 == relay_2 || relay_3 == relay_1)
-        {
-            alert(relay_3+" is selected more than once.");
-            return;
-        }
-    }
-    httpGet(0,0,"update_fauxmo",{
-        "relay_1" : relay_1,
-        "relay_2" : relay_2,
-        "relay_3" : relay_3
-    })
+    httpGet(0,0,"update_fauxmo",relay_data)
     setTimeout(function(){
         location.reload();
     },1000)
