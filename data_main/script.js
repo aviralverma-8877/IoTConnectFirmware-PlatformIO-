@@ -46,6 +46,10 @@ function init_socket()
     }
     Socket.onopen = function(event){
         console.log("Connected to web sockets...")
+        document.getElementById("freeze").style.opacity=0;
+        setTimeout(function(){
+            document.getElementById("freeze").style.display="none";
+        },1000)
     }
     Socket.onclose = function(event){
         console.log("Connection to websockets closed....")
@@ -306,6 +310,10 @@ function update_fuxmo_list(){
         "relay_2" : relay_2,
         "relay_3" : relay_3
     })
+    document.getElementById("freeze").style.display="block";
+    setTimeout(function(){
+        document.getElementById("freeze").style.opacity=1;
+    },1000) 
     setTimeout(function(){
         location.reload();
     },1000)
@@ -360,6 +368,10 @@ function update_wifi()
     close_alert();
     return new Promise (() => {
         response = httpGet(0,0,"set_wifi",{"ssid":ssid,"pass":pass});
+        document.getElementById("freeze").style.display="block";
+        setTimeout(function(){
+            document.getElementById("freeze").style.opacity=1;
+        },1000) 
         setTimeout(()=>
         {
             window.location.replace("http://iot-connect-"+chipid+".local/");
@@ -792,6 +804,10 @@ function save_config()
         if(result.done)
         {
             alert("Device config saved successfully. Rebooting....");
+            document.getElementById("freeze").style.display="block";
+            setTimeout(function(){
+                document.getElementById("freeze").style.opacity=1;
+            },1000) 
             setTimeout(()=>{
                 location.reload();
             },5000)
