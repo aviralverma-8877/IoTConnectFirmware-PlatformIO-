@@ -14,8 +14,6 @@
     String WiFi_SSID;
     String WiFi_PASS;
     bool wifi_setup_done;
-    String fauxmo_relay_1;
-    String fauxmo_relay_2;
-    String fauxmo_relay_3;
+    String fauxmo_relay;
   };
 #endif

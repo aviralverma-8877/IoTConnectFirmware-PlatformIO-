@@ -199,15 +199,15 @@ function show_status(json)
         document.getElementById("save_status").checked = save_eeprom;
         btn_relay_act = json["btn_relay_act"];
         selectElement("relay_select", btn_relay_act)
-        fauxmo_relay_1 = json["fauxmo_relay_1"]
-        if(fauxmo_relay_1 != "N/A")
-            selectElement("fauxmo_select_1", fauxmo_relay_1)
-        fauxmo_relay_2 = json["fauxmo_relay_2"]
-        if(fauxmo_relay_2 != "N/A")
-            selectElement("fauxmo_select_2", fauxmo_relay_2)
-        fauxmo_relay_3 = json["fauxmo_relay_3"]
-        if(fauxmo_relay_3 != "N/A")
-            selectElement("fauxmo_select_3", fauxmo_relay_3)
+        relays = document.getElementsByClassName("fauxmo_control");
+        relays_data = JSON.parse(json['fauxmo_relay']);
+        for(i=0; i<relays.length; i++)
+        {
+            if(relays_data[relays[i].value])
+                relays[i].checked = true;
+            else
+                relays[i].checked = false;
+        }    
         var cont = "";
         wifi_ssid = json['wifi_ssid'];
         wifi_type = json['type'];
@@ -262,10 +262,10 @@ function print_table(relay_count, on_change_val, name, topic)
             </label>\
         </th>\
         <th style=\"font-family: 'Fjalla One'; font-size:10px\">\
-            Mqtt Topic : "+topic+"\
+            Alexa : <input type=\"checkbox\" value=\""+relay_count+"\" class=\"fauxmo_control\" id=\"fauxmo_control_"+relay_count+"\" onchange=\"update_fauxmo_list()\" />\
         </th>\
         <th style=\"font-family: 'Fjalla One'; font-size:10px\">\
-            Alexa : <input type=\"checkbox\" value=\""+relay_count+"\" class=\"fauxmo_control\" id=\"fauxmo_control_"+relay_count+"\" onchange=\"update_fuxmo_list()\" />\
+            Mqtt Topic : "+topic+"\
         </th>\
     </tr>";
     table.innerHTML += content;
@@ -273,14 +273,14 @@ function print_table(relay_count, on_change_val, name, topic)
     cont += "<option value='"+topic+"'>"+name+"</option>";
     document.getElementById("relay_select").innerHTML = cont;
 }
-function update_fuxmo_list(){
+function update_fauxmo_list(){
     relays = document.getElementsByClassName("fauxmo_control");
-    relay_data = {}
-    for(i=0; i<relays.length(); i++)
+    relays_data = {}
+    for(i=0; i<relays.length; i++)
     {
-        relay_data[relays[i].value] = relays[i].checked()
+        relays_data[relays[i].value] = relays[i].checked
     }
-    httpGet(0,0,"update_fauxmo",relay_data)
+    httpGet(0,0,"update_fauxmo",relays_data)
     setTimeout(function(){
         location.reload();
     },1000)

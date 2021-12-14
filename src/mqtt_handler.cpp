@@ -280,34 +280,37 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 /*----Meathod for sending MQTT Data-------------------------*/
 void sendToMQTT(String topic, String msg)
 {
-  StaticJsonDocument<200> doc;
-  StaticJsonDocument<200> filter;
-  filter["mqtt"]["prefix"] = true;
-  filter["mqtt"]["suffix"] = true;
-  filter["mqtt"]["service"] = true;
-  String device_config = read_device_config();
-  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
-  if(error)
+  if(MQTTStatus)
   {
-    return;
-  }
-  String service = doc["mqtt"]["service"];
-  if(!comp(service.c_str(),"N/A"))
-  {
-    String prefix = doc["mqtt"]["prefix"];
-    String suffix = doc["mqtt"]["suffix"];
-    String fullTopic = prefix+topic+suffix;
-    doc.clear();
-    serialDisplay("sendToMQTT","Published to "+fullTopic);
-    mqtt.publish(fullTopic.c_str(), MQTT_QoS, false, msg.c_str(), msg.length());
-    DynamicJsonDocument doc(1500);
-    doc["action"] = "mqtt_out";
-    doc["topic"] = fullTopic;
-    doc["payload"] = msg;
-    String r;
-    serializeJson(doc, r);
-    doc.clear();
-    send_data_to_webSocket(r);
+    StaticJsonDocument<200> doc;
+    StaticJsonDocument<200> filter;
+    filter["mqtt"]["prefix"] = true;
+    filter["mqtt"]["suffix"] = true;
+    filter["mqtt"]["service"] = true;
+    String device_config = read_device_config();
+    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+    if(error)
+    {
+      return;
+    }
+    String service = doc["mqtt"]["service"];
+    if(!comp(service.c_str(),"N/A"))
+    {
+      String prefix = doc["mqtt"]["prefix"];
+      String suffix = doc["mqtt"]["suffix"];
+      String fullTopic = prefix+topic+suffix;
+      doc.clear();
+      serialDisplay("sendToMQTT","Published to "+fullTopic);
+      mqtt.publish(fullTopic.c_str(), MQTT_QoS, false, msg.c_str(), msg.length());
+      DynamicJsonDocument doc(1500);
+      doc["action"] = "mqtt_out";
+      doc["topic"] = fullTopic;
+      doc["payload"] = msg;
+      String r;
+      serializeJson(doc, r);
+      doc.clear();
+      send_data_to_webSocket(r);
+    }
   }
 }
 /*----Meathod for sending MQTT Data-------------------------*/

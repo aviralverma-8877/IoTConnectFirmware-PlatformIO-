@@ -41,7 +41,7 @@ void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
 String device_status()
 {
   String return_msg = "";
-  DynamicJsonDocument return_doc(700);
+  DynamicJsonDocument return_doc(2000);
   read_config();
   return_doc["action"] = "device_status";
   return_doc["uname"] = conf.http_username;
@@ -52,9 +52,7 @@ String device_status()
   return_doc["save_eeprom"] = conf.save_eeprom;
   return_doc["firmware_version"] = FIRMWARE_V;
   return_doc["mqtt_status"] = MQTTStatus;
-  return_doc["fauxmo_relay_1"] = conf.fauxmo_relay_1;
-  return_doc["fauxmo_relay_2"] = conf.fauxmo_relay_2;
-  return_doc["fauxmo_relay_3"] = conf.fauxmo_relay_3;
+  return_doc["fauxmo_relay"] = conf.fauxmo_relay;
   return_doc["mqtt_status"] = MQTTStatus;
   bool WiFi_status = (WiFi.status() == WL_CONNECTED);
   return_doc["wifi_status"] = WiFi_status;
@@ -73,6 +71,7 @@ String device_status()
     return_doc["init_setup"] = init_setup;
   }
   doc.clear();
+  return_doc.shrinkToFit();
   serializeJson(return_doc, return_msg);
   return_doc.clear();
   return return_msg;
@@ -153,7 +152,7 @@ void reset()
   serialDisplay("reset","Formatting SPIFFS");
   SPIFFS.format();
   serialDisplay("reset","Formatting Completed");
-  configuration newConf = {false,false,true,false,2000,"N/A","admin","admin","","",false,"N/A","N/A","N/A"};
+  configuration newConf = {false,false,true,false,2000,"N/A","admin","admin","","",false,"{}"};
   newConf.setupFlag = true;
   serialDisplay("reset","Writing Config");
   write_config(newConf);
@@ -196,7 +195,8 @@ void ICACHE_RAM_ATTR handleData(float h, float t) {
   String s;
   serializeJson(doc, s);
   send_data_to_webSocket(s);
-  sendToMQTT(espsensor, s);
+  if(MQTTStatus)
+    sendToMQTT(espsensor, s);
 }
 
 void ICACHE_RAM_ATTR handleError(uint8_t e) {
@@ -415,10 +415,11 @@ void read_config()
 
       configFile.readBytes(buf.get(), size);
       configFile.close();
-      StaticJsonDocument<500> jsonBuffer;
+      DynamicJsonDocument jsonBuffer(2000);
       DeserializationError error = deserializeJson(jsonBuffer, buf.get());
       if(error)
         return;
+      jsonBuffer.shrinkToFit();
       conf.led_enabled = jsonBuffer["led_enabled"];
       conf.save_eeprom = jsonBuffer["save_eeprom"];
       conf.pingTime = jsonBuffer["pingTime"];
@@ -435,12 +436,8 @@ void read_config()
       conf.WiFi_SSID = ssid;
       String pass = jsonBuffer["WiFi_PASS"];
       conf.WiFi_PASS = pass; 
-      String fauxmo_relay_1 = jsonBuffer["fauxmo_relay_1"];
-      conf.fauxmo_relay_1 = fauxmo_relay_1;
-      String fauxmo_relay_2 = jsonBuffer["fauxmo_relay_2"];
-      conf.fauxmo_relay_2 = fauxmo_relay_2;
-      String fauxmo_relay_3 = jsonBuffer["fauxmo_relay_3"];
-      conf.fauxmo_relay_3 = fauxmo_relay_3;
+      String fauxmo_relay = jsonBuffer["fauxmo_relay"];
+      conf.fauxmo_relay = fauxmo_relay;
     }
   }
 }
