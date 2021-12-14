@@ -261,7 +261,7 @@ function print_table(relay_count, on_change_val, name, topic)
                 <span class=\"slider round\"></span>\
             </label>\
         </th>\
-        <th style=\"font-family: 'Fjalla One'\">\
+        <th style=\"font-family: 'Fjalla One'; font-size:10px\">\
             Mqtt Topic : "+topic+"\
         </th>\
     </tr>";
