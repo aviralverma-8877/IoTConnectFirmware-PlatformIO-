@@ -285,6 +285,10 @@ function update_fauxmo_list(){
         relays_data[relays[i].value] = relays[i].checked
     }
     httpGet(0,0,"update_fauxmo",relays_data)
+    document.getElementById("freeze").style.display="block";
+    setTimeout(function(){
+        document.getElementById("freeze").style.opacity=1;
+    },1000) 
     setTimeout(function(){
         location.reload();
     },1000)
