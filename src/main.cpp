@@ -40,7 +40,7 @@ void setup()
   }
   if (!SPIFFS.exists("/config.json")) 
   {
-    configuration newConfig = {false,false,true,false,2000,"N/A","admin","admin","","",false,"N/A","N/A","N/A"};
+    configuration newConfig = {false,false,true,false,2000,"N/A","admin","admin","","",false,"{}"};
     newConfig.setupFlag = true;
     newConfig.wifi_setup_done = false;
     write_config(newConfig);

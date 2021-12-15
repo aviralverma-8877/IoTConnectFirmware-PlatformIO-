@@ -57,9 +57,7 @@ String device_status()
   return_doc["save_eeprom"] = conf.save_eeprom;
   return_doc["firmware_version"] = FIRMWARE_V;
   return_doc["mqtt_status"] = MQTTStatus;
-  return_doc["fauxmo_relay_1"] = conf.fauxmo_relay_1;
-  return_doc["fauxmo_relay_2"] = conf.fauxmo_relay_2;
-  return_doc["fauxmo_relay_3"] = conf.fauxmo_relay_3;
+  return_doc["fauxmo_relay"] = conf.fauxmo_relay;
   return_doc["mqtt_status"] = MQTTStatus;
   bool WiFi_status = (WiFi.status() == WL_CONNECTED);
   return_doc["wifi_status"] = WiFi_status;
@@ -78,6 +76,7 @@ String device_status()
     return_doc["init_setup"] = init_setup;
   }
   doc.clear();
+  return_doc.shrinkToFit();
   serializeJson(return_doc, return_msg);
   return_doc.clear();
   return return_msg;
@@ -160,7 +159,7 @@ void reset()
     serialDisplay("reset","Error formatting");
   }
   serialDisplay("reset","Formatting Completed");
-  configuration newConf = {false,false,true,false,2000,"N/A","admin","admin","","",false,"N/A","N/A","N/A"};
+  configuration newConf = {false,false,true,false,2000,"N/A","admin","admin","","",false,"{}"};
   newConf.setupFlag = true;
   serialDisplay("reset","Writing Config");
   write_config(newConf);
@@ -315,8 +314,23 @@ void checkReset()
       String relay = conf.btn_relay_act;
       if(!comp(relay.c_str(), "N/A"))
       {
-        serialDisplay("checkReset","Toggling Relay");
-        toggle_relay(relay);
+        DynamicJsonDocument new_doc(1500);
+        String mqtt_data = read_mqtt_config();
+        DeserializationError error = deserializeJson(new_doc, mqtt_data);
+        if(error)
+        {
+            return;
+        }
+        new_doc.shrinkToFit();
+        JsonArray array = new_doc["relay"].as<JsonArray>();
+        for (JsonObject ele : array) {
+            String topic = ele["topic"];
+            if(comp(topic.c_str(), relay.c_str()))
+            {
+              toggle_relay(ele["name"]);
+              break;
+            }
+        }
       }
     }
   }
@@ -435,12 +449,8 @@ void read_config()
     conf.WiFi_SSID = ssid;
     String pass = jsonBuffer["WiFi_PASS"];
     conf.WiFi_PASS = pass; 
-    String fauxmo_relay_1 = jsonBuffer["fauxmo_relay_1"];
-    conf.fauxmo_relay_1 = fauxmo_relay_1;
-    String fauxmo_relay_2 = jsonBuffer["fauxmo_relay_2"];
-    conf.fauxmo_relay_2 = fauxmo_relay_2;
-    String fauxmo_relay_3 = jsonBuffer["fauxmo_relay_3"];
-    conf.fauxmo_relay_3 = fauxmo_relay_3;
+    String fauxmo_relay = jsonBuffer["fauxmo_relay"];
+    conf.fauxmo_relay = fauxmo_relay;
   }
   else if (SPIFFS.exists("/config.json")) {
     File configFile = SPIFFS.open("/config.json");
@@ -471,12 +481,8 @@ void read_config()
       conf.WiFi_SSID = ssid;
       String pass = jsonBuffer["WiFi_PASS"];
       conf.WiFi_PASS = pass; 
-      String fauxmo_relay_1 = jsonBuffer["fauxmo_relay_1"];
-      conf.fauxmo_relay_1 = fauxmo_relay_1;
-      String fauxmo_relay_2 = jsonBuffer["fauxmo_relay_2"];
-      conf.fauxmo_relay_2 = fauxmo_relay_2;
-      String fauxmo_relay_3 = jsonBuffer["fauxmo_relay_3"];
-      conf.fauxmo_relay_3 = fauxmo_relay_3;
+      String fauxmo_relay = jsonBuffer["fauxmo_relay"];
+      conf.fauxmo_relay = fauxmo_relay;
     }
   }
 }
