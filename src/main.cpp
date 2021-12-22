@@ -21,6 +21,7 @@
 #include <ESPmDNS.h>
 #include "FS.h"
 #include "SPIFFS.h"
+#include "ble_methods.h"
 
 void loopTask();
 void dns_loop(void *parameter);
@@ -29,15 +30,16 @@ void checkReset_loop(void *parameter);
 
 void setup() 
 {
+  if(debugging)
+  {
+    Serial.begin(115200);
+  }
   if(!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED))
   {
     serialDisplay("setup","SPIFFS Mount Failed");
     return;
   }
-  if(debugging)
-  {
-    Serial.begin(115200);
-  }
+  ble_init();
   if (!SPIFFS.exists("/config.json")) 
   {
     configuration newConfig = {false,false,true,false,2000,"N/A","admin","admin","","",false,"{}"};

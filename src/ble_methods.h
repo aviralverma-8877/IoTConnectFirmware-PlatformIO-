@@ -1,0 +1,18 @@
+#ifndef ble_methods
+    #define ble_methods
+    #include <Arduino.h>
+    #include "structures.h"
+    #include <Arduino.h>
+    #include <ArduinoJson.h>
+    #include <BLEDevice.h>
+    #include <BLEUtils.h>
+    #include <BLEServer.h>
+    #include "FS.h"
+    #include "SPIFFS.h"
+    #include "mqtt_handler.h"
+    #include "global_var_two.h"
+    #include "global_var_one.h"
+    #define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+    #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+    void ble_init();
+#endif
