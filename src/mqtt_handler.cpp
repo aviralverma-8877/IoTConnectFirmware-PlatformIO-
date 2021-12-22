@@ -438,6 +438,7 @@ void send_to_web_mqtt(String msg)
 {
   serialDisplay("send_to_web_mqtt","Sending Status WebSocket");
   send_data_to_webSocket(msg);
+  send_to_bluetooth_serial(msg);
   if(MQTTStatus)
   {
     serialDisplay("send_to_web_mqtt","Sending Status MQTT");

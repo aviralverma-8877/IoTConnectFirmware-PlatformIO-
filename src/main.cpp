@@ -11,7 +11,7 @@
 #include "device_handler.h"
 #include "web_sockets_handler.h"
 #include "fauxmo_handler.h"
-
+#include "bluetooth_control.h"
 //Include Global libraries
 #include <WiFi.h>
 #include <AsyncTCP.h>
@@ -74,6 +74,7 @@ void setup()
       TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
     }
   }
+  bluetooth_init();      //init the bluetooth module
   loopTask();
 }
 void loopTask()

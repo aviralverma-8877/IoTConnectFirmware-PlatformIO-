@@ -40,6 +40,7 @@ String LocalIP = "";                      //Global variables
 byte loopCount = 0;                       //Global variables
 bool shouldReboot = false;
 IPAddress apIP(192, 168, 4, 1);
+BluetoothSerial SerialBT;
 /*----------------------------------------------------------*/
 /*--------------Tickers for Async Meathods------------------*/
 Ticker TickerForsendSensorData;

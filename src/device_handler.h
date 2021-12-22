@@ -15,6 +15,7 @@
     #include "web_sockets_handler.h"
     #include "mqtt_handler.h"
     #include "web_handler.h"
+    #include "bluetooth_control.h"
 
     void setup_tickers();
     void onWifiConnect(WiFiEvent_t event, WiFiEventInfo_t info);

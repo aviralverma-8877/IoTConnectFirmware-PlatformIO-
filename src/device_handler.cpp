@@ -203,6 +203,7 @@ void ICACHE_RAM_ATTR handleData(float h, float t) {
   serializeJson(doc, s);
   send_data_to_webSocket(s);
   sendToMQTT(espsensor, s);
+  send_to_bluetooth_serial(s);
 }
 
 void ICACHE_RAM_ATTR handleError(uint8_t e) {

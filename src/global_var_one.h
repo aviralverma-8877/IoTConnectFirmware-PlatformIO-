@@ -13,6 +13,7 @@
     #include <DHT.h>
     #include <WiFiClient.h>
     #include <HTTPClient.h>
+    #include "BluetoothSerial.h"
     extern "C" {
         #include "freertos/FreeRTOS.h"
         #include "freertos/ringbuf.h"
@@ -65,6 +66,7 @@
     extern String wifi_ssid;                  //Global variables
     extern String wifi_pass;                  //Global variables
     extern IPAddress apIP;                    //Global variables
+    extern BluetoothSerial SerialBT;                 //Global variables
     /*----------------------------------------------------------*/
     /*--------------Tickers for Async Meathods------------------*/
     extern Ticker TickerForsendSensorData;
