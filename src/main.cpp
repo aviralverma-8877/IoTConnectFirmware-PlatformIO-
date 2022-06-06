@@ -9,6 +9,7 @@
 #include "web_handler.h"
 #include "mqtt_handler.h"
 #include "device_handler.h"
+#include "sensor_handler.h"
 #include "web_sockets_handler.h"
 #include "fauxmo_handler.h"
 
