@@ -10,6 +10,7 @@
     #include "common_meathods.h"
     #include "web_sockets_handler.h"
     #include "mqtt_handler.h"
+    #include "sensor_handler.h"
 
     void setup_tickers();
     void onWifiConnect(const WiFiEventStationModeGotIP& event);
@@ -22,8 +23,6 @@
     void feedbackLED();
     void reset();
     void pinging();
-    void setup_sensor();
-    void sendSensorData();
     void checkReset();
     bool comp(const char *val1,const char *val2);
     void fetchIP();
