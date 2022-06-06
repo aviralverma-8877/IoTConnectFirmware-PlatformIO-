@@ -7,7 +7,7 @@
     #include <ArduinoJson.h>                  //Encoading and Decoding JSON
     #include <ESP8266httpUpdate.h>            //ESP Update Library.
     #include <ShiftRegister74HC595.h>         //For controlling Relays from 74HC595 shift register
-    #include <DNSServer.h>            //For redirecting the user on connecting to device WiFi
+    #include <DNSServer.h>                    //For redirecting the user on connecting to device WiFi
     #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>
     #include <DHT.h>
@@ -17,8 +17,10 @@
     #include "device_handler.h"
     //Configuring Device
     #ifndef FIRMWARE_V
-    #define FIRMWARE_V "2.2.3"                //Current firmware version. (Displayed on Device Portal)
+        #define FIRMWARE_V "2.2.3"                //Current firmware version. (Displayed on Device Portal)
     #endif
+    /*----------------------------------------------------------*/
+    /*----------------------------------------------------------*/
     extern WiFiClient wifiClient;
     extern HTTPClient httpAPI;
     extern int MQTT_QoS;
@@ -29,7 +31,7 @@
     extern bool def_btn_value;
     extern bool ap_enabled;
     extern configuration conf;
-    extern AsyncMqttClient mqtt;                     //Variable to initiate MQTT.
+    extern AsyncMqttClient mqtt;              //Variable to initiate MQTT.
     extern uint8_t dht_pin;
     extern String DHTType;
     extern DHT11 sensor_dht11;

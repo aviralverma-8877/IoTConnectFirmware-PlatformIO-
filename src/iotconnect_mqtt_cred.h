@@ -1,7 +1,7 @@
 #ifndef iotconnect_mqtt
     #define iotconnect_mqtt
 ////////////////////////Default MQTT Config//////////////////////////////////////////
-
+//----------------keep this file confidential--------------------------------------//
         #ifndef MQTT_HOST                                   //MQTT Server address
             #define MQTT_HOST "mqtt.iot-connect.in"
         #endif
@@ -14,6 +14,6 @@
         #ifndef MQTT_PASS                                   //MQTT Password
             #define MQTT_PASS "iot-12345"
         #endif
-
+//----------------keep this file confidential--------------------------------------//
 ////////////////////////Default MQTT Config//////////////////////////////////////////
 #endif
