@@ -1,6 +1,11 @@
 pipeline {
     agent { label 'linux' }
     stages {
+        stage('clean') {
+            steps {
+                sh 'sudo rm -r .pio'
+            }
+        }
         stage('Build esp01_1m') {
             steps {
                 sh 'sudo pio run -e esp01_1m'
