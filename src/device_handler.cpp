@@ -85,7 +85,7 @@ void relay_action(String relay, bool value, String by)
   DynamicJsonDocument doc(1500);
   read_config();
   bool save_eeprom = conf.save_eeprom;
-  serialDisplay("relay_action", "SAVE EEPROM" + String(save_eeprom));
+  serialDisplay("relay_action", "SAVE EEPROM " + String(save_eeprom));
   if (save_eeprom)
   {
     String mqtt_data = read_mqtt_config();
@@ -568,9 +568,9 @@ void perform_action(String relay, bool value)
     return;
   doc.shrinkToFit();
   JsonArray array = doc["relay"];
-  for (JsonVariant value : array)
+  for (JsonVariant val : array)
   {
-    DynamicJsonDocument ele = value;
+    DynamicJsonDocument ele = val;
     String com = ele["comp"];
     String name = ele["name"];
     if (comp(com.c_str(), "shift_reg"))
