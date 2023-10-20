@@ -1,7 +1,7 @@
-//Including Libraries
+// Including Libraries
 #include <Arduino.h>
 
-//Include Local libraries
+// Include Local libraries
 #include "global_var_two.h"
 #include "global_var_one.h"
 #include "structures.h"
@@ -13,12 +13,12 @@
 #include "web_sockets_handler.h"
 #include "fauxmo_handler.h"
 
-//Include Global libraries
+// Include Global libraries
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include <DNSServer.h>
 #include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h> 
+#include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
 #include "FS.h"
 #include "SPIFFS.h"
@@ -28,20 +28,20 @@ void dns_loop(void *parameter);
 void fauxmo_loop(void *parameter);
 void checkReset_loop(void *parameter);
 
-void setup() 
+void setup()
 {
-  if(!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED))
+  if (!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED))
   {
-    serialDisplay("setup","SPIFFS Mount Failed");
+    serialDisplay("setup", "SPIFFS Mount Failed");
     return;
   }
-  if(debugging)
+  if (debugging)
   {
     Serial.begin(115200);
   }
-  if (!SPIFFS.exists("/config.json")) 
+  if (!SPIFFS.exists("/config.json"))
   {
-    configuration newConfig = {false,false,true,false,2000,"N/A","admin","admin","","",false,"{}"};
+    configuration newConfig = {false, false, true, false, 2000, "N/A", "admin", "admin", "", "", false, "{}"};
     newConfig.setupFlag = true;
     newConfig.wifi_setup_done = false;
     write_config(newConfig);
@@ -50,28 +50,29 @@ void setup()
   print_config();
   delayMS = conf.pingTime;
   configure_gpio();
-  if(conf.save_eeprom)
+  if (conf.save_eeprom)
     perform_action();
-  if(!conf.setupFlag)
+  if (!conf.setupFlag)
   {
-    WiFi.onEvent(onWifiConnect, SYSTEM_EVENT_STA_GOT_IP);
-    WiFi.onEvent(onWifiDisconnect, SYSTEM_EVENT_STA_DISCONNECTED);
+    WiFi.onEvent(onWifiConnect, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
+    WiFi.onEvent(onWifiDisconnect, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
   }
   initWebSocket();
-  setup_web_server();    //Webserver Handler
-  serialDisplay("setup","ap_enabled "+String(ap_enabled));
-  serialDisplay("setup","Current Core : " + String(xPortGetCoreID()));
-  if(!ap_enabled)
+  setup_web_server(); // Webserver Handler
+  serialDisplay("setup", "ap_enabled " + String(ap_enabled));
+  serialDisplay("setup", "Current Core : " + String(xPortGetCoreID()));
+  if (!ap_enabled)
   {
-    fetchIP();             //Fetching Public and Local IP
-    setup_fauxmo();        //Fauxmo Alexa handler
-    setup_sensor();        //DHT and LDR Setup
-    setup_tickers();       //Ticker Setup
+    fetchIP();       // Fetching Public and Local IP
+    setup_fauxmo();  // Fauxmo Alexa handler
+    setup_sensor();  // DHT and LDR Setup
+    setup_tickers(); // Ticker Setup
   }
-  else{
-    if(hasSensor)
+  else
+  {
+    if (hasSensor)
     {
-      setup_sensor();        //DHT and LDR Setup
+      setup_sensor(); // DHT and LDR Setup
       TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
     }
   }
@@ -85,7 +86,7 @@ void loopTask()
 }
 void dns_loop(void *parameter)
 {
-  for(;;)
+  for (;;)
   {
     dnsServer.processNextRequest();
     vTaskDelay(10);
@@ -94,7 +95,7 @@ void dns_loop(void *parameter)
 
 void fauxmo_loop(void *parameter)
 {
-  for(;;)
+  for (;;)
   {
     fauxmo.handle();
     vTaskDelay(10);
@@ -103,15 +104,15 @@ void fauxmo_loop(void *parameter)
 
 void checkReset_loop(void *parameter)
 {
-  for(;;)
+  for (;;)
   {
-    if(!conf.setupFlag)
+    if (!conf.setupFlag)
       checkReset();
     vTaskDelay(10);
   }
 }
 
-void loop() 
+void loop()
 {
   vTaskDelay(1);
 }
