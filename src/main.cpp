@@ -54,8 +54,11 @@ void setup()
     perform_action();
   if (!conf.setupFlag)
   {
-    WiFi.onEvent(onWifiConnect, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
-    WiFi.onEvent(onWifiDisconnect, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
+    // Uncomment for new Arduino framework.
+    // WiFi.onEvent(onWifiConnect, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
+    // WiFi.onEvent(onWifiDisconnect, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
+    WiFi.onEvent(onWifiConnect, SYSTEM_EVENT_STA_GOT_IP);
+    WiFi.onEvent(onWifiDisconnect, SYSTEM_EVENT_STA_DISCONNECTED);
   }
   initWebSocket();
   setup_web_server(); // Webserver Handler
