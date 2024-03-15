@@ -1,8 +1,4 @@
-.pio
-.pioenvs
-.piolibdeps
-.vscode
-.vscode/*
-.vs
-.vs/*
-.vscode/extensions.json
+.pio/
+.vscode/
+lib/
+test/
