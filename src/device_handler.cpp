@@ -49,7 +49,7 @@ void onWifiDisconnect(WiFiEvent_t event, WiFiEventInfo_t info)
 String device_status()
 {
   String return_msg = "";
-  DynamicJsonDocument return_doc(700);
+  JsonDocument return_doc;
   read_config();
   return_doc["action"] = "device_status";
   return_doc["uname"] = conf.http_username;
@@ -67,9 +67,9 @@ String device_status()
   return_doc["chip_id"] = chipid;
   return_doc["ram"] = ESP.getFreeHeap();
   String device_config = read_device_config();
-  StaticJsonDocument<100> filter;
+  JsonDocument filter;
   filter["init_setup_done"] = true;
-  StaticJsonDocument<100> doc;
+  JsonDocument doc;
   DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
   if (error)
   {
@@ -87,7 +87,7 @@ String device_status()
 }
 void relay_action(String relay, bool value, String by)
 {
-  DynamicJsonDocument doc(1500);
+  JsonDocument doc;
   read_config();
   bool save_eeprom = conf.save_eeprom;
   serialDisplay("relay_action", "SAVE EEPROM " + String(save_eeprom));
@@ -180,7 +180,7 @@ void pinging()
   if (MQTTStatus)
   {
     serialDisplay("pinging", "Pinged now");
-    StaticJsonDocument<200> doc;
+    JsonDocument doc;
     doc["d"] = chipid;
     if (hasSensor)
       doc["s"] = true;
@@ -232,7 +232,7 @@ void checkReset()
       serialDisplay("checkReset", "Button Released");
       reset_btn_status = false;
       reset_btn_press_count++;
-      StaticJsonDocument<200> doc;
+      JsonDocument doc;
       doc["action"] = "reset_btn";
       doc["espid"] = chipid;
       doc["count"] = reset_btn_press_count;
@@ -244,7 +244,7 @@ void checkReset()
       String relay = conf.btn_relay_act;
       if (!comp(relay.c_str(), "N/A"))
       {
-        DynamicJsonDocument new_doc(1500);
+        JsonDocument new_doc;
         String mqtt_data = read_mqtt_config();
         DeserializationError error = deserializeJson(new_doc, mqtt_data);
         if (error)
@@ -294,7 +294,7 @@ void fetchIP()
     {
       String payload = httpAPI.getString();
       httpAPI.end();
-      StaticJsonDocument<200> doc;
+      JsonDocument doc;
       deserializeJson(doc, payload);
       IpAddress = "";
       const char *s = doc["ip"];
@@ -361,7 +361,7 @@ void read_config()
 {
   if (!comp(config_queue.c_str(), ""))
   {
-    StaticJsonDocument<500> jsonBuffer;
+    JsonDocument jsonBuffer;
     DeserializationError error = deserializeJson(jsonBuffer, config_queue);
     if (error)
       return;
@@ -395,7 +395,7 @@ void read_config()
 
       configFile.readBytes(buf.get(), size);
       configFile.close();
-      StaticJsonDocument<500> jsonBuffer;
+      JsonDocument jsonBuffer;
       DeserializationError error = deserializeJson(jsonBuffer, buf.get());
       if (error)
         return;
@@ -467,19 +467,19 @@ String read_device_config()
   return "";
 }
 
-void generate_mqtt_topics(DynamicJsonDocument doc)
+void generate_mqtt_topics(JsonDocument doc)
 {
   int relay_count = 1;
   bool has_shift_reg = doc["device_config"]["shift_out_reg"]["avail"];
 
-  DynamicJsonDocument topic_doc(1500);
+  JsonDocument topic_doc;
   JsonArray relay = topic_doc.createNestedArray("relay");
 
   if (has_shift_reg)
   {
     for (int i = 0; i < 8; i++)
     {
-      StaticJsonDocument<200> relay_object;
+      JsonDocument relay_object;
       String key = "Relay " + String(relay_count);
       String value = chipid + "/shift_out_reg/pin_" + i;
       relay_object["name"] = key;
@@ -496,7 +496,7 @@ void generate_mqtt_topics(DynamicJsonDocument doc)
   {
     for (int i = 0; i < relay_gpio_count; i++)
     {
-      StaticJsonDocument<200> relay_object;
+      JsonDocument relay_object;
       String key = "Relay " + String(relay_count);
       int pin = doc["device_config"]["relay"]["GPIO"][i];
       String value = chipid + "/gpio_relay/pin_" + pin;
@@ -525,8 +525,8 @@ void generate_mqtt_topics(DynamicJsonDocument doc)
 void toggle_relay(String relay)
 {
   String mqtt_data = read_mqtt_config();
-  DynamicJsonDocument doc(1000);
-  StaticJsonDocument<200> filter;
+  JsonDocument doc;
+  JsonDocument filter;
   filter["relay"][0]["name"] = true;
   filter["relay"][0]["pin"] = true;
   filter["relay"][0]["comp"] = true;
@@ -537,7 +537,7 @@ void toggle_relay(String relay)
   JsonArray array = doc["relay"];
   for (JsonVariant val : array)
   {
-    DynamicJsonDocument ele = val;
+    JsonDocument ele = val;
     String com = ele["comp"];
     String name = ele["name"];
     byte pin = ele["pin"];
@@ -568,8 +568,8 @@ void toggle_relay(String relay)
 void perform_action()
 {
   String mqtt_data = read_mqtt_config();
-  DynamicJsonDocument doc(1000);
-  StaticJsonDocument<200> filter;
+  JsonDocument doc;
+  JsonDocument filter;
   filter["relay"][0]["name"] = true;
   filter["relay"][0]["status"] = true;
   filter["relay"][0]["pin"] = true;
@@ -581,7 +581,7 @@ void perform_action()
   JsonArray array = doc["relay"];
   for (JsonVariant val : array)
   {
-    DynamicJsonDocument ele = val;
+    JsonDocument ele = val;
     String com = ele["comp"];
     if (comp(com.c_str(), "shift_reg"))
     {
@@ -601,8 +601,8 @@ void perform_action()
 void perform_action(String relay, bool value)
 {
   String mqtt_data = read_mqtt_config();
-  DynamicJsonDocument doc(1000);
-  StaticJsonDocument<200> filter;
+  JsonDocument doc;
+  JsonDocument filter;
   filter["relay"][0]["name"] = true;
   filter["relay"][0]["pin"] = true;
   filter["relay"][0]["comp"] = true;
@@ -613,7 +613,7 @@ void perform_action(String relay, bool value)
   JsonArray array = doc["relay"];
   for (JsonVariant val : array)
   {
-    DynamicJsonDocument ele = val;
+    JsonDocument ele = val;
     String com = ele["comp"];
     String name = ele["name"];
     if (comp(com.c_str(), "shift_reg"))

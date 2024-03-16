@@ -21,8 +21,8 @@ void onMqttConnect(bool sessionPresent) {
   reconnect_mqtt = false;
   if (SPIFFS.exists("/mqtt_topics.json")) 
   {
-    StaticJsonDocument<1000> doc;
-    StaticJsonDocument<100> filter;
+    JsonDocument doc;
+    JsonDocument filter;
     filter["mqtt"]["service"] = true;
     String device_config = read_device_config();
     DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
@@ -69,7 +69,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   {
     p += payload[i];
   }
-  StaticJsonDocument<500> root;
+  JsonDocument root;
   root["action"] = "mqtt_in";
   root["topic"] = topic;
   root["payload"] = p;
@@ -79,7 +79,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   send_data_to_webSocket(pl);
   root.clear();
   String device_config = read_device_config();
-  StaticJsonDocument<200> device_filter;
+  JsonDocument device_filter;
   device_filter["mqtt"]["prefix"] = true;
   device_filter["mqtt"]["suffix"] = true;
   DeserializationError error_1 = deserializeJson(root, device_config, DeserializationOption::Filter(device_filter));
@@ -99,7 +99,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   /*-------Action command for reconfigring WiFi---------------*/
       if(comp(action,"RESET_DEVICE"))
       {
-        StaticJsonDocument<200> doc;
+        JsonDocument doc;
         doc["action"] = "ResetDevice";
         doc["stat"] = "Reset Success.";
         String r;
@@ -112,7 +112,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   /*-------Action command for fetching WiFi SSID--------------*/
       if(comp(action,"SSID"))
       {
-        StaticJsonDocument<200> doc;
+        JsonDocument doc;
         doc["SSID"] = Wifi_ssid;
         doc["RSSI"] = String(WiFi.RSSI());
         String r;
@@ -138,7 +138,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   /*-------Action command for getting Sensor Frequency--------------*/
       if(comp(action,"GETFREQ"))
       {
-        StaticJsonDocument<200> doc;
+        JsonDocument doc;
         doc["FREQ"] = delayMS;
         String r;
         serializeJson(doc, r);
@@ -149,7 +149,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   /*-------Action command for fetching ESP Chip ID------------*/
       if(comp(action,"ESPID"))
       {
-        StaticJsonDocument<200> doc;
+        JsonDocument doc;
         doc["CHIPID"] = chipid;
         String r;
         serializeJson(doc, r);
@@ -161,7 +161,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   /*-------Action command for resetting ESP-------------------*/
       if(comp(action,"RESET"))
       {
-        StaticJsonDocument<200> doc;
+        JsonDocument doc;
         doc["action"] = "ResetStatus";
         doc["stat"] = "Resetting Device...";
         String r;
@@ -196,7 +196,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   /*-----Action command for getting getting firmware version--*/
       else if(comp(action,"GET_VERSION"))
       {
-        StaticJsonDocument<200> doc;
+        JsonDocument doc;
         doc["action"] = "Firmware Version";
         doc["value"] = FIRMWARE_V;
         String r;
@@ -209,10 +209,10 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       else if(comp(action,"GET_MQTT_TOPICS"))
       {
         String mqtt_topics = read_mqtt_config();
-        StaticJsonDocument<100> filter;
+        JsonDocument filter;
         filter["relay"][0]["name"] = true;
         filter["relay"][0]["topic"] = true;
-        StaticJsonDocument<500> doc;
+        JsonDocument doc;
         DeserializationError error = deserializeJson(doc, mqtt_topics, DeserializationOption::Filter(filter));
         if(error)
         {
@@ -231,15 +231,15 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     const char* relay = "";
     bool action = false;
     String mqtt_data = read_mqtt_config();
-    StaticJsonDocument<200> filter;
+    JsonDocument filter;
     filter["relay"][0]["name"] = true;
     filter["relay"][0]["topic"] = true;
     filter["relay"][0]["status"] = true;
-    StaticJsonDocument<500> doc;
+    JsonDocument doc;
     DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
     if(error)
       return;
-    StaticJsonDocument<200> msg;
+    JsonDocument msg;
     DeserializationError error_2 = deserializeJson(msg, p);
     if(error_2)
       return;
@@ -271,8 +271,8 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 void sendToMQTT(String topic, String msg)
 {
   serialDisplay("sendToMQTT", "Send to MQTT Start");
-  StaticJsonDocument<200> doc;
-  StaticJsonDocument<200> filter;
+  JsonDocument doc;
+  JsonDocument filter;
   filter["mqtt"]["prefix"] = true;
   filter["mqtt"]["suffix"] = true;
   filter["mqtt"]["service"] = true;
@@ -293,7 +293,7 @@ void sendToMQTT(String topic, String msg)
     doc.clear();
     serialDisplay("sendToMQTT","Published to "+fullTopic);
     mqtt.publish(fullTopic.c_str(), MQTT_QoS, false, msg.c_str(), msg.length());
-    DynamicJsonDocument doc(1500);
+    JsonDocument doc;
     doc["action"] = "mqtt_out";
     doc["topic"] = fullTopic;
     doc["payload"] = msg;
@@ -314,8 +314,8 @@ String send_device_template(bool send_on_mqtt)
   read_config();
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
-    StaticJsonDocument<500> device_doc;
-    StaticJsonDocument<200> filter;
+    JsonDocument device_doc;
+    JsonDocument filter;
     filter["mqtt"]["prefix"] = true;
     filter["mqtt"]["suffix"] = true;
     String device_config = read_device_config();
@@ -330,7 +330,7 @@ String send_device_template(bool send_on_mqtt)
     serialDisplay("send_device_template","MQTT Suffix"+suffix);
     device_doc.clear();
     filter.clear();
-    DynamicJsonDocument doc(1500);
+    JsonDocument doc;
     String mqtt_data = read_mqtt_config();
     filter["relay"][0]["name"] = true;
     filter["relay"][0]["pin"] = true;
@@ -384,8 +384,8 @@ void send_status(String relay, bool value)
   serialDisplay("send_status(String relay, bool value)","Sending Status START");
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
-    StaticJsonDocument<200> filter;
-    DynamicJsonDocument doc(1000);
+    JsonDocument filter;
+    JsonDocument doc;
     filter.clear();
     String mqtt_data = read_mqtt_config();
     filter["relay"][0]["name"] = true;
@@ -406,7 +406,7 @@ void send_status(String relay, bool value)
       serialDisplay("send_status(String relay, bool value)","Relay Saved Value "+name);
       if(comp(relay.c_str(),name.c_str()))
       {
-        StaticJsonDocument<500> data;
+        JsonDocument data;
         data["esp_chip_id"] = chipid;
         data["action"] = "status";
         data["pin"] = kv["pin"];
@@ -465,8 +465,8 @@ void connectToMqtt()
 void subscribe_mqtt_input()
 {
   serialDisplay("subscribe_mqtt_input","Subscribing to topics");
-  StaticJsonDocument<200> doc;
-  StaticJsonDocument<200> filter;
+  JsonDocument doc;
+  JsonDocument filter;
   filter["mqtt"]["prefix"] = true;
   filter["mqtt"]["suffix"] = true;
   filter["mqtt"]["qos"] = true;
@@ -500,8 +500,8 @@ void subscribe_mqtt_input()
 void connect_to_mqtt()
 {
   serialDisplay("connect_to_mqtt","Setting up MQTT Properties");
-  StaticJsonDocument<500> doc;
-  StaticJsonDocument<100> filter;
+  JsonDocument doc;
+  JsonDocument filter;
   filter["mqtt"] = true;
   String device_config = read_device_config();
   DeserializationError error = deserializeJson(doc, device_config,DeserializationOption::Filter(filter));
@@ -529,9 +529,9 @@ void connect_to_mqtt()
 void setup_mqtt()
 {
   String device_config = read_device_config();
-  StaticJsonDocument<100> filter;
+  JsonDocument filter;
   filter["mqtt"]["service"] = true;
-  StaticJsonDocument<100> doc;
+  JsonDocument doc;
   DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
   if(error)
     return;

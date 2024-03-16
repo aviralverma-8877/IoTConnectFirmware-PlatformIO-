@@ -8,7 +8,7 @@ void setup_fauxmo()
     fauxmo.enable(true);
     fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
         serialDisplay("setup_fauxmo","Fauxmo called "+String(device_name));
-        DynamicJsonDocument doc(1500);
+        JsonDocument doc;
         String mqtt_data = read_mqtt_config();
         DeserializationError error = deserializeJson(doc, mqtt_data);
         if(error)
@@ -47,8 +47,8 @@ void fauxmo_remove_device(const char* device_name)
 void fauxmo_remove_all_device()
 {
     String mqtt_data = read_mqtt_config();
-    StaticJsonDocument<200> doc;
-    StaticJsonDocument<200> filter;
+    JsonDocument doc;
+    JsonDocument filter;
     filter["relay"][0]["name"] = true;
     DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
     if(error)
@@ -64,7 +64,7 @@ void fauxmo_add_device()
 {
     read_config();
     String fauxmo_relay = conf.fauxmo_relay;
-    StaticJsonDocument<500> doc;
+    JsonDocument doc;
     DeserializationError error = deserializeJson(doc, fauxmo_relay);
     if(error)
         return;

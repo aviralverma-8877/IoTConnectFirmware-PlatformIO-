@@ -34,7 +34,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 void handleWebControl(AsyncWebServerRequest *request)
 {
   String message;
-  StaticJsonDocument<200> doc;
+  JsonDocument doc;
   if(request->hasParam("command"))
   {
     String command = request->arg("command");
@@ -42,7 +42,7 @@ void handleWebControl(AsyncWebServerRequest *request)
     if (error) 
     {
       String return_msg = "";
-      StaticJsonDocument<200> return_doc;
+      JsonDocument return_doc;
       return_doc["done"] = 0;
       return_doc["error"] = "error in parsing";
       serializeJson(return_doc, return_msg);
@@ -64,7 +64,7 @@ void handleWebControl(AsyncWebServerRequest *request)
     if (error) 
     {
       String return_msg = "";
-      StaticJsonDocument<200> return_doc;
+      JsonDocument return_doc;
       return_doc["done"] = 0;
       return_doc["error"] = "Error in parsing";
       serializeJson(return_doc, return_msg);
@@ -119,14 +119,14 @@ void handlefauxmo(AsyncWebServerRequest *request)
   if(request->hasParam("options"))
   {
     String fauxmo_relay = request->arg("options");
-    StaticJsonDocument<500> doc;
+    JsonDocument doc;
     DeserializationError error = deserializeJson(doc, fauxmo_relay);
     if(error)
     {
       return;
     }
 
-    StaticJsonDocument<200> return_doc;
+    JsonDocument return_doc;
     String return_msg;
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);
@@ -148,18 +148,18 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
   {
     serialDisplay("handleDeviceConfig","Step 1");
     String device_config = request->arg("options");
-    DynamicJsonDocument doc(5000);
+    JsonDocument doc;
     DeserializationError error = deserializeJson(doc, device_config);
     if (error) 
     {
-      StaticJsonDocument<200> return_doc;
+      JsonDocument return_doc;
       return_doc["done"] = false;
       return_doc["error"] = "Failed to parse config";
       serializeJson(return_doc, return_msg);
       request->send(200, "application/json", return_msg);
       return;
     }
-    StaticJsonDocument<200> return_doc;
+    JsonDocument return_doc;
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);
     request->send(200, "application/json", return_msg);
@@ -185,7 +185,7 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
   }
   else
   {
-    StaticJsonDocument<200> return_doc;
+    JsonDocument return_doc;
     return_doc["done"] = false;
     return_doc["error"] = "No config available";
     serializeJson(return_doc, return_msg);
@@ -199,12 +199,12 @@ void scan_wifi(void *parameter)
   int networksFound = WiFi.scanNetworks();
   serialDisplay("scan_wifi","Scan completed");
   serialDisplay("scan_wifi","Total "+String(networksFound)+" network found");
-  StaticJsonDocument<800> wifi_ssid;
+  JsonDocument wifi_ssid;
   wifi_ssid["action"] = "scan_wifi";
   JsonArray ssid = wifi_ssid.createNestedArray("ssid");
   for(int i=0; i<networksFound; i++)
   {
-    StaticJsonDocument<200> wifi;
+    JsonDocument wifi;
     wifi["ssid"] = WiFi.SSID(i);
     wifi["RSSI"] = String(WiFi.RSSI(i));
     ssid.add(wifi);
@@ -219,7 +219,7 @@ void scan_wifi(void *parameter)
 void web_scan_wifi(AsyncWebServerRequest *request)
 {
   String return_msg = "";
-  StaticJsonDocument<200> return_doc;
+  JsonDocument return_doc;
   return_doc["done"] = true;
   serializeJson(return_doc, return_msg);
   request->send(200, "application/json", return_msg); 
@@ -236,13 +236,13 @@ void web_update_login(AsyncWebServerRequest *request)
 {
   if(request->hasParam("options"))
   {
-    StaticJsonDocument<200> login_option;
+    JsonDocument login_option;
     String option = request->arg("options");
     DeserializationError error = deserializeJson(login_option, option);
     if (error) 
     {
       String return_msg = "";
-      StaticJsonDocument<200> return_doc;
+      JsonDocument return_doc;
       return_doc["done"] = false;
       serializeJson(return_doc, return_msg);
       request->send(200, "application/json", return_msg); 
@@ -255,7 +255,7 @@ void web_update_login(AsyncWebServerRequest *request)
     write_config(conf);
 
     String return_msg = "";
-    StaticJsonDocument<200> return_doc;
+    JsonDocument return_doc;
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);
     request->send(200, "application/json", return_msg); 
@@ -265,13 +265,13 @@ void web_set_wifi(AsyncWebServerRequest *request)
 {
   if(request->hasParam("options"))
   {
-    StaticJsonDocument<200> wifi_option;
+    JsonDocument wifi_option;
     String option = request->arg("options");
     DeserializationError error = deserializeJson(wifi_option, option);
     if (error) 
     {
       String return_msg = "";
-      StaticJsonDocument<200> return_doc;
+      JsonDocument return_doc;
       return_doc["done"] = false;
       serializeJson(return_doc, return_msg);
       request->send(200, "application/json", return_msg); 
@@ -286,7 +286,7 @@ void web_set_wifi(AsyncWebServerRequest *request)
     write_config(conf);
     serialDisplay("web_set_wifi","new config saved");    
     String return_msg = "";
-    StaticJsonDocument<200> return_doc;
+    JsonDocument return_doc;
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);
     request->send(200, "application/json", return_msg);

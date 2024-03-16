@@ -54,7 +54,7 @@ void configure_gpio()
 {
     serialDisplay("configure_gpio","Configuring GPIO");
     String config = read_device_config();
-    DynamicJsonDocument doc(1000);
+    JsonDocument doc;
     DeserializationError error = deserializeJson(doc, config);
     if(error)
     {

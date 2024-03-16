@@ -4,7 +4,7 @@
 /*-----Meathod for sending sensor data----------------------*/
 
 void ICACHE_RAM_ATTR handleData(float h, float t) {
-  StaticJsonDocument<100> doc;
+  JsonDocument doc;
   volatile float humidity = h;
   volatile float temperature = t;
   doc["action"] = "sensor";
@@ -23,8 +23,8 @@ void ICACHE_RAM_ATTR handleError(uint8_t e) {
 
 void setup_sensor()
 {
-  StaticJsonDocument<200> doc;
-  StaticJsonDocument<200> filter;
+  JsonDocument doc;
+  JsonDocument filter;
   filter["device_config"]["dht"]["INSTALLED"] = true;
   String device_config = read_device_config();
   DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
@@ -50,8 +50,8 @@ void setup_sensor()
 
 void sendSensorData()
 {
-  StaticJsonDocument<200> doc;
-  StaticJsonDocument<200> filter;
+  JsonDocument doc;
+  JsonDocument filter;
   filter["device_config"]["dht"]["INSTALLED"] = true;
   filter["device_config"]["light"]["INSTALLED"] = true;
   String device_config = read_device_config();

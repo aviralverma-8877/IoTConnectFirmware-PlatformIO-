@@ -34,7 +34,7 @@
     void connectToWiFi();
     void print_config();
     void read_config();
-    void generate_mqtt_topics(DynamicJsonDocument doc);
+    void generate_mqtt_topics(JsonDocument doc);
     String read_device_config();
     void toggle_relay(String relay);
     void perform_action();
