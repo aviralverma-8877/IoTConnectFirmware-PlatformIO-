@@ -22,13 +22,12 @@ void onMqttConnect(bool sessionPresent) {
   TickerForconnectToMqtt.detach();
   if (SPIFFS.exists("/mqtt_topics.json")) 
   {
-    StaticJsonDocument<1000> doc;
-    StaticJsonDocument<100> filter;
+    JsonDocument doc;
+    JsonDocument filter;
     filter["mqtt"]["service"] = true;
     String device_config = read_device_config();
-    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
-    if(error)
-      return;
+    deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+
     String service = doc["mqtt"]["service"];
     if(!comp(service.c_str(), "N/A"))
       subscribe_mqtt_input();
@@ -72,7 +71,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   {
     p += payload[i];
   }
-  StaticJsonDocument<500> root;
+  JsonDocument root;
   root["action"] = "mqtt_in";
   root["topic"] = topic;
   root["payload"] = p;
@@ -82,7 +81,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   send_data_to_webSocket(pl);
   root.clear();
   String device_config = read_device_config();
-  StaticJsonDocument<200> device_filter;
+  JsonDocument device_filter;
   device_filter["mqtt"]["prefix"] = true;
   device_filter["mqtt"]["suffix"] = true;
   DeserializationError error_1 = deserializeJson(root, device_config, DeserializationOption::Filter(device_filter));
@@ -94,160 +93,153 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   {
     serialDisplay("onMqttMessage","MQTT Payload : "+p);
     root.clear();
-    DeserializationError error = deserializeJson(root, p);
-    if (!error) 
+    deserializeJson(root, p);
+
+    const char *action;
+    action = root["action"];
+/*-------Action command for reconfigring WiFi---------------*/
+    if(comp(action,"RESET_DEVICE"))
     {
-      const char *action;
-      action = root["action"];
-  /*-------Action command for reconfigring WiFi---------------*/
-      if(comp(action,"RESET_DEVICE"))
-      {
-        StaticJsonDocument<200> doc;
-        doc["action"] = "ResetDevice";
-        doc["stat"] = "Reset Success.";
-        String r;
-        serializeJson(doc, r);
-        sendToMQTT(outtopic, r);
-        callback = &reset;
-        return;
-      }
-  /*-------Action command for reconfigring WiFi---------------*/
-  /*-------Action command for fetching WiFi SSID--------------*/
-      if(comp(action,"SSID"))
-      {
-        StaticJsonDocument<200> doc;
-        doc["SSID"] = Wifi_ssid;
-        doc["RSSI"] = String(WiFi.RSSI());
-        String r;
-        serializeJson(doc, r);
-        sendToMQTT(outtopic, r);
-        return;
-      }
-  /*-------Action command for fetching WiFi SSID--------------*/
-  /*-------Action command for setting Sensor Frequency--------------*/
-      if(comp(action,"FREQ"))
-      {
-        delayMS = root["f"];
-        conf.pingTime = delayMS;      //Saving the delay time in config
-        write_config(conf);
-        if(hasSensor)
-        {
-          TickerForsendSensorData.detach();
-          TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
-        }
-        return;
-      }
-  /*-------Action command for setting Sensor Frequency--------------*/
-  /*-------Action command for getting Sensor Frequency--------------*/
-      if(comp(action,"GETFREQ"))
-      {
-        StaticJsonDocument<200> doc;
-        doc["FREQ"] = delayMS;
-        String r;
-        serializeJson(doc, r);
-        sendToMQTT(outtopic, r);
-        return;
-      }
-  /*-------Action command for getting Sensor Frequency--------*/
-  /*-------Action command for fetching ESP Chip ID------------*/
-      if(comp(action,"ESPID"))
-      {
-        StaticJsonDocument<200> doc;
-        doc["CHIPID"] = chipid;
-        String r;
-        serializeJson(doc, r);
-        sendToMQTT(outtopic, r);
-        return;
-      }
-  /*-------Action command for fetching ESP Chip ID------------*/
-
-  /*-------Action command for resetting ESP-------------------*/
-      if(comp(action,"RESET"))
-      {
-        StaticJsonDocument<200> doc;
-        doc["action"] = "ResetStatus";
-        doc["stat"] = "Resetting Device...";
-        String r;
-        serializeJson(doc, r);
-        sendToMQTT(outtopic, r);
-        TickerForTimeOut.once(2,[](){
-          ESP.reset();
-        });
-        return;
-      }
-  /*-------Action command for resetting ESP-------------------*/
-
-  /*-------Action command for controlling Relays--------------*/
-      else if(comp(action,"RELAY"))
-      {
-        String no = root["no"];
-        bool value = root["value"];
-        String by = root["by"];
-        root.clear();
-        TickerForTimeOut.once_ms(100,[no, value, by](){
-          relay_action(no, value, by);
-        });
-        return;
-      }
-  /*-------Action command for controlling Relays--------------*/
-  /*-------Action command for getting Relays status-----------*/
-      else if(comp(action,"STATUS"))
-      {
-        root.clear();
-        TickerForTimeOut.once_ms(100,[](){
-          send_device_template(true);
-        });
-        return;
-      }
-  /*-------Action command for getting Relays status-----------*/
-  /*-----Action command for getting getting firmware version--*/
-      else if(comp(action,"GET_VERSION"))
-      {
-        StaticJsonDocument<200> doc;
-        doc["action"] = "Firmware Version";
-        doc["value"] = FIRMWARE_V;
-        String r;
-        serializeJson(doc, r);
-        sendToMQTT(outtopic, r);
-        return;
-      }
-  /*-----Action command for getting getting firmware version--*/
-  /*-------Get MQTT Topic list--------------------------------*/
-      else if(comp(action,"GET_MQTT_TOPICS"))
-      {
-        String mqtt_topics = read_mqtt_config();
-        StaticJsonDocument<100> filter;
-        filter["relay"][0]["name"] = true;
-        filter["relay"][0]["topic"] = true;
-        StaticJsonDocument<500> doc;
-        DeserializationError error = deserializeJson(doc, mqtt_topics, DeserializationOption::Filter(filter));
-        if(error)
-        {
-          return;
-        }
-        mqtt_topics = "";
-        serializeJson(doc,mqtt_topics);
-        sendToMQTT(outtopic, mqtt_topics);
-        return;
-      }
-  /*-------Get MQTT Topic list--------------------------------*/
+      JsonDocument doc;
+      doc["action"] = "ResetDevice";
+      doc["stat"] = "Reset Success.";
+      String r;
+      serializeJson(doc, r);
+      sendToMQTT(outtopic, r);
+      callback = &reset;
+      return;
     }
+/*-------Action command for reconfigring WiFi---------------*/
+/*-------Action command for fetching WiFi SSID--------------*/
+    if(comp(action,"SSID"))
+    {
+      JsonDocument doc;
+      doc["SSID"] = Wifi_ssid;
+      doc["RSSI"] = String(WiFi.RSSI());
+      String r;
+      serializeJson(doc, r);
+      sendToMQTT(outtopic, r);
+      return;
+    }
+/*-------Action command for fetching WiFi SSID--------------*/
+/*-------Action command for setting Sensor Frequency--------------*/
+    if(comp(action,"FREQ"))
+    {
+      delayMS = root["f"];
+      conf.pingTime = delayMS;      //Saving the delay time in config
+      write_config(conf);
+      if(hasSensor)
+      {
+        TickerForsendSensorData.detach();
+        TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
+      }
+      return;
+    }
+/*-------Action command for setting Sensor Frequency--------------*/
+/*-------Action command for getting Sensor Frequency--------------*/
+    if(comp(action,"GETFREQ"))
+    {
+      JsonDocument doc;
+      doc["FREQ"] = delayMS;
+      String r;
+      serializeJson(doc, r);
+      sendToMQTT(outtopic, r);
+      return;
+    }
+/*-------Action command for getting Sensor Frequency--------*/
+/*-------Action command for fetching ESP Chip ID------------*/
+    if(comp(action,"ESPID"))
+    {
+      JsonDocument doc;
+      doc["CHIPID"] = chipid;
+      String r;
+      serializeJson(doc, r);
+      sendToMQTT(outtopic, r);
+      return;
+    }
+/*-------Action command for fetching ESP Chip ID------------*/
+
+/*-------Action command for resetting ESP-------------------*/
+    if(comp(action,"RESET"))
+    {
+      JsonDocument doc;
+      doc["action"] = "ResetStatus";
+      doc["stat"] = "Resetting Device...";
+      String r;
+      serializeJson(doc, r);
+      sendToMQTT(outtopic, r);
+      TickerForTimeOut.once(2,[](){
+        ESP.reset();
+      });
+      return;
+    }
+/*-------Action command for resetting ESP-------------------*/
+
+/*-------Action command for controlling Relays--------------*/
+    else if(comp(action,"RELAY"))
+    {
+      String no = root["no"];
+      bool value = root["value"];
+      String by = root["by"];
+      root.clear();
+      TickerForTimeOut.once_ms(100,[no, value, by](){
+        relay_action(no, value, by);
+      });
+      return;
+    }
+/*-------Action command for controlling Relays--------------*/
+/*-------Action command for getting Relays status-----------*/
+    else if(comp(action,"STATUS"))
+    {
+      root.clear();
+      TickerForTimeOut.once_ms(100,[](){
+        send_device_template(true);
+      });
+      return;
+    }
+/*-------Action command for getting Relays status-----------*/
+/*-----Action command for getting getting firmware version--*/
+    else if(comp(action,"GET_VERSION"))
+    {
+      JsonDocument doc;
+      doc["action"] = "Firmware Version";
+      doc["value"] = FIRMWARE_V;
+      String r;
+      serializeJson(doc, r);
+      sendToMQTT(outtopic, r);
+      return;
+    }
+/*-----Action command for getting getting firmware version--*/
+/*-------Get MQTT Topic list--------------------------------*/
+    else if(comp(action,"GET_MQTT_TOPICS"))
+    {
+      String mqtt_topics = read_mqtt_config();
+      JsonDocument filter;
+      filter["relay"][0]["name"] = true;
+      filter["relay"][0]["topic"] = true;
+      JsonDocument doc;
+      deserializeJson(doc, mqtt_topics, DeserializationOption::Filter(filter));
+      mqtt_topics = "";
+      serializeJson(doc,mqtt_topics);
+      sendToMQTT(outtopic, mqtt_topics);
+      return;
+    }
+  /*-------Get MQTT Topic list--------------------------------*/
   }
   else
   {
     const char* relay = "";
     bool action = false;
     String mqtt_data = read_mqtt_config();
-    StaticJsonDocument<500> filter;
+    JsonDocument filter;
     filter["relay"][0]["name"] = true;
     filter["relay"][0]["topic"] = true;
     filter["relay"][0]["status"] = true;
-    DynamicJsonDocument doc(2000);
-    DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
-    if(error)
-      return;
+    JsonDocument doc;
+    deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
+
     doc.shrinkToFit();
-    StaticJsonDocument<500> msg;
+    JsonDocument msg;
     DeserializationError error_2 = deserializeJson(msg, p);
     if(error_2)
       return;
@@ -282,17 +274,14 @@ void sendToMQTT(String topic, String msg)
 {
   if(MQTTStatus)
   {
-    StaticJsonDocument<200> doc;
-    StaticJsonDocument<200> filter;
+    JsonDocument doc;
+    JsonDocument filter;
     filter["mqtt"]["prefix"] = true;
     filter["mqtt"]["suffix"] = true;
     filter["mqtt"]["service"] = true;
     String device_config = read_device_config();
-    DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
-    if(error)
-    {
-      return;
-    }
+    deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+
     String service = doc["mqtt"]["service"];
     if(!comp(service.c_str(),"N/A"))
     {
@@ -302,7 +291,7 @@ void sendToMQTT(String topic, String msg)
       doc.clear();
       serialDisplay("sendToMQTT","Published to "+fullTopic);
       mqtt.publish(fullTopic.c_str(), MQTT_QoS, false, msg.c_str(), msg.length());
-      DynamicJsonDocument doc(1500);
+      JsonDocument doc;
       doc["action"] = "mqtt_out";
       doc["topic"] = fullTopic;
       doc["payload"] = msg;
@@ -321,31 +310,27 @@ String send_device_template(bool send_on_mqtt)
   read_config();
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
-    StaticJsonDocument<500> device_doc;
-    StaticJsonDocument<200> filter;
+    JsonDocument device_doc;
+    JsonDocument filter;
     filter["mqtt"]["prefix"] = true;
     filter["mqtt"]["suffix"] = true;
     String device_config = read_device_config();
-    DeserializationError error = deserializeJson(device_doc, device_config, DeserializationOption::Filter(filter));
-    if(error)
-    {
-      return "";
-    }
+    deserializeJson(device_doc, device_config, DeserializationOption::Filter(filter));
+
     String prefix = device_doc["mqtt"]["prefix"];
     String suffix = device_doc["mqtt"]["suffix"];
     serialDisplay("send_device_template","MQTT Prefix: "+prefix);
     serialDisplay("send_device_template","MQTT Suffix"+suffix);
     device_doc.clear();
     filter.clear();
-    DynamicJsonDocument doc(1500);
+    JsonDocument doc;
     String mqtt_data = read_mqtt_config();
     filter["relay"][0]["name"] = true;
     filter["relay"][0]["pin"] = true;
     filter["relay"][0]["comp"] = true;
     filter["relay"][0]["topic"] = true;
-    error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
-    if(error)
-      return "";
+    deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
+
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
     {
       String com = kv["comp"];
@@ -392,19 +377,15 @@ void send_status(String relay, bool value)
   read_config();
   if(SPIFFS.exists("/mqtt_topics.json"))
   {
-    StaticJsonDocument<200> filter;
-    DynamicJsonDocument doc(2000);
+    JsonDocument filter;
+    JsonDocument doc;
     filter.clear();
     String mqtt_data = read_mqtt_config();
     filter["relay"][0]["name"] = true;
     filter["relay"][0]["pin"] = true;
     filter["relay"][0]["comp"] = true;
-    DeserializationError error = deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
-    if(error)
-    {
-      serialDisplay("send_status(String relay, bool value)","Deserialization Error");
-      return;
-    }
+    deserializeJson(doc, mqtt_data,DeserializationOption::Filter(filter));
+
     doc.shrinkToFit();
     String r;
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
@@ -414,7 +395,7 @@ void send_status(String relay, bool value)
       serialDisplay("send_status(String relay, bool value)","Relay Saved Value"+name);
       if(comp(relay.c_str(),name.c_str()))
       {
-        StaticJsonDocument<500> data;
+        JsonDocument data;
         data["esp_chip_id"] = chipid;
         data["action"] = "status";
         data["pin"] = kv["pin"];
@@ -476,17 +457,14 @@ void connectToMqtt()
 void subscribe_mqtt_input()
 {
   serialDisplay("subscribe_mqtt_input","Subscribing to topics");
-  DynamicJsonDocument doc(2000);
-  StaticJsonDocument<200> filter;
+  JsonDocument doc;
+  JsonDocument filter;
   filter["mqtt"]["prefix"] = true;
   filter["mqtt"]["suffix"] = true;
   filter["mqtt"]["qos"] = true;
   String device_config = read_device_config();
-  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
-  if(error)
-  {
-    return;
-  }
+  deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+
   MQTT_QoS = doc["mqtt"]["qos"];
   String prefix = doc["mqtt"]["prefix"];
   String suffix = doc["mqtt"]["suffix"];
@@ -495,11 +473,7 @@ void subscribe_mqtt_input()
   filter.clear();
   filter["relay"][0]["topic"] = true;
   String mqtt_data = read_mqtt_config();
-  error = deserializeJson(doc, mqtt_data, DeserializationOption::Filter(filter));
-  if(error)
-  {
-    return;
-  }
+  deserializeJson(doc, mqtt_data, DeserializationOption::Filter(filter));
   doc.shrinkToFit();
   for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
   {
@@ -512,15 +486,12 @@ void subscribe_mqtt_input()
 void connect_to_mqtt()
 {
   serialDisplay("connect_to_mqtt","Setting up MQTT Properties");
-  StaticJsonDocument<500> doc;
-  StaticJsonDocument<100> filter;
+  JsonDocument doc;
+  JsonDocument filter;
   filter["mqtt"] = true;
   String device_config = read_device_config();
-  DeserializationError error = deserializeJson(doc, device_config,DeserializationOption::Filter(filter));
-  if(error)
-  {
-    return;
-  }
+  deserializeJson(doc, device_config,DeserializationOption::Filter(filter));
+
   const char* host = doc["mqtt"]["host"];
   uint16_t port = doc["mqtt"]["port"];
   serialDisplay("connect_to_mqtt","MQTT Host : "+String(host));
@@ -541,12 +512,11 @@ void connect_to_mqtt()
 void setup_mqtt()
 {
   String device_config = read_device_config();
-  StaticJsonDocument<100> filter;
+  JsonDocument filter;
   filter["mqtt"]["service"] = true;
-  StaticJsonDocument<100> doc;
-  DeserializationError error = deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
-  if(error)
-    return;
+  JsonDocument doc;
+  deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
+
   String service = doc["mqtt"]["service"];
   if(!comp(service.c_str(),"N/A"))
   {

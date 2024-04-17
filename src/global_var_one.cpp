@@ -54,12 +54,9 @@ void configure_gpio()
 {
     serialDisplay("configure_gpio","Configuring GPIO");
     String config = read_device_config();
-    DynamicJsonDocument doc(1000);
-    DeserializationError error = deserializeJson(doc, config);
-    if(error)
-    {
-        return;
-    }
+    JsonDocument doc;
+    deserializeJson(doc, config);
+
     doc.shrinkToFit();
     bool shift_reg_avail = doc["device_config"]["shift_out_reg"]["avail"];
     if(shift_reg_avail)

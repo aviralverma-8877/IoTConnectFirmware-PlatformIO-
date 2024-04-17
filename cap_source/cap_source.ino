@@ -24,7 +24,7 @@ void loop()
   {
     if(digitalRead(pins[i]) == HIGH)
     {
-      StaticJsonDocument<200> doc;
+      JsonDocument doc;
       digitalWrite(2, HIGH);
       pressed = true;
       if(lastPushed != i)
@@ -52,12 +52,8 @@ void loop()
       data += r;
     }
     data.trim();
-    StaticJsonDocument<200> doc;
-    DeserializationError error = deserializeJson(doc, data);
-    if(error)
-    {
-      return;
-    }
+    JsonDocument doc;
+    deserializeJson(doc, data);
     String action = doc["a"];
     if(action == "RS")
     {

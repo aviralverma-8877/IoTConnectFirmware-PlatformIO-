@@ -5,7 +5,7 @@ bool reconnect_mqtt = true;
 bool reset_btn_status = false;
 byte reset_btn_press_count = 0;
 unsigned long reset_btn_press_time = 0;
-bool debugging = false;                      //Turn On or Off the serial output.
+bool debugging = true;                      //Turn On or Off the serial output.
 String websocket_msg = "";
 /*--------------MQTT Configration---------------------------*/
 bool MQTTStatus = false;

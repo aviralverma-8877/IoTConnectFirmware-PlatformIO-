@@ -11,7 +11,7 @@ void write_config(configuration config)
 }
 String config_to_json(configuration config)
 {
-  DynamicJsonDocument jsonBuffer(2000);
+  JsonDocument jsonBuffer;
   jsonBuffer["setupFlag"] = config.setupFlag;
   jsonBuffer["updateFlag"] = config.updateFlag;
   jsonBuffer["led_enabled"] = config.led_enabled;
@@ -29,7 +29,7 @@ String config_to_json(configuration config)
   serializeJsonPretty(jsonBuffer, r);
   return r;
 }
-void write_device_config(DynamicJsonDocument jsonBuffer)
+void write_device_config(JsonDocument jsonBuffer)
 {
 
   File configFile = SPIFFS.open("/device_config.json", "w");
@@ -55,7 +55,7 @@ void serialDisplay(String head,String body)
 {
   if(debugging)
   {
-    StaticJsonDocument<200> doc;
+    JsonDocument doc;
     doc["action"] = "display";
     doc["head"] = head;
     doc["body"] = body;
