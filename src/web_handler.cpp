@@ -234,10 +234,12 @@ void web_set_wifi(AsyncWebServerRequest *request)
     TickerForTimeOut.once(1,[request](){
       WiFi.mode(WIFI_STA);
       WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
-      TickerForTimeOut.once(15,[](){
+      int start_time = millis();
+      TickerForTimeOut.once_ms(1000,[start_time](){
         if(WiFi.status() != WL_CONNECTED)
         {
-          reset();
+          if((millis() - start_time) > 60000)
+            reset();
         }
         else
         {
@@ -402,8 +404,8 @@ void enable_ap()
   serialDisplay("enable_ap","Enabling AP");
   WiFi.disconnect();
   WiFi.mode(WIFI_AP);
-  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  WiFi.softAP("IoT Connect", "", 10);
+  // WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+  WiFi.softAP("IoT Connect", "12345678", 10);
   ap_enabled = true;
 }
 
