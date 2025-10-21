@@ -165,7 +165,7 @@ void web_scan_wifi(AsyncWebServerRequest *request)
 {
   WiFi.scanNetworksAsync([request](int networksFound){
     JsonDocument wifi_ssid;
-    JsonArray ssid = wifi_ssid.createNestedArray("ssid");
+    JsonArray ssid = wifi_ssid["ssid"].to<JsonArray>();
     for(int i=0; i<networksFound; i++)
     {
       JsonDocument wifi;

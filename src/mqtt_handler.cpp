@@ -243,7 +243,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     DeserializationError error_2 = deserializeJson(msg, p);
     if(error_2)
       return;
-    if(!msg.containsKey("action"))
+    if(!msg["action"].is<int>())
       return;
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
     {
