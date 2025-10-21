@@ -20,7 +20,7 @@ void onMqttConnect(bool sessionPresent) {
   MQTTStatus = true;
   reconnect_mqtt = false;
   TickerForconnectToMqtt.detach();
-  if (SPIFFS.exists("/mqtt_topics.json")) 
+  if (LittleFS.exists("/mqtt_topics.json")) 
   {
     JsonDocument doc;
     JsonDocument filter;
@@ -308,7 +308,7 @@ String send_device_template(bool send_on_mqtt)
 {
   serialDisplay("send_device_template","Sending Status START");
   read_config();
-  if(SPIFFS.exists("/mqtt_topics.json"))
+  if(LittleFS.exists("/mqtt_topics.json"))
   {
     JsonDocument device_doc;
     JsonDocument filter;
@@ -375,7 +375,7 @@ void send_status(String relay, bool value)
 {
   serialDisplay("send_status(String relay, bool value)","Sending Status START");
   read_config();
-  if(SPIFFS.exists("/mqtt_topics.json"))
+  if(LittleFS.exists("/mqtt_topics.json"))
   {
     JsonDocument filter;
     JsonDocument doc;

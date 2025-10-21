@@ -3,7 +3,7 @@
 #include"device_handler.h"
 
 /*-----Meathod for sending sensor data----------------------*/
-void ICACHE_RAM_ATTR handleData(float h, float t) {
+void IRAM_ATTR handleData(float h, float t) {
   JsonDocument doc;
   volatile float humidity = h;
   volatile float temperature = t;
@@ -19,7 +19,7 @@ void ICACHE_RAM_ATTR handleData(float h, float t) {
     sendToMQTT(espsensor, s);
 }
 
-void ICACHE_RAM_ATTR handleError(uint8_t e) {
+void IRAM_ATTR handleError(uint8_t e) {
 }
 
 void setup_sensor()

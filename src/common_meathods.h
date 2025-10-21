@@ -3,7 +3,7 @@
     #include <Arduino.h>
     #include "structures.h"
     #include <Arduino.h>
-    #include <FS.h>
+    #include <LittleFS.h>
     #include <ArduinoJson.h>
     #include "mqtt_handler.h"
     #include "global_var_two.h"

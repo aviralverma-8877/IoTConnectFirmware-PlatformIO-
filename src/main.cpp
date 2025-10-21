@@ -24,8 +24,8 @@ void setup()
 {
   if(debugging)
     Serial.begin(115200);
-  SPIFFS.begin();
-  if (!SPIFFS.exists("/config.json")) 
+  LittleFS.begin();
+  if (!LittleFS.exists("/config.json")) 
   {
     configuration newConfig = {false,false,true,false,2000,"N/A","admin","admin","","",false,"{}"};
     newConfig.setupFlag = true;

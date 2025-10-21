@@ -3,7 +3,7 @@
 void (*callback)(void);
 void write_config(configuration config)
 {
-  File configFile = SPIFFS.open("/config.json", "w");
+  File configFile = LittleFS.open("/config.json", "w");
   String r = config_to_json(config);
   Serial.println(r);
   configFile.print(r); 
@@ -32,7 +32,7 @@ String config_to_json(configuration config)
 void write_device_config(JsonDocument jsonBuffer)
 {
 
-  File configFile = SPIFFS.open("/device_config.json", "w");
+  File configFile = LittleFS.open("/device_config.json", "w");
   String r;
   serializeJsonPretty(jsonBuffer, r);
   configFile.print(r); 
@@ -44,7 +44,7 @@ void write_device_config(JsonDocument jsonBuffer)
 
 void write_mqtt_topics(String r)
 {
-  File configFile = SPIFFS.open("/mqtt_topics.json", "w");
+  File configFile = LittleFS.open("/mqtt_topics.json", "w");
   configFile.print(r); 
   configFile.close();
 }

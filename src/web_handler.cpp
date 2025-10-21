@@ -14,7 +14,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
     }
 
     void handleRequest(AsyncWebServerRequest *request) {
-      File index = SPIFFS.open("/index.html", "r");
+      File index = LittleFS.open("/index.html", "r");
       if (index) {
         AsyncResponseStream *response = request->beginResponseStream("text/html");
         response->printf("<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"3;url=http://%s/index\" /><title>Redirecting...</title></head><body>", WiFi.softAPIP().toString().c_str());
@@ -39,7 +39,6 @@ void handleWebControl(AsyncWebServerRequest *request)
 {
   String message;
   JsonDocument doc;
-  int params = request->params();
   if(request->hasParam("command"))
   {
     String command = request->arg("command");
@@ -101,7 +100,6 @@ void handleWebStatus(AsyncWebServerRequest *request)
 }
 void handlefauxmo(AsyncWebServerRequest *request)
 {
-  int params = request->params();
   if(request->hasParam("options"))
   {
     String fauxmo_relay = request->arg("options");
@@ -123,7 +121,6 @@ void handlefauxmo(AsyncWebServerRequest *request)
 void handleDeviceConfig(AsyncWebServerRequest *request)
 {
   String return_msg;
-  int params = request->params();
   if(request->hasParam("options"))
   {
     String device_config = request->arg("options");
@@ -449,7 +446,7 @@ void setup_web_server()
     handleDeviceConfig(request);
   });
   server.on("/index", HTTP_GET, [](AsyncWebServerRequest *request){
-    File index = SPIFFS.open("/index.html", "r");
+    File index = LittleFS.open("/index.html", "r");
     if (index) {
       if(!ap_enabled)
       {
@@ -458,7 +455,7 @@ void setup_web_server()
           return request->requestAuthentication();
         }
       }
-      request->send(SPIFFS, "/index.html", "text/html");
+      request->send(LittleFS, "/index.html", "text/html");
     }
     else{
       request->redirect("/update");
@@ -467,14 +464,14 @@ void setup_web_server()
   });
   if(debugging)
   {
-    server.serveStatic("/device_config.json", SPIFFS, "/device_config.json");
-    server.serveStatic("/config.json", SPIFFS, "/config.json");
-    server.serveStatic("/mqtt_topics.json", SPIFFS, "/mqtt_topics.json");
+    server.serveStatic("/device_config.json", LittleFS, "/device_config.json");
+    server.serveStatic("/config.json", LittleFS, "/config.json");
+    server.serveStatic("/mqtt_topics.json", LittleFS, "/mqtt_topics.json");
   }
-  server.serveStatic("/script.js", SPIFFS, "/script.js");
-  server.serveStatic("/style.css", SPIFFS, "/style.css");
-  server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
-  server.serveStatic("/bk_img.png", SPIFFS, "/bk_img.png");
+  server.serveStatic("/script.js", LittleFS, "/script.js");
+  server.serveStatic("/style.css", LittleFS, "/style.css");
+  server.serveStatic("/favicon.ico", LittleFS, "/favicon.ico");
+  server.serveStatic("/bk_img.png", LittleFS, "/bk_img.png");
   server.onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
     //fauxmo request handling
       if (fauxmo.process(request->client(), request->method() == HTTP_GET, request->url(), String((char *)data))) return;
@@ -499,13 +496,13 @@ void setup_web_server()
   if(!ap_enabled)
   {
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-      File index = SPIFFS.open("/index.html", "r");
+      File index = LittleFS.open("/index.html", "r");
       if (index) {
         if(!request->authenticate(conf.http_username.c_str(), conf.http_password.c_str()))
         {
           return request->requestAuthentication();
         }
-        request->send(SPIFFS, "/index.html", "text/html");
+        request->send(LittleFS, "/index.html", "text/html");
       }
       else{
         request->redirect("/update");
