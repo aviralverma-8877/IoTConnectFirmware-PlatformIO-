@@ -64,8 +64,7 @@ void configure_gpio()
         byte clock_pin = doc["device_config"]["shift_out_reg"]["clockPin"];
         byte data_pin = doc["device_config"]["shift_out_reg"]["serialDataPin"];
         byte latch_pin = doc["device_config"]["shift_out_reg"]["latchPin"];
-        ShiftRegister74HC595<1> shift_reg(data_pin,clock_pin,latch_pin);
-        sr = shift_reg;
+        sr = ShiftRegister74HC595<1>(data_pin,clock_pin,latch_pin);
     }
     byte relay_count = doc["device_config"]["relay"]["count"];
     if(relay_count > 0)

@@ -1,6 +1,14 @@
 //Including Libraries
 #include <Arduino.h>
 
+#include "user_interface.h"
+// removed: #include "uart.h"
+
+#define BIT_RATE_115200 115200
+
+// remove custom user_init() that called uart_init(...) (wrong prototype / unsafe)
+// ...existing code...
+
 //Include Local libraries
 #include "global_var_two.h"
 #include "global_var_one.h"
@@ -22,8 +30,15 @@
 
 void setup() 
 {
-  if(debugging)
-    Serial.begin(115200);
+  // disable SDK os_printf as early as possible
+  system_set_os_print(false);
+
+  // use Arduino Serial API instead of calling uart_init directly
+  if (debugging) {
+    Serial.begin(BIT_RATE_115200);
+    delay(50); // let UART settle
+  }
+
   LittleFS.begin();
   if (!LittleFS.exists("/config.json")) 
   {
