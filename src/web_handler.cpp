@@ -405,7 +405,7 @@ void enable_ap()
   WiFi.disconnect();
   WiFi.mode(WIFI_AP);
   // WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  WiFi.softAP("IoT Connect", "12345678", 10);
+  WiFi.softAP("IoT Connect", "12345678");
   ap_enabled = true;
 }
 
