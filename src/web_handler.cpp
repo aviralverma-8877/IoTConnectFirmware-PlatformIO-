@@ -290,8 +290,8 @@ void firmware_web_updater()
     <form method='POST' action='/update_flash' enctype='multipart/form-data'>\
       <input type='file' placeholder='firmware.bin' name='update'><input type='submit' value='Update'> firmware.bin\
     </form></ br>\
-    <form method='POST' action='/update_spiffs' enctype='multipart/form-data'>\
-      <input type='file' placeholder='spiffs.bin' name='update'><input type='submit' value='Update'> spiffs.bin\
+    <form method='POST' action='/update_littlefs' enctype='multipart/form-data'>\
+      <input type='file' placeholder='LittleFS.bin' name='update'><input type='submit' value='Update'> LittleFS.bin\
     </form><hr />\
     <button onclick=\"if(confirm('Are you sure you want to reset this device?')){httpGet('device','{\\'action\\':\\'reset\\'}')}\">Reset</button>");
   });
@@ -338,7 +338,7 @@ void firmware_web_updater()
     }
   });
 
-  server.on("/update_spiffs", HTTP_POST, [](AsyncWebServerRequest *request){
+  server.on("/update_littlefs", HTTP_POST, [](AsyncWebServerRequest *request){
     shouldReboot = !Update.hasError();
     if(shouldReboot)
     {
