@@ -39,9 +39,16 @@ void setup()
     delay(50); // let UART settle
   }
 
-  LittleFS.begin();
+  if (!LittleFS.begin()) {
+    serialDisplay("Setup","Failed to mount LittleFS. Formatting might be needed or power issue.");
+    return;
+  }
+  else{
+    serialDisplay("Setup","LittleFS initialized.");
+  }
   if (!LittleFS.exists("/config.json")) 
   {
+    serialDisplay("Setup","No config file.");
     configuration newConfig = {false,false,true,false,2000,"N/A","admin","admin","","",false,"{}"};
     newConfig.setupFlag = true;
     newConfig.wifi_setup_done = false;
