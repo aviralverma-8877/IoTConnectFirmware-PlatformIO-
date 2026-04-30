@@ -2,7 +2,7 @@
 #include<ArduinoJson.h>
 #include"device_handler.h"
 
-/*-----Meathod for sending sensor data----------------------*/
+/*-----Method for sending sensor data----------------------*/
 void IRAM_ATTR handleData(float h, float t) {
   JsonDocument doc;
   volatile float humidity = h;
@@ -20,6 +20,8 @@ void IRAM_ATTR handleData(float h, float t) {
 }
 
 void IRAM_ATTR handleError(uint8_t e) {
+  // DHT sensor error codes: 1=Timeout, 2=Checksum error, 3=Unknown
+  serialDisplay("DHT_Error", "Sensor read failed, error code: " + String(e));
 }
 
 void setup_sensor()
@@ -72,7 +74,7 @@ void sendSensorData()
   }
   if(has_light)
   {
-    illuminance_value = map(analogRead(LDR_PIN), 0, 1024, 0, 100);
+    illuminance_value = map(analogRead(LDR_PIN), 0, ESP8266_ADC_MAX, 0, ILLUMINANCE_PERCENT_MAX);
   }
 }
-/*-----Meathod for sending sensor data----------------------*/
+/*-----Method for sending sensor data----------------------*/

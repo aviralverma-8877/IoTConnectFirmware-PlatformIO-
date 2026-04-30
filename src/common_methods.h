@@ -1,5 +1,5 @@
-#ifndef common_meathods
-    #define common_meathods
+#ifndef common_methods
+    #define common_methods
     #include <Arduino.h>
     #include "structures.h"
     #include <Arduino.h>
@@ -9,7 +9,7 @@
     #include "mqtt_handler.h"
     #include "global_var_two.h"
     #include "global_var_one.h"
-    extern void (*callback)(void);                                 //Callback function meathod
+    extern void (*callback)(void);                                 //Callback function method
     void write_config(configuration config);
     void serialDisplay(String head,String body);
     void blank();

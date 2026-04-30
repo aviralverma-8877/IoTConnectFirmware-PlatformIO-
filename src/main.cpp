@@ -13,7 +13,7 @@
 #include "global_var_two.h"
 #include "global_var_one.h"
 #include "structures.h"
-#include "common_meathods.h"
+#include "common_methods.h"
 #include "web_handler.h"
 #include "mqtt_handler.h"
 #include "device_handler.h"

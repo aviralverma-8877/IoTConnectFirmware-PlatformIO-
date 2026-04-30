@@ -1,0 +1,20 @@
+#ifndef iotconnect_mqtt
+    #define iotconnect_mqtt
+////////////////////////Default MQTT Config//////////////////////////////////////////
+//----------------COPY THIS FILE TO iotconnect_mqtt_cred.h AND FILL IN YOUR CREDENTIALS
+//----------------NEVER COMMIT iotconnect_mqtt_cred.h TO VERSION CONTROL
+        #ifndef MQTT_HOST                                   //MQTT Server address
+            #define MQTT_HOST "mqtt.example.com"
+        #endif
+        #ifndef MQTT_PORT                                   //MQTT Server port
+            #define MQTT_PORT 1883
+        #endif
+        #ifndef MQTT_UNAME                                  //MQTT Username
+            #define MQTT_UNAME "your_username_here"
+        #endif
+        #ifndef MQTT_PASS                                   //MQTT Password
+            #define MQTT_PASS "your_password_here"
+        #endif
+//----------------COPY THIS FILE TO iotconnect_mqtt_cred.h AND FILL IN YOUR CREDENTIALS
+////////////////////////Default MQTT Config//////////////////////////////////////////
+#endif

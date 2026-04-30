@@ -8,7 +8,7 @@
     #include "global_var_two.h"
     #include "device_handler.h"
     #include "mqtt_handler.h"
-    #include "common_meathods.h"
+    #include "common_methods.h"
     #include "web_sockets_handler.h"
 
 

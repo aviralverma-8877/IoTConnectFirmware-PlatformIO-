@@ -1,4 +1,4 @@
-#include "common_meathods.h"
+#include "common_methods.h"
 
 void (*callback)(void);
 void write_config(configuration config)
@@ -37,7 +37,7 @@ void write_device_config(JsonDocument jsonBuffer)
   serializeJsonPretty(jsonBuffer, r);
   configFile.print(r); 
   configFile.close();
-  TickerForTimeOut.once(1,[](){
+  TickerForTimeOut.once(CONFIG_SAVE_TIMEOUT_SEC,[](){
     ESP.reset();
   });
 }
@@ -50,7 +50,7 @@ void write_mqtt_topics(String r)
 }
 
 
-/*-------Meathod for displaying serial data in JSON---------*/
+/*-------Method for displaying serial data in JSON---------*/
 void serialDisplay(String head,String body)
 {
   if(debugging)
@@ -64,14 +64,14 @@ void serialDisplay(String head,String body)
     Serial.println(c);
   }
 }
-/*-------Meathod for displaying serial data in JSON---------*/
+/*-------Method for displaying serial data in JSON---------*/
 /*-----Blank function-----------------------------------------*/
 void blank()
 {
   
 }
 /*-----Blank function-----------------------------------------*/
-/*-----Meathod to convert IP Address to String -------------*/
+/*-----Method to convert IP Address to String -------------*/
 String IpAddress2String(const IPAddress& ipAddress)
 {
   return String(ipAddress[0]) + String(".") +\
@@ -79,4 +79,4 @@ String IpAddress2String(const IPAddress& ipAddress)
   String(ipAddress[2]) + String(".") +\
   String(ipAddress[3])  ;
 }
-/*-----Meathod to convert IP Address to String -------------*/
+/*-----Method to convert IP Address to String -------------*/

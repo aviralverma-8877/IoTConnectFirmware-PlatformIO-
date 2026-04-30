@@ -19,6 +19,17 @@
 #ifndef FIRMWARE_V
 #define FIRMWARE_V "3.0.0" // Current firmware version. (Displayed on Device Portal)
 #endif
+
+// Timing Constants (in milliseconds)
+#define WIFI_RECONNECT_INTERVAL_SEC 5       // WiFi/MQTT reconnection check interval (seconds)
+#define LED_BLINK_INTERVAL_SEC 0.6          // LED blink rate during connection attempts (seconds)
+#define RESET_CHECK_INTERVAL_MS 10          // Reset button check interval (milliseconds)
+#define DEFAULT_PING_INTERVAL_MS 2000       // Default device ping/heartbeat interval
+#define CONFIG_SAVE_TIMEOUT_SEC 1           // Timeout before reboot after config save (seconds)
+
+// ADC Constants
+#define ESP8266_ADC_MAX 1023                // ESP8266 ADC maximum value (10-bit)
+#define ILLUMINANCE_PERCENT_MAX 100         // Maximum percentage for light sensor mapping
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 extern WiFiClient wifiClient;
@@ -62,7 +73,7 @@ extern String wifi_ssid;         // Global variables
 extern String wifi_pass;         // Global variables
 extern IPAddress apIP;           // Global variables
 /*----------------------------------------------------------*/
-/*--------------Tickers for Async Meathods------------------*/
+/*--------------Tickers for Async Methods------------------*/
 extern Ticker TickerForPinging;
 extern Ticker TickerForsendSensorData;
 extern Ticker TickerForcheckReset;
@@ -71,6 +82,6 @@ extern Ticker TickerForFeedbackLED;
 extern Ticker TickerForTimeOut;
 extern Ticker TickerForTimeOutTwo;
 extern Ticker TickerForWebSocketStatus;
-/*--------------Tickers for Async Meathods------------------*/
+/*--------------Tickers for Async Methods------------------*/
 void configure_gpio();
 #endif

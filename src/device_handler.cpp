@@ -3,10 +3,10 @@
 
 void setup_tickers()
 {
-  TickerForPinging.attach(5, pinging);
+  TickerForPinging.attach(WIFI_RECONNECT_INTERVAL_SEC, pinging);
   if (hasSensor)
     TickerForsendSensorData.attach_ms(delayMS, sendSensorData);
-  TickerForcheckReset.attach_ms(10, checkReset);
+  TickerForcheckReset.attach_ms(RESET_CHECK_INTERVAL_MS, checkReset);
 }
 
 void onWifiConnect(const WiFiEventStationModeGotIP &event)
@@ -22,18 +22,18 @@ void onWifiConnect(const WiFiEventStationModeGotIP &event)
   {
     digitalWrite(indicator_led, !def_led_value);
   }
-  TickerForWebSocketStatus.attach(5, sendWebSocketStatus);
+  TickerForWebSocketStatus.attach(WIFI_RECONNECT_INTERVAL_SEC, sendWebSocketStatus);
   if (reconnect_mqtt)
   {
     TickerForconnectToMqtt.detach();
-    TickerForconnectToMqtt.attach(5, setup_mqtt);
+    TickerForconnectToMqtt.attach(WIFI_RECONNECT_INTERVAL_SEC, setup_mqtt);
   }
 }
 
 void onWifiDisconnect(const WiFiEventStationModeDisconnected &event)
 {
   TickerForFeedbackLED.detach();
-  TickerForFeedbackLED.attach(0.6, feedbackLED);
+  TickerForFeedbackLED.attach(LED_BLINK_INTERVAL_SEC, feedbackLED);
   serialDisplay("onWifiDisconnect", "WiFi Disconnected");
   TickerForWebSocketStatus.detach();
   reconnect_mqtt = true;

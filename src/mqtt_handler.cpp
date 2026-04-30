@@ -52,7 +52,7 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
     mqtt.disconnect();
     mqtt.setCleanSession(true);
     TickerForconnectToMqtt.detach();
-    TickerForconnectToMqtt.attach(5, setup_mqtt);
+    TickerForconnectToMqtt.attach(WIFI_RECONNECT_INTERVAL_SEC, setup_mqtt);
   }
   serialDisplay("onMqttDisconnect","MQTT is disconnected.");
 }
@@ -85,15 +85,21 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   device_filter["mqtt"]["prefix"] = true;
   device_filter["mqtt"]["suffix"] = true;
   DeserializationError error_1 = deserializeJson(root, device_config, DeserializationOption::Filter(device_filter));
-  if(error_1)
+  if(error_1) {
+    serialDisplay("onMqttMessage", "JSON deserialization failed: " + String(error_1.c_str()));
     return;
+  }
   String prefix = root["mqtt"]["prefix"];
   String suffix = root["mqtt"]["suffix"];
   if(strcmp(topic, (prefix+intopic+suffix).c_str())==0)
   {
     serialDisplay("onMqttMessage","MQTT Payload : "+p);
     root.clear();
-    deserializeJson(root, p);
+    DeserializationError error_payload = deserializeJson(root, p);
+    if(error_payload) {
+      serialDisplay("onMqttMessage", "Payload JSON parse failed: " + String(error_payload.c_str()));
+      return;
+    }
 
     const char *action;
     action = root["action"];
@@ -241,8 +247,10 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     doc.shrinkToFit();
     JsonDocument msg;
     DeserializationError error_2 = deserializeJson(msg, p);
-    if(error_2)
+    if(error_2) {
+      serialDisplay("onMqttMessage", "Relay topic JSON parse failed: " + String(error_2.c_str()));
       return;
+    }
     if(!msg["action"].is<int>())
       return;
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
@@ -502,7 +510,7 @@ void connect_to_mqtt()
     const char* uname = doc["mqtt"]["uname"];
     const char* pass = doc["mqtt"]["pass"];
     serialDisplay("connect_to_mqtt","MQTT Username : "+String(uname));
-    serialDisplay("connect_to_mqtt","MQTT Password : "+String(pass));
+    serialDisplay("connect_to_mqtt","MQTT Password : ********"); // Password masked for security
     mqtt.setCredentials(uname, pass);
   }
   mqtt.setServer(host, port);

@@ -40,7 +40,7 @@ byte loopCount = 0;                       //Global variables
 bool shouldReboot = false;
 IPAddress apIP(192, 168, 4, 1);
 /*----------------------------------------------------------*/
-/*--------------Tickers for Async Meathods------------------*/
+/*--------------Tickers for Async Methods------------------*/
 Ticker TickerForPinging;
 Ticker TickerForsendSensorData;
 Ticker TickerForcheckReset;
@@ -49,7 +49,7 @@ Ticker TickerForFeedbackLED;
 Ticker TickerForTimeOut;
 Ticker TickerForTimeOutTwo;
 Ticker TickerForWebSocketStatus;
-/*--------------Tickers for Async Meathods------------------*/
+/*--------------Tickers for Async Methods------------------*/
 void configure_gpio()
 {
     serialDisplay("configure_gpio","Configuring GPIO");

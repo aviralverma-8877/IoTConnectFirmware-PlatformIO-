@@ -7,9 +7,8 @@
     #include "mqtt_handler.h"
     #include "global_var_one.h"
     #include "global_var_two.h"
-    #include "common_meathods.h"
+    #include "common_methods.h"
     #include "web_sockets_handler.h"
-    #include "mqtt_handler.h"
     #include "sensor_handler.h"
 
     void setup_tickers();

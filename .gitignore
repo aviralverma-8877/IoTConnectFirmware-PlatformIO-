@@ -2,3 +2,17 @@
 .vscode/*
 lib/*
 test/*
+
+# Sensitive credential files
+src/iotconnect_mqtt_cred.h
+*.local.json
+*.env
+
+# Build artifacts
+build/
+*.bin
+*.elf
+
+# OS files
+.DS_Store
+Thumbs.db
