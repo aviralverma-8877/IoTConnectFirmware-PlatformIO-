@@ -12,7 +12,11 @@ src/iotconnect_mqtt_cred.h
 build/
 *.bin
 *.elf
+build.log
 
 # OS files
 .DS_Store
 Thumbs.db
+
+# Scripts (keep in repo but mark as optional)
+# build.sh and upload.sh are checked in for convenience
