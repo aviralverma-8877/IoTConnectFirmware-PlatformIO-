@@ -268,7 +268,7 @@ function print_table(relay_count, on_change_val, name, topic)
             "<div class='rc-top'>" +
                 "<span class='rc-name'>"+name+"</span>" +
                 "<label class='switch'>" +
-                    "<input type='checkbox' id='checkbox-"+relay_count+"' onchange='"+on_change_val+"'>" +
+                    "<input type='checkbox' id='checkbox-"+relay_count+"' onchange=\""+on_change_val+"\">" +
                     "<span class='slider round'></span>" +
                 "</label>" +
             "</div>" +
