@@ -3,6 +3,18 @@
 extern "C" uint32_t _FS_start;
 extern "C" uint32_t _FS_end;
 
+static unsigned long wifiSetupStartTime = 0;
+
+void checkWifiAfterSetup() {
+  if (WiFi.status() == WL_CONNECTED) {
+    TickerForTimeOutTwo.detach();
+    ESP.reset();
+  } else if (millis() - wifiSetupStartTime > 60000) {
+    TickerForTimeOutTwo.detach();
+    reset();
+  }
+}
+
 class CaptiveRequestHandler : public AsyncWebHandler {
   public:
     CaptiveRequestHandler() {}
@@ -228,21 +240,11 @@ void web_set_wifi(AsyncWebServerRequest *request)
     request->send(200, "application/json", return_msg);
 
     WiFi.disconnect();
-    TickerForTimeOut.once(1,[request](){
+    TickerForTimeOut.once(1, [](){
       WiFi.mode(WIFI_STA);
-      WiFi.begin(conf.WiFi_SSID,conf.WiFi_PASS);
-      int start_time = millis();
-      TickerForTimeOut.once_ms(1000,[start_time](){
-        if(WiFi.status() != WL_CONNECTED)
-        {
-          if((millis() - start_time) > 60000)
-            reset();
-        }
-        else
-        {
-          ESP.reset();
-        }        
-      });
+      WiFi.begin(conf.WiFi_SSID, conf.WiFi_PASS);
+      wifiSetupStartTime = millis();
+      TickerForTimeOutTwo.attach(3, checkWifiAfterSetup);
     });
 
   }

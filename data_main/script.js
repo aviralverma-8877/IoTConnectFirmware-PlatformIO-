@@ -152,8 +152,10 @@ function set_ui()
     init_socket();
     show_status(json);
     data = httpGet(0, 0, 'device_template');
-    json = JSON.parse(data);
-    draw_table_data(json);
+    try {
+        json = JSON.parse(data);
+        if(json && json.relay) draw_table_data(json);
+    } catch(e) { console.log("device_template error: " + e); }
 }
 
 function reset_device(show_alert)

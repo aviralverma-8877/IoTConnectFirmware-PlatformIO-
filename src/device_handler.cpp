@@ -426,7 +426,7 @@ void generate_mqtt_topics()
   bool has_shift_reg = doc["device_config"]["shift_out_reg"]["avail"];
 
   JsonDocument topic_doc;
-  JsonArray relay = doc["relay"].to<JsonArray>();
+  JsonArray relay = topic_doc["relay"].to<JsonArray>();
   if (has_shift_reg)
   {
     for (int i = 0; i < 8; i++)
