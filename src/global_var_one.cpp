@@ -38,6 +38,7 @@ String IpAddress = "";                    //Global variables
 String LocalIP = "";                      //Global variables
 byte loopCount = 0;                       //Global variables
 bool shouldReboot = false;
+bool initSetupDone = false;
 IPAddress apIP(192, 168, 4, 1);
 /*----------------------------------------------------------*/
 /*--------------Tickers for Async Methods------------------*/

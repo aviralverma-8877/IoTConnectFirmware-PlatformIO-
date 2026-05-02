@@ -22,6 +22,7 @@
 
 // Timing Constants (in milliseconds)
 #define WIFI_RECONNECT_INTERVAL_SEC 5       // WiFi/MQTT reconnection check interval (seconds)
+#define WS_STATUS_INTERVAL_SEC 2            // WebSocket dashboard status push interval (seconds)
 #define LED_BLINK_INTERVAL_SEC 0.6          // LED blink rate during connection attempts (seconds)
 #define RESET_CHECK_INTERVAL_MS 10          // Reset button check interval (milliseconds)
 #define DEFAULT_PING_INTERVAL_MS 2000       // Default device ping/heartbeat interval
@@ -69,6 +70,7 @@ extern AsyncWebSocket webSocket; // Global variables
 extern AsyncWebServer server;    // Global variables
 extern int illuminance_value;    // Global variables
 extern bool shouldReboot;        // Global variables
+extern bool initSetupDone;       // Global variables
 extern String wifi_ssid;         // Global variables
 extern String wifi_pass;         // Global variables
 extern IPAddress apIP;           // Global variables

@@ -57,6 +57,12 @@ void setup()
   delay(100);
   read_config();
   print_config();
+  {
+    String dc = read_device_config();
+    JsonDocument _dc;
+    deserializeJson(_dc, dc);
+    initSetupDone = _dc["init_setup_done"] | false;
+  }
   delayMS = conf.pingTime;
   configure_gpio();
   if(conf.save_eeprom)
@@ -86,10 +92,11 @@ void setup()
   }
 }
 
-void loop() 
+void loop()
 {
   dnsServer.processNextRequest();
   MDNS.update();
   fauxmo.handle();
+  webSocket.cleanupClients();
   callback();
 }

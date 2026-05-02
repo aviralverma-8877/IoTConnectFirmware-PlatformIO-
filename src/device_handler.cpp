@@ -22,7 +22,7 @@ void onWifiConnect(const WiFiEventStationModeGotIP &event)
   {
     digitalWrite(indicator_led, !def_led_value);
   }
-  TickerForWebSocketStatus.attach(WIFI_RECONNECT_INTERVAL_SEC, sendWebSocketStatus);
+  TickerForWebSocketStatus.attach(WS_STATUS_INTERVAL_SEC, sendWebSocketStatus);
   if (reconnect_mqtt)
   {
     TickerForconnectToMqtt.detach();
@@ -61,15 +61,7 @@ String device_status()
   return_doc["wifi_status"] = WiFi_status;
   return_doc["chip_id"] = chipid;
   return_doc["ram"] = ESP.getFreeHeap();
-  String device_config = read_device_config();
-  JsonDocument filter;
-  filter["init_setup_done"] = true;
-  JsonDocument doc;
-  deserializeJson(doc, device_config, DeserializationOption::Filter(filter));
-
-  bool init_setup = doc["init_setup_done"];
-  return_doc["init_setup"] = init_setup;
-  doc.clear();
+  return_doc["init_setup"] = initSetupDone;
   return_doc.shrinkToFit();
   serializeJson(return_doc, return_msg);
   return_doc.clear();
