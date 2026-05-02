@@ -46,6 +46,8 @@ function init_socket()
     }
     Socket.onopen = function(event){
         console.log("Connected to web sockets...")
+        var dot = document.getElementById("ws-dot");
+        if(dot) dot.className = "ws-dot live";
         document.getElementById("freeze").style.opacity=0;
         setTimeout(function(){
             document.getElementById("freeze").style.display="none";
@@ -53,6 +55,8 @@ function init_socket()
     }
     Socket.onclose = function(event){
         console.log("Connection to websockets closed....")
+        var dot = document.getElementById("ws-dot");
+        if(dot) dot.className = "ws-dot";
         setTimeout(function(){
             console.log("Reconnecting....")
             init_socket();
@@ -214,31 +218,35 @@ function show_status(json)
             else
                 relays[i].checked = false;
         }    
-        var cont = "";
         wifi_ssid = json['wifi_ssid'];
-        wifi_type = json['type'];
         mqtt_status = json["mqtt_status"];
         wifi_status = json["wifi_status"];
-        if(wifi_status)
-            cont = "Connected to <b>"+wifi_ssid+"</b>";
-        if(mqtt_status)
-            cont += "<br />MQTT Status : <b>Connected</b><br />";
-        else
-            cont += "<br />MQTT Status : <b>Not Connected</b><br />";
-        cont += "Signal Strength : <span id='signal_st' class='signal_st'></span><div id='signal_bk' class='signal_bk'><div id='signal_fk' class='signal_fk'></div></div>"
-        cont += "Free Heap : <div id='free_heap_bk' class='signal_bk'><div id='free_heap_fk' class='signal_fk'></div></div>"
-        element = document.getElementById('WiFi_Status');
-        element.innerHTML = cont;
         dBm = json["wifi_rssi"];
-        quality = 2 * (dBm + 100);
-        if(quality > 100)
-        {
-            quality = 100;
-        }
-        document.getElementById("signal_fk").style.width = quality+"px";
-        document.getElementById("signal_st").innerHTML = quality+" %";
+        quality = Math.min(2*(dBm+100), 100);
         free_heap = json["ram"];
-        free_heap_per = ((free_heap/(64*1024))*100)
+        free_heap_per = Math.min((free_heap/65536)*100, 100);
+
+        var wifiLabel = wifi_status
+            ? "<span class='badge on'>"+wifi_ssid+"</span>"
+            : "<span class='badge off'>Offline</span>";
+        var mqttLabel = mqtt_status
+            ? "<span class='badge on'>Connected</span>"
+            : "<span class='badge off'>Offline</span>";
+
+        var cont = "<div class='stat-grid'>";
+        cont += "<div class='stat-card'><div class='stat-lbl'>WiFi</div><div class='stat-val' style='margin-top:6px'>"+wifiLabel+"</div></div>";
+        cont += "<div class='stat-card'><div class='stat-lbl'>MQTT</div><div class='stat-val' style='margin-top:6px'>"+mqttLabel+"</div></div>";
+        cont += "<div class='stat-card'><div class='stat-lbl'>Signal</div><div class='stat-val'>"
+             +  "<span id='signal_st' class='signal_st'>"+quality+"%</span>"
+             +  "<div id='signal_bk' class='signal_bk'><div id='signal_fk' class='signal_fk'></div></div>"
+             +  "</div></div>";
+        cont += "<div class='stat-card'><div class='stat-lbl'>Free Heap</div><div class='stat-val'>"
+             +  "<div id='free_heap_bk' class='signal_bk'><div id='free_heap_fk' class='signal_fk'></div></div>"
+             +  "</div></div>";
+        cont += "</div>";
+
+        document.getElementById("WiFi_Status").innerHTML = cont;
+        document.getElementById("signal_fk").style.width = quality+"px";
         document.getElementById("free_heap_fk").style.width = free_heap_per+"px";
         document.getElementById("firmware_version").innerHTML = json["firmware_version"];
     }
@@ -254,30 +262,26 @@ function toggle_relay(element, relay)
 table_printed = false;
 function print_table(relay_count, on_change_val, name, topic)
 {
-    var table = document.getElementById("relay_table");
-    var content = "";
-    content = "\
-    <tr>\
-        <th style=\"font-family: 'Fjalla One'\">\
-            "+name+" : <span id='status-"+relay_count+"'></span>\
-        </th>\
-        <th>\
-            <label class=\"switch\">\
-                <input type=\"checkbox\" id=\"checkbox-"+relay_count+"\" onchange=\""+on_change_val+"\">\
-                <span class=\"slider round\"></span>\
-            </label>\
-        </th>\
-        <th style=\"font-family: 'Fjalla One'; font-size:10px\">\
-            Alexa : <input type=\"checkbox\" value=\""+topic+"\" class=\"fauxmo_control\" id=\"fauxmo_control_"+relay_count+"\" onchange=\"update_fauxmo_list()\" />\
-        </th>\
-        <th style=\"font-family: 'Fjalla One'; font-size:10px\">\
-            Mqtt Topic : "+topic+"\
-        </th>\
-    </tr>";
-    table.innerHTML += content;
-    cont = document.getElementById("relay_select").innerHTML;
-    cont += "<option value='"+topic+"'>"+name+"</option>";
-    document.getElementById("relay_select").innerHTML = cont;
+    var grid = document.getElementById("relay_table");
+    grid.innerHTML +=
+        "<div class='relay-card' id='relay-card-"+relay_count+"'>" +
+            "<div class='rc-top'>" +
+                "<span class='rc-name'>"+name+"</span>" +
+                "<label class='switch'>" +
+                    "<input type='checkbox' id='checkbox-"+relay_count+"' onchange='"+on_change_val+"'>" +
+                    "<span class='slider round'></span>" +
+                "</label>" +
+            "</div>" +
+            "<div><span id='status-"+relay_count+"' class='badge off'>OFF</span></div>" +
+            "<div class='rc-topic'>"+topic+"</div>" +
+            "<div class='rc-alexa'>" +
+                "<input type='checkbox' value='"+topic+"' class='fauxmo_control' " +
+                    "id='fauxmo_control_"+relay_count+"' onchange='update_fauxmo_list()'>" +
+                "<span>Alexa</span>" +
+            "</div>" +
+        "</div>";
+    var sel = document.getElementById("relay_select");
+    sel.innerHTML += "<option value='"+topic+"'>"+name+"</option>";
 }
 function update_fauxmo_list(){
     relays = document.getElementsByClassName("fauxmo_control");
@@ -323,19 +327,21 @@ function draw_table_data(json)
 
 function update_table_data(ele)
 {
-    pin = ele.comp + "-" + ele.pin;
-    var element = document.getElementById('status-'+pin);
+    var pin = ele.comp + "-" + ele.pin;
+    var status_el = document.getElementById("status-"+pin);
+    var card_el   = document.getElementById("relay-card-"+pin);
+    var cb        = document.getElementById("checkbox-"+pin);
     if(ele.status)
     {
-        document.getElementById('status-'+pin).style.color = "green";
-        document.getElementById('checkbox-'+pin).checked = true;
-        element.innerHTML = 'ON';
+        if(status_el){ status_el.className = "badge on";  status_el.innerHTML = "ON"; }
+        if(card_el)    card_el.className = "relay-card is-on";
+        if(cb)         cb.checked = true;
     }
     else
     {
-        document.getElementById('status-'+pin).style.color = "red";
-        document.getElementById('checkbox-'+pin).checked = false;
-        element.innerHTML = 'OFF';
+        if(status_el){ status_el.className = "badge off"; status_el.innerHTML = "OFF"; }
+        if(card_el)    card_el.className = "relay-card";
+        if(cb)         cb.checked = false;
     }
 }
 function update_wifi()

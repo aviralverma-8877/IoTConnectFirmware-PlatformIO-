@@ -1,1 +1,824 @@
-function init_socket(){Socket=new WebSocket("ws://"+window.location.hostname+"/ws"),Socket.onmessage=function(e){try{if(json=JSON.parse(e.data),"alert"==json.action)alert(json.msg);else if("status"==json.action)update_table_data(json);else if("device_status"==json.action)show_status(json);else if("sensor"==json.action)show_sensor(json);else if("mqtt_out"==json.action){var t=document.getElementById("consoleBoard").innerHTML;document.getElementById("consoleBoard").innerHTML="MQTT ("+json.topic+") >> "+json.payload+" <br />"+t}else if("mqtt_in"==json.action){t=document.getElementById("consoleBoard").innerHTML;document.getElementById("consoleBoard").innerHTML="MQTT ("+json.topic+") << "+json.payload+" <br />"+t}else console.log(json)}catch(e){}},Socket.onopen=function(e){console.log("Connected to web sockets..."),document.getElementById("freeze").style.opacity=0,setTimeout(function(){document.getElementById("freeze").style.display="none"},1e3)},Socket.onclose=function(e){console.log("Connection to websockets closed...."),setTimeout(function(){console.log("Reconnecting...."),init_socket()},1e3)},Socket.onerror=function(e){console.log("Error in websockets")}}function open_debug_console(){document.getElementById("console_btn").innerHTML="Close Debug Console",document.getElementById("console_btn").setAttribute("onclick","close_debug_console()"),document.getElementById("console").style.display="block",setTimeout(function(){document.getElementById("console").style.opacity=1},10)}function close_debug_console(){document.getElementById("console_btn").innerHTML="Open Debug Console",document.getElementById("console_btn").setAttribute("onclick","open_debug_console()"),document.getElementById("console").style.opacity=0,setTimeout(function(){document.getElementById("console").style.display="none"},1e3)}function httpGet(e,t,n,i={}){close_alert(),"toggle_relay"==n&&(theUrl='/control?command={"relay":"'+e+'","action":'+t+"}"),"device"==n&&(theUrl="/control?device="+i),"get_status"==n&&(theUrl="/get_status"),"scan_wifi"==n&&(theUrl="/scan_wifi"),"set_wifi"==n&&(theUrl="/set_wifi?options="+JSON.stringify(i)),"update_fauxmo"==n&&(theUrl="/update_fauxmo?options="+JSON.stringify(i)),"update_login"==n&&(theUrl="/update_login?options="+JSON.stringify(i)),"update_device_config"==n&&(theUrl="/update_device_config?options="+JSON.stringify(i)),"device_template"==n&&(theUrl="/device_template");try{var o=new XMLHttpRequest;return o.open("GET",theUrl,!1),o.send(null),o.responseText}catch(e){return JSON.stringify({done:!1,error:e})}}function pair_device(e){window.open("https://iot-connect.in/add_device/"+e,"_blank")}function set_ui(){data=httpGet(0,0,"get_status"),json=JSON.parse(data),null!=json.chip_id&&(chipid=json.chip_id,document.getElementById("hostname").innerHTML="http://iot-connect-"+json.chip_id+".local",document.getElementById("hostname").setAttribute("href","http://iot-connect-"+json.chip_id+".local"),document.getElementById("pair_btn").setAttribute("onclick","pair_device("+chipid+")"),document.getElementById("pair_btn").style.display="block"),init_socket(),show_status(json),data=httpGet(0,0,"device_template");try{json=JSON.parse(data);if(json&&json.relay)draw_table_data(json)}catch(e){console.log("device_template error: "+e)}}function reset_device(e){httpGet(0,0,"device","{'action':'reset'}")}function selectElement(e,t){let n=document.getElementById(e);n.value=t}function show_sensor(e){e.hasOwnProperty("t")&&(document.getElementById("sensor_temp").innerHTML="<span id='sensor_temp_st' class='signal_st'></span><div id='sensor_temp_bk' class='signal_bk'><div id='sensor_temp_fk' class='signal_fk'></div></div>",document.getElementById("sensor_temp_fk").style.width=e.t+"px",document.getElementById("sensor_temp_st").innerHTML=e.t+" °C"),e.hasOwnProperty("h")&&(document.getElementById("sensor_humid").innerHTML="<span id='sensor_humid_st' class='signal_st'></span><div id='sensor_humid_bk' class='signal_bk'><div id='sensor_humid_fk' class='signal_fk'></div></div>",document.getElementById("sensor_humid_fk").style.width=e.h+"px",document.getElementById("sensor_humid_st").innerHTML=e.h+" %"),e.hasOwnProperty("l")&&(document.getElementById("sensor_light").innerHTML="<span id='sensor_light_st' class='signal_st'></span><div id='sensor_light_bk' class='signal_bk'><div id='sensor_light_fk' class='signal_fk'></div></div>",document.getElementById("sensor_light_fk").style.width=e.l+"px",document.getElementById("sensor_light_st").innerHTML=e.l+" %")}function show_status(e){if(e.init_setup||(document.getElementById("cover").onclick="",document.getElementById("close_btn").style.display="none",document.getElementById("pair_btn").style.display="none",start_init_setup()),null!=e){for(onb_status=e.onb_led,document.getElementById("on_board_led").checked=onb_status,save_eeprom=e.save_eeprom,document.getElementById("save_status").checked=save_eeprom,btn_relay_act=e.btn_relay_act,selectElement("relay_select",btn_relay_act),relays=document.getElementsByClassName("fauxmo_control"),relays_data=JSON.parse(e.fauxmo_relay),i=0;i<relays.length;i++)relays_data[relays[i].value]?relays[i].checked=!0:relays[i].checked=!1;var t="";wifi_ssid=e.wifi_ssid,wifi_type=e.type,mqtt_status=e.mqtt_status,wifi_status=e.wifi_status,wifi_status&&(t="Connected to <b>"+wifi_ssid+"</b>"),mqtt_status?t+="<br />MQTT Status : <b>Connected</b><br />":t+="<br />MQTT Status : <b>Not Connected</b><br />",t+="Signal Strength : <span id='signal_st' class='signal_st'></span><div id='signal_bk' class='signal_bk'><div id='signal_fk' class='signal_fk'></div></div>",t+="Free Heap : <div id='free_heap_bk' class='signal_bk'><div id='free_heap_fk' class='signal_fk'></div></div>",element=document.getElementById("WiFi_Status"),element.innerHTML=t,dBm=e.wifi_rssi,quality=2*(dBm+100),quality>100&&(quality=100),document.getElementById("signal_fk").style.width=quality+"px",document.getElementById("signal_st").innerHTML=quality+" %",free_heap=e.ram,free_heap_per=free_heap/65536*100,document.getElementById("free_heap_fk").style.width=free_heap_per+"px",document.getElementById("firmware_version").innerHTML=e.firmware_version}}function toggle_relay(e,t){e.checked?httpGet(t,1,"toggle_relay"):httpGet(t,0,"toggle_relay")}function print_table(e,t,n,i){var o=document.getElementById("relay_table"),s="";s="    <tr>        <th style=\"font-family: 'Fjalla One'\">            "+n+" : <span id='status-"+e+'\'></span>        </th>        <th>            <label class="switch">                <input type="checkbox" id="checkbox-'+e+'" onchange="'+t+'">                <span class="slider round"></span>            </label>        </th>        <th style="font-family: \'Fjalla One\'; font-size:10px">            Alexa : <input type="checkbox" value="'+i+'" class="fauxmo_control" id="fauxmo_control_'+e+'" onchange="update_fauxmo_list()" />        </th>        <th style="font-family: \'Fjalla One\'; font-size:10px">            Mqtt Topic : '+i+"        </th>    </tr>",o.innerHTML+=s,cont=document.getElementById("relay_select").innerHTML,cont+="<option value='"+i+"'>"+n+"</option>",document.getElementById("relay_select").innerHTML=cont}function update_fauxmo_list(){for(relays=document.getElementsByClassName("fauxmo_control"),relays_data={},i=0;i<relays.length;i++)relays_data[relays[i].value]=relays[i].checked;httpGet(0,0,"update_fauxmo",relays_data),document.getElementById("freeze").style.display="block",setTimeout(function(){document.getElementById("freeze").style.opacity=1},1e3),setTimeout(function(){location.reload()},1e3)}function draw_table_data(e){relays=e.relay,prefix="",suffix="",null!=e.prefix&&(prefix=e.prefix),null!=e.suffix&&(suffix=e.suffix),relays.forEach(function(e){on_change_val="toggle_relay(this, '"+e.name+"')",pin=e.comp+"-"+e.pin,topic=prefix+e.topic+suffix,table_printed||(print_table(pin,on_change_val,e.name,topic),setTimeout(function(){update_table_data(e)},10))}),table_printed=!0}function update_table_data(e){pin=e.comp+"-"+e.pin;var t=document.getElementById("status-"+pin);e.status?(document.getElementById("status-"+pin).style.color="green",document.getElementById("checkbox-"+pin).checked=!0,t.innerHTML="ON"):(document.getElementById("status-"+pin).style.color="red",document.getElementById("checkbox-"+pin).checked=!1,t.innerHTML="OFF")}function update_wifi(){return ssid=document.getElementById("ssid_input").value,pass=document.getElementById("pass_input").value,close_alert(),new Promise(()=>{response=httpGet(0,0,"set_wifi",{ssid:ssid,pass:pass}),document.getElementById("freeze").style.display="block",setTimeout(function(){document.getElementById("freeze").style.opacity=1},1e3),setTimeout(()=>{window.location.replace("http://iot-connect-"+chipid+".local/")},2e4)})}function scan_wifi(){element=document.getElementById("ssid_list"),element.innerHTML="    <tr>        <td style=\"font-family: 'Fjalla One'\">            <b>Scanning...</b>        </td>    </tr>",setTimeout(function(){return new Promise(()=>{if(response=httpGet(0,0,"scan_wifi"),wifi_list=JSON.parse(response).ssid,content="",element=document.getElementById("ssid_list"),element.innerHTML="",wifi_list.length>0)for(i=0;i<wifi_list.length;i++)ssid_name=wifi_list[i].ssid,ssid_rssi=wifi_list[i].RSSI,quality=2*(parseInt(ssid_rssi)+100),quality>100&&(quality=100),content="<tr>                                            <td style=\"font-family: 'Fjalla One'\">                                                <a href='#ssid_input' onclick='ssid_input.value=\""+ssid_name+"\"'><b>"+ssid_name+"</b></a>                                            </td>                                            <td>                                                <span id='ssid_"+i+"_signal_st' class='signal_st'></span><div id='ssid_"+i+"_signal_bk' class='signal_bk'><div id='ssid_"+i+"_signal_fk' class='signal_fk'></div></div>                                            </td>                                        </tr>",element.innerHTML=element.innerHTML+content,document.getElementById("ssid_"+i+"_signal_fk").style.width=quality+"px"})},10)}function update_login(e,t,n){t.value==n.value?e.value.length>6?t.value.length>6?(response=httpGet(0,0,"update_login",{uname:e.value,password:t.value}),data=JSON.parse(response),done=data.done,done&&alert("Username and password updated.")):alert("Password length should be more than 6 charecter."):alert("Username length should be more than 6 charecter."):alert("Password and confirm password not matching.")}function list_gpio(){for(j=0;j<ele_list.length;j++)for(ele=document.getElementById(ele_list[j]),ele.innerHTML="<option value='N/A'>N/A</option>",i=0;i<avail_GPIO.length;i++)ele.innerHTML+="<option value='"+avail_GPIO[i]+"'>GPIO "+avail_GPIO[i]+"</option>"}function start_init_setup(){document.getElementById("cover").style.display="block",document.getElementById("popup").style.display="block",setTimeout(()=>{document.getElementById("cover").style.opacity=1,document.getElementById("popup").style.opacity=1,setTimeout(function(){list_gpio()},700)},10)}function close_init_setup(){document.getElementById("cover").style.opacity=0,document.getElementById("popup").style.opacity=0,setTimeout(()=>{document.getElementById("cover").style.display="none",document.getElementById("popup").style.display="none"},700)}function check_board(e){document.getElementById("custom_board_configs").style.display="Custom Board"==e?"block":"none"}function check_broker(e){document.getElementById("mqtt_detail_table").style.display="Custom"==e?"block":"none"}function check_config(){if("Custom Board"==document.getElementById("device_type").value){if(sta=document.getElementById("status_led").value,res=document.getElementById("rst_pin").value,""!=sta&&"N/A"!=sta){if(""!=res&&"N/A"!=res){if(document.getElementById("sr_avail").checked){if("N/A"==document.getElementById("sr_dpin").value)return alert("No data pin alloted to shift register."),!1;if("N/A"==document.getElementById("sr_cpin").value)return alert("No clock pin alloted to shift register."),!1;if("N/A"==document.getElementById("sr_lpin").value)return alert("No latch pin alloted to shift register."),!1}if(document.getElementById("dht_sens_avail").checked&&"N/A"==document.getElementById("sen_pin").value)return alert("No DHT sensor pin alloted."),!1;var e=[];for(j=0;j<ele_list.length;j++)if(ele=document.getElementById(ele_list[j]),"N/A"!=ele.value&&""!=ele.value){if(-1!=e.indexOf(ele.value))return alert("GPIO "+ele.value+" has been assigned more than once."),!1;e.push(ele.value)}return!0}return alert("Reset button pin needs to be defined."),!1}return alert("Status LED pin needs to be defined."),!1}return!0}function save_config(){if(check_config()){var e={init_setup_done:!0,mqtt:{service:"",host:"",port:1883,uname:"",pass:"",qos:1,prefix:"",suffix:"",auth:!1},device_config:{shift_out_reg:{avail:!0,serialDataPin:16,clockPin:14,latchPin:12},status_led:{led_pin:13,status:!0,def:!0},reset_btn:{btn_pin:4,def:!0},relay:{count:0,GPIO:[]},dht:{TYPE:"DHT11",GPIO:2,INSTALLED:!1},light:{GPIO:"A0",INSTALLED:!1}}};if("Custom"==document.getElementById("mqtt_broker").value)if(service="Custom",host=document.getElementById("mqtt_host").value,port=document.getElementById("mqtt_port").value,uname=document.getElementById("mqtt_uname").value,pass=document.getElementById("mqtt_pass").value,qos=document.getElementById("mqtt_qos").value,prefix=document.getElementById("mqtt_prefix").value,suffix=document.getElementById("mqtt_suffix").value,""!=host)if(""!=port&&port>0)if(qos in[0,1,2]){if(""==uname)auth=!1;else if(auth=!0,""==pass)return void alert("Please provide MQTT login password.");e.mqtt.service=service,e.mqtt.host=host,e.mqtt.port=port,e.mqtt.uname=uname,e.mqtt.pass=pass,e.mqtt.qos=qos,e.mqtt.prefix=prefix,e.mqtt.suffix=suffix,e.mqtt.auth=auth}else alert("QoS must be in 0, 1 or 2");else alert("Please provide valid MQTT port number.");else alert("Please provide valid MQTT hostname.");else service=document.getElementById("mqtt_broker").value,e.mqtt.service=service;if("IoT Connect Board Rev 1"==document.getElementById("device_type").value&&(e.device_config.shift_out_reg.avail=!0,e.device_config.shift_out_reg.serialDataPin=16,e.device_config.shift_out_reg.clockPin=14,e.device_config.shift_out_reg.latchPin=12,e.device_config.status_led.led_pin=13,e.device_config.status_led.def=!0,e.device_config.reset_btn.btn_pin=4,e.device_config.reset_btn.def=!0,e.device_config.relay.count=0,e.device_config.dht.INSTALLED=!1,e.device_config.light.INSTALLED=!1),"IoT Connect Board Rev 2"==document.getElementById("device_type").value&&(e.device_config.shift_out_reg.avail=!0,e.device_config.shift_out_reg.serialDataPin=16,e.device_config.shift_out_reg.clockPin=14,e.device_config.shift_out_reg.latchPin=12,e.device_config.status_led.led_pin=13,e.device_config.status_led.def=!0,e.device_config.reset_btn.btn_pin=4,e.device_config.reset_btn.def=!0,e.device_config.relay.count=0,e.device_config.dht.INSTALLED=!0,e.device_config.dht.TYPE="dht11",e.device_config.dht.GPIO=2,e.device_config.light.INSTALLED=!0,e.device_config.light.GPIO="A0"),"Sonoff Basics"==document.getElementById("device_type").value&&(e.device_config.shift_out_reg.avail=!1,e.device_config.status_led.led_pin=13,e.device_config.status_led.def=!1,e.device_config.reset_btn.btn_pin=0,e.device_config.reset_btn.def=!1,e.device_config.relay.count=1,e.device_config.relay.GPIO=[12],e.device_config.dht.INSTALLED=!1,e.device_config.light.INSTALLED=!1),"Custom Board"==document.getElementById("device_type").value){for(document.getElementById("sr_avail").checked?(e.device_config.shift_out_reg.avail=!0,e.device_config.shift_out_reg.serialDataPin=document.getElementById("sr_dpin").value,e.device_config.shift_out_reg.clockPin=document.getElementById("sr_cpin").value,e.device_config.shift_out_reg.latchPin=document.getElementById("sr_lpin").value):e.device_config.shift_out_reg.avail=!1,e.device_config.status_led.led_pin=document.getElementById("status_led").value,document.getElementById("led_default_high").checked?def=!0:def=!1,e.device_config.status_led.def=def,e.device_config.reset_btn.btn_pin=document.getElementById("rst_pin").value,document.getElementById("btn_default_high").checked?def=!0:def=!1,e.device_config.reset_btn.def=def,e.device_config.relay.count=0,i=1;i<=5;i++)"N/A"!=document.getElementById("rly_"+i).value&&(e.device_config.relay.count++,e.device_config.relay.GPIO.push(document.getElementById("rly_"+i).value));document.getElementById("dht_sens_avail").checked?(e.device_config.dht.INSTALLED=!0,e.device_config.dht.GPIO=document.getElementById("sen_pin").value):e.device_config.dht.INSTALLED=!1,document.getElementById("ldr_sens_avail").checked?e.device_config.light.INSTALLED=!0:(e.device_config.light.INSTALLED=!1,e.device_config.light.GPIO="A0")}data=httpGet(0,0,"update_device_config",e),result=JSON.parse(data),result.done?(alert("Device config saved successfully. Rebooting...."),document.getElementById("freeze").style.display="block",setTimeout(function(){document.getElementById("freeze").style.opacity=1},1e3),setTimeout(()=>{location.reload()},5e3)):alert(result.error)}}function alert(e,t){document.getElementById("message").innerHTML=e,document.getElementById("customAlert").style.display="block",null==t?document.getElementById("okButton").setAttribute("onclick","close_alert()"):(document.getElementById("cancelButton").style.display="block",document.getElementById("cancelButton").setAttribute("onclick","close_alert()"),document.getElementById("okButton").setAttribute("onclick",t))}function close_alert(){document.getElementById("message").innerHTML="",document.getElementById("customAlert").style.display="none",document.getElementById("cancelButton").style.display="none"}var Socket,wifi_status=!1,chipid="";table_printed=!1;var avail_GPIO=[0,1,2,3,4,5,12,13,14,15,16],ele_list=["sr_dpin","sr_cpin","sr_lpin","status_led","rst_pin","rly_1","rly_2","rly_3","rly_4","rly_5","sen_pin"];
+var Socket;
+var wifi_status=false;
+var chipid = "";
+function init_socket()
+{
+    Socket = new WebSocket('ws://'+window.location.hostname+"/ws");
+    Socket.onmessage = function(event){
+        //console.log("Text : "+event.data);
+        try
+        {
+            json = JSON.parse(event.data);
+            if(json.action == "alert")
+            {
+                alert(json.msg)
+            }
+            else if(json.action == "status")
+            {
+                update_table_data(json);
+            }
+            else if(json.action == "device_status")
+            {
+                show_status(json);
+            }
+            else if(json.action == "sensor")
+            {
+                show_sensor(json);
+            }
+            else if(json.action == "mqtt_out")
+            {
+                var cont = document.getElementById("consoleBoard").innerHTML;
+                document.getElementById("consoleBoard").innerHTML = "MQTT ("+json.topic+") >> "+json.payload+" <br />" + cont;
+            }
+            else if(json.action == "mqtt_in")
+            {
+                var cont = document.getElementById("consoleBoard").innerHTML;
+                document.getElementById("consoleBoard").innerHTML = "MQTT ("+json.topic+") << "+json.payload+" <br />" + cont;
+            }
+            else{
+                console.log(json)
+            }
+        }
+        catch(err)
+        {
+           // console.log("Error : "+err);
+        }
+    }
+    Socket.onopen = function(event){
+        console.log("Connected to web sockets...")
+        var dot = document.getElementById("ws-dot");
+        if(dot) dot.className = "ws-dot live";
+        document.getElementById("freeze").style.opacity=0;
+        setTimeout(function(){
+            document.getElementById("freeze").style.display="none";
+        },1000)
+    }
+    Socket.onclose = function(event){
+        console.log("Connection to websockets closed....")
+        var dot = document.getElementById("ws-dot");
+        if(dot) dot.className = "ws-dot";
+        setTimeout(function(){
+            console.log("Reconnecting....")
+            init_socket();
+        },1000);
+    }
+    Socket.onerror = function(event){
+        console.log("Error in websockets");
+    }
+}
+
+function open_debug_console()
+{
+    document.getElementById("console_btn").innerHTML = "Close Debug Console"
+    document.getElementById("console_btn").setAttribute('onclick',"close_debug_console()");
+    document.getElementById("console").style.display="block";
+    setTimeout(function(){
+        document.getElementById("console").style.opacity=1;
+    },10)
+}
+
+function close_debug_console()
+{
+    document.getElementById("console_btn").innerHTML = "Open Debug Console"
+    document.getElementById("console_btn").setAttribute('onclick',"open_debug_console()");
+    document.getElementById("console").style.opacity=0;
+    setTimeout(function(){
+        document.getElementById("console").style.display="none";
+    },1000)
+}
+
+function httpGet(relay, value, action, options = {})
+{
+    close_alert();
+    if(action == "toggle_relay")
+    {
+        theUrl = '/control?command={"relay":\"'+relay+'\","action":'+value+'}';
+    }
+    if(action == "device")
+    {
+        theUrl = '/control?device='+options;
+    }
+    if(action == "get_status")
+    {
+        theUrl = '/get_status';
+    }
+    if(action == "scan_wifi")
+    {
+        theUrl = '/scan_wifi';
+    }
+    if(action == "set_wifi")
+    {
+        theUrl = '/set_wifi?options='+JSON.stringify(options);
+    }
+    if(action == "update_fauxmo")
+    {
+        theUrl = '/update_fauxmo?options='+JSON.stringify(options);
+    }
+    if(action == "update_login")
+    {
+        theUrl = '/update_login?options='+JSON.stringify(options);
+    }
+    if(action == "update_device_config")
+    {
+        theUrl = '/update_device_config?options='+JSON.stringify(options);
+    }
+    if(action == "device_template")
+    {
+        theUrl = "/device_template"
+    }
+    try
+    {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open( "GET", theUrl, false );
+        xmlHttp.send( null );
+        return xmlHttp.responseText;
+    }
+    catch(err){
+        return JSON.stringify({"done":false,"error":err});
+    }
+}
+function pair_device(esp_id)
+{
+    window.open("https://iot-connect.in/add_device/"+esp_id, '_blank');
+}
+function set_ui()
+{
+    data = httpGet(0, 0, 'get_status');
+    json = JSON.parse(data);
+    if(json.chip_id != undefined)
+    {
+        chipid = json.chip_id;
+        document.getElementById("hostname").innerHTML = "http://iot-connect-"+json.chip_id+".local";
+        document.getElementById("hostname").setAttribute('href', "http://iot-connect-"+json.chip_id+".local");
+        document.getElementById("pair_btn").setAttribute('onclick',"pair_device("+chipid+")");
+        document.getElementById("pair_btn").style.display = "block";
+    }
+    init_socket();
+    show_status(json);
+    data = httpGet(0, 0, 'device_template');
+    try {
+        json = JSON.parse(data);
+        if(json && json.relay) draw_table_data(json);
+    } catch(e) { console.log("device_template error: " + e); }
+}
+
+function reset_device(show_alert)
+{
+    httpGet(0,0,'device','{\'action\':\'reset\'}')
+}
+
+function selectElement(id, valueToSelect) {    
+    let element = document.getElementById(id);
+    element.value = valueToSelect;
+}
+function show_sensor(json)
+{
+    if(json.hasOwnProperty("t"))
+    {
+        document.getElementById("sensor_temp").innerHTML ="<span id='sensor_temp_st' class='signal_st'></span><div id='sensor_temp_bk' class='signal_bk'><div id='sensor_temp_fk' class='signal_fk'></div></div>"
+        document.getElementById("sensor_temp_fk").style.width = json.t+"px";
+        document.getElementById("sensor_temp_st").innerHTML = json.t+" °C";
+    }
+    if(json.hasOwnProperty("h"))
+    {
+        document.getElementById("sensor_humid").innerHTML ="<span id='sensor_humid_st' class='signal_st'></span><div id='sensor_humid_bk' class='signal_bk'><div id='sensor_humid_fk' class='signal_fk'></div></div>"
+        document.getElementById("sensor_humid_fk").style.width = json.h+"px";
+        document.getElementById("sensor_humid_st").innerHTML = json.h+" %";
+    }
+    if(json.hasOwnProperty("l"))
+    {
+        document.getElementById("sensor_light").innerHTML ="<span id='sensor_light_st' class='signal_st'></span><div id='sensor_light_bk' class='signal_bk'><div id='sensor_light_fk' class='signal_fk'></div></div>"
+        document.getElementById("sensor_light_fk").style.width = json.l+"px";
+        document.getElementById("sensor_light_st").innerHTML = json.l+" %";
+    }
+}
+function show_status(json)
+{
+    if(!json.init_setup)
+    {
+        document.getElementById("cover").onclick = "";
+        document.getElementById("close_btn").style.display = "none";
+        document.getElementById("pair_btn").style.display = "none";
+        start_init_setup();
+    }
+    if(json != null)
+    {
+        onb_status = json['onb_led'];
+        document.getElementById("on_board_led").checked = onb_status;
+        save_eeprom = json['save_eeprom'];
+        document.getElementById("save_status").checked = save_eeprom;
+        btn_relay_act = json["btn_relay_act"];
+        selectElement("relay_select", btn_relay_act)
+        relays = document.getElementsByClassName("fauxmo_control");
+        relays_data = JSON.parse(json['fauxmo_relay']);
+        for(i=0; i<relays.length; i++)
+        {
+            if(relays_data[relays[i].value])
+                relays[i].checked = true;
+            else
+                relays[i].checked = false;
+        }    
+        wifi_ssid = json['wifi_ssid'];
+        mqtt_status = json["mqtt_status"];
+        wifi_status = json["wifi_status"];
+        dBm = json["wifi_rssi"];
+        quality = Math.min(2*(dBm+100), 100);
+        free_heap = json["ram"];
+        free_heap_per = Math.min((free_heap/65536)*100, 100);
+
+        var wifiLabel = wifi_status
+            ? "<span class='badge on'>"+wifi_ssid+"</span>"
+            : "<span class='badge off'>Offline</span>";
+        var mqttLabel = mqtt_status
+            ? "<span class='badge on'>Connected</span>"
+            : "<span class='badge off'>Offline</span>";
+
+        var cont = "<div class='stat-grid'>";
+        cont += "<div class='stat-card'><div class='stat-lbl'>WiFi</div><div class='stat-val' style='margin-top:6px'>"+wifiLabel+"</div></div>";
+        cont += "<div class='stat-card'><div class='stat-lbl'>MQTT</div><div class='stat-val' style='margin-top:6px'>"+mqttLabel+"</div></div>";
+        cont += "<div class='stat-card'><div class='stat-lbl'>Signal</div><div class='stat-val'>"
+             +  "<span id='signal_st' class='signal_st'>"+quality+"%</span>"
+             +  "<div id='signal_bk' class='signal_bk'><div id='signal_fk' class='signal_fk'></div></div>"
+             +  "</div></div>";
+        cont += "<div class='stat-card'><div class='stat-lbl'>Free Heap</div><div class='stat-val'>"
+             +  "<div id='free_heap_bk' class='signal_bk'><div id='free_heap_fk' class='signal_fk'></div></div>"
+             +  "</div></div>";
+        cont += "</div>";
+
+        document.getElementById("WiFi_Status").innerHTML = cont;
+        document.getElementById("signal_fk").style.width = quality+"px";
+        document.getElementById("free_heap_fk").style.width = free_heap_per+"px";
+        document.getElementById("firmware_version").innerHTML = json["firmware_version"];
+    }
+}
+
+function toggle_relay(element, relay)
+{
+    if(element.checked) 
+        httpGet(relay,1,"toggle_relay"); 
+    else 
+        httpGet(relay,0,"toggle_relay");
+}
+table_printed = false;
+function print_table(relay_count, on_change_val, name, topic)
+{
+    var grid = document.getElementById("relay_table");
+    grid.innerHTML +=
+        "<div class='relay-card' id='relay-card-"+relay_count+"'>" +
+            "<div class='rc-top'>" +
+                "<span class='rc-name'>"+name+"</span>" +
+                "<label class='switch'>" +
+                    "<input type='checkbox' id='checkbox-"+relay_count+"' onchange='"+on_change_val+"'>" +
+                    "<span class='slider round'></span>" +
+                "</label>" +
+            "</div>" +
+            "<div><span id='status-"+relay_count+"' class='badge off'>OFF</span></div>" +
+            "<div class='rc-topic'>"+topic+"</div>" +
+            "<div class='rc-alexa'>" +
+                "<input type='checkbox' value='"+topic+"' class='fauxmo_control' " +
+                    "id='fauxmo_control_"+relay_count+"' onchange='update_fauxmo_list()'>" +
+                "<span>Alexa</span>" +
+            "</div>" +
+        "</div>";
+    var sel = document.getElementById("relay_select");
+    sel.innerHTML += "<option value='"+topic+"'>"+name+"</option>";
+}
+function update_fauxmo_list(){
+    relays = document.getElementsByClassName("fauxmo_control");
+    relays_data = {}
+    for(i=0; i<relays.length; i++)
+    {
+        relays_data[relays[i].value] = relays[i].checked
+    }
+    httpGet(0,0,"update_fauxmo",relays_data)
+    document.getElementById("freeze").style.display="block";
+    setTimeout(function(){
+        document.getElementById("freeze").style.opacity=1;
+    },1000) 
+    setTimeout(function(){
+        location.reload();
+    },1000)
+}
+
+function draw_table_data(json)
+{
+    relays = json.relay;
+    prefix = "";
+    suffix = "";
+    if(json.prefix != undefined)
+        prefix = json.prefix;
+    if(json.suffix != undefined)
+        suffix = json.suffix;
+    relays.forEach(function(element) 
+    {
+        on_change_val = "toggle_relay(this, '"+element.name+"')"
+        pin = element.comp + "-" + element.pin;
+        topic = prefix+element.topic+suffix;
+        if(!table_printed)
+        {
+            print_table(pin, on_change_val, element.name, topic);
+            setTimeout(function(){
+                update_table_data(element)
+            },10);
+        }
+    });
+    table_printed = true;
+}
+
+function update_table_data(ele)
+{
+    var pin = ele.comp + "-" + ele.pin;
+    var status_el = document.getElementById("status-"+pin);
+    var card_el   = document.getElementById("relay-card-"+pin);
+    var cb        = document.getElementById("checkbox-"+pin);
+    if(ele.status)
+    {
+        if(status_el){ status_el.className = "badge on";  status_el.innerHTML = "ON"; }
+        if(card_el)    card_el.className = "relay-card is-on";
+        if(cb)         cb.checked = true;
+    }
+    else
+    {
+        if(status_el){ status_el.className = "badge off"; status_el.innerHTML = "OFF"; }
+        if(card_el)    card_el.className = "relay-card";
+        if(cb)         cb.checked = false;
+    }
+}
+function update_wifi()
+{
+    ssid = document.getElementById("ssid_input").value
+    pass = document.getElementById("pass_input").value
+    close_alert();
+    return new Promise (() => {
+        response = httpGet(0,0,"set_wifi",{"ssid":ssid,"pass":pass});
+        document.getElementById("freeze").style.display="block";
+        setTimeout(function(){
+            document.getElementById("freeze").style.opacity=1;
+        },1000) 
+        setTimeout(()=>
+        {
+            window.location.replace("http://iot-connect-"+chipid+".local/");
+        },20000);
+    });
+}
+function scan_wifi()
+{
+    element = document.getElementById('ssid_list');
+    element.innerHTML = "\
+    <tr>\
+        <td style=\"font-family: 'Fjalla One'\">\
+            <b>Scanning...</b>\
+        </td>\
+    </tr>";
+    setTimeout(function(){
+        return new Promise (() => {
+            response = httpGet(0,0,"scan_wifi");
+            wifi_list = JSON.parse(response)["ssid"];
+            content = "";
+            element = document.getElementById('ssid_list');
+            element.innerHTML = "";
+            if(wifi_list.length > 0)
+            {
+                for(i=0; i<wifi_list.length; i++)
+                {
+                    ssid_name = wifi_list[i]["ssid"]
+                    ssid_rssi = wifi_list[i]["RSSI"]
+                    quality = (2 * (parseInt(ssid_rssi) + 100))
+                    if(quality > 100)
+                    {
+                        quality = 100;
+                    }
+                    content = "<tr>\
+                                            <td style=\"font-family: 'Fjalla One'\">\
+                                                <a href='#ssid_input' onclick='ssid_input.value=\""+ssid_name+"\"'><b>"+ssid_name+"</b></a>\
+                                            </td>\
+                                            <td>\
+                                                <span id='ssid_"+i+"_signal_st' class='signal_st'></span><div id='ssid_"+i+"_signal_bk' class='signal_bk'><div id='ssid_"+i+"_signal_fk' class='signal_fk'></div></div>\
+                                            </td>\
+                                        </tr>"
+                    element.innerHTML = element.innerHTML+content;
+                    document.getElementById('ssid_'+i+'_signal_fk').style.width = quality+"px";
+                }
+            }
+        });
+    },10);
+}
+
+function update_login(login_uname_input, login_pass_input, login_confirm_pass_input)
+{
+    if(login_pass_input.value == login_confirm_pass_input.value)
+    {
+        if(login_uname_input.value.length > 6){
+            if(login_pass_input.value.length > 6)
+            {
+                response = httpGet(0,0,"update_login",
+                {
+                    "uname":login_uname_input.value,
+                    "password":login_pass_input.value
+                });
+                data = JSON.parse(response);
+                done = data["done"];
+                if(done)
+                {
+                    alert("Username and password updated.")
+                }
+            }
+            else{
+                alert("Password length should be more than 6 charecter.");
+            }
+        }
+        else{
+            alert("Username length should be more than 6 charecter.");
+        }
+    }
+    else 
+        alert('Password and confirm password not matching.');
+}
+
+var avail_GPIO = [0,1,2,3,4,5,12,13,14,15,16]
+var ele_list = [
+    "sr_dpin",
+    "sr_cpin",
+    "sr_lpin",
+    "status_led",
+    "rst_pin",
+    "rly_1",
+    "rly_2",
+    "rly_3",
+    "rly_4",
+    "rly_5",
+    "sen_pin"
+]
+
+function list_gpio()
+{
+    for(j=0; j<ele_list.length; j++)
+    {   ele = document.getElementById(ele_list[j]);
+        ele.innerHTML = "<option value='N/A'>N/A</option>";
+        for(i=0; i<avail_GPIO.length; i++)
+        {
+            ele.innerHTML += "<option value='"+avail_GPIO[i]+"'>GPIO "+avail_GPIO[i]+"</option>"
+        }
+    }
+}
+
+function start_init_setup()
+{
+    document.getElementById("cover").style.display = "block";
+    document.getElementById("popup").style.display = "block";
+    setTimeout(()=>{
+        document.getElementById("cover").style.opacity = 1;
+        document.getElementById("popup").style.opacity = 1;
+        setTimeout(function(){
+            list_gpio();
+        },700)
+    }, 10);
+}
+function close_init_setup()
+{
+    document.getElementById("cover").style.opacity = 0;
+    document.getElementById("popup").style.opacity = 0;
+    setTimeout(()=>{
+        document.getElementById("cover").style.display = "none";
+        document.getElementById("popup").style.display = "none";
+    }, 700);
+}
+
+function check_board(board_type)
+{
+    if(board_type == "Custom Board")
+    {
+        document.getElementById("custom_board_configs").style.display = "block";
+    }
+    else
+    {
+        document.getElementById("custom_board_configs").style.display = "none";
+    }
+}
+
+function check_broker(board_type)
+{
+    if(board_type == "Custom")
+    {
+        document.getElementById("mqtt_detail_table").style.display = "block";
+    }
+    else
+    {
+        document.getElementById("mqtt_detail_table").style.display = "none";
+    }
+}
+
+function check_config()
+{
+    if(document.getElementById("device_type").value == "Custom Board")
+    {
+        sta = document.getElementById("status_led").value;
+        res = document.getElementById("rst_pin").value;
+        if(sta != "" && sta != "N/A")
+        {
+            if(res != "" && res != "N/A")
+            {
+                if(document.getElementById("sr_avail").checked)
+                {
+                    if(document.getElementById("sr_dpin").value == "N/A")
+                    {
+                        alert("No data pin alloted to shift register.")
+                        return false
+                    }
+                    if(document.getElementById("sr_cpin").value == "N/A")
+                    {
+                        alert("No clock pin alloted to shift register.")
+                        return false
+                    }
+                    if(document.getElementById("sr_lpin").value == "N/A")
+                    {
+                        alert("No latch pin alloted to shift register.")
+                        return false
+                    }
+                }
+                if(document.getElementById("dht_sens_avail").checked)
+                {
+                    if(document.getElementById("sen_pin").value == "N/A")
+                    {
+                        alert("No DHT sensor pin alloted.")
+                        return false
+                    }
+                }
+                var used_GPIO = []
+                for(j=0; j<ele_list.length; j++)
+                {   ele = document.getElementById(ele_list[j]);
+                    if(ele.value != "N/A" && ele.value != "")
+                    {
+                        if(used_GPIO.indexOf(ele.value) != -1)
+                        {
+                            alert("GPIO "+ele.value+" has been assigned more than once.");
+                            return false;
+                        }
+                        used_GPIO.push(ele.value)
+                    }
+                }
+                return true;
+            }
+            else
+            {
+                alert("Reset button pin needs to be defined.")
+                return false;
+            }
+        }
+        else
+        {
+            alert("Status LED pin needs to be defined.")
+            return false;
+        }
+    }
+    else{
+        return true;
+    }
+}
+
+function save_config()
+{
+    if(check_config())
+    {
+        var config = {
+            "init_setup_done":true,
+            "mqtt":{
+                "service":"",
+                "host":"",
+                "port":1883,
+                "uname":"",
+                "pass":"",
+                "qos":1,
+                "prefix":"",
+                "suffix":"",
+                "auth":false
+            },
+            "device_config":{
+                "shift_out_reg" : {
+                    "avail" : true,
+                    "serialDataPin" : 16,
+                    "clockPin" : 14,
+                    "latchPin" : 12
+                },
+                "status_led" : {
+                    "led_pin":13,
+                    "status":true,
+                    "def" : true
+                },
+                "reset_btn" : {
+                    "btn_pin" : 4,
+                    "def" : true
+                },
+                "relay" : {
+                    "count" : 0,
+                    "GPIO" : []
+                },
+                "dht":{
+                    "TYPE":"DHT11",
+                    "GPIO":2,
+                    "INSTALLED":false
+                },
+                "light":{
+                    "GPIO":"A0",
+                    "INSTALLED":false
+                }
+            }
+        }
+        if(document.getElementById("mqtt_broker").value == "Custom")
+        {
+            service = "Custom"
+            host = document.getElementById("mqtt_host").value;
+            port = document.getElementById("mqtt_port").value;
+            uname = document.getElementById("mqtt_uname").value;
+            pass = document.getElementById("mqtt_pass").value;
+            qos = document.getElementById("mqtt_qos").value;
+            prefix = document.getElementById("mqtt_prefix").value;
+            suffix = document.getElementById("mqtt_suffix").value;
+            if(host != "")
+            {    
+                if(port != "" && port > 0)
+                {
+                    if(qos in [0,1,2])
+                    {
+                        if(uname == "")
+                            auth = false
+                        else
+                        {
+                            auth = true
+                            if(pass == "")
+                            {
+                                alert("Please provide MQTT login password.")
+                                return;
+                            }
+                        }
+                        config.mqtt.service = service;
+                        config.mqtt.host = host;
+                        config.mqtt.port = port;
+                        config.mqtt.uname = uname;
+                        config.mqtt.pass = pass;
+                        config.mqtt.qos = qos;
+                        config.mqtt.prefix = prefix;
+                        config.mqtt.suffix = suffix;
+                        config.mqtt.auth = auth;
+                    }
+                    else{
+                        alert("QoS must be in 0, 1 or 2");
+                    }
+                }
+                else
+                {
+                    alert("Please provide valid MQTT port number.")
+                }
+            }
+            else
+            {
+                alert("Please provide valid MQTT hostname.")
+            }
+        }
+        else
+        {
+            service = document.getElementById("mqtt_broker").value;
+            config.mqtt.service = service;
+        }
+        if(document.getElementById("device_type").value == "IoT Connect Board Rev 1")
+        {
+            config.device_config.shift_out_reg.avail = true;
+            config.device_config.shift_out_reg.serialDataPin = 16;
+            config.device_config.shift_out_reg.clockPin = 14;
+            config.device_config.shift_out_reg.latchPin = 12;
+            config.device_config.status_led.led_pin = 13;
+            config.device_config.status_led.def = true;
+            config.device_config.reset_btn.btn_pin = 4;
+            config.device_config.reset_btn.def = true;
+            config.device_config.relay.count = 0;
+            config.device_config.dht.INSTALLED = false;
+            config.device_config.light.INSTALLED = false;
+        }
+        if(document.getElementById("device_type").value == "IoT Connect Board Rev 2")
+        {
+            config.device_config.shift_out_reg.avail = true;
+            config.device_config.shift_out_reg.serialDataPin = 16;
+            config.device_config.shift_out_reg.clockPin = 14;
+            config.device_config.shift_out_reg.latchPin = 12;
+            config.device_config.status_led.led_pin = 13;
+            config.device_config.status_led.def = true;
+            config.device_config.reset_btn.btn_pin = 4;
+            config.device_config.reset_btn.def = true;
+            config.device_config.relay.count = 0;
+            config.device_config.dht.INSTALLED = true;
+            config.device_config.dht.TYPE = "dht11"
+            config.device_config.dht.GPIO = 2
+            config.device_config.light.INSTALLED = true;
+            config.device_config.light.GPIO = "A0"
+        }
+        if(document.getElementById("device_type").value == "Sonoff Basics")
+        {
+            config.device_config.shift_out_reg.avail = false;
+            config.device_config.status_led.led_pin = 13;
+            config.device_config.status_led.def = false;
+            config.device_config.reset_btn.btn_pin = 0;
+            config.device_config.reset_btn.def = false;
+            config.device_config.relay.count = 1;
+            config.device_config.relay.GPIO = [12]
+            config.device_config.dht.INSTALLED = false;
+            config.device_config.light.INSTALLED = false;
+        }
+        if(document.getElementById("device_type").value == "Custom Board")
+        {
+            if(document.getElementById("sr_avail").checked)
+            {
+                config.device_config.shift_out_reg.avail = true;
+                config.device_config.shift_out_reg.serialDataPin = document.getElementById("sr_dpin").value;
+                config.device_config.shift_out_reg.clockPin = document.getElementById("sr_cpin").value;
+                config.device_config.shift_out_reg.latchPin = document.getElementById("sr_lpin").value;
+            }
+            else
+            {
+                config.device_config.shift_out_reg.avail = false;
+            }
+            config.device_config.status_led.led_pin = document.getElementById("status_led").value;
+            if(document.getElementById("led_default_high").checked)
+            {
+                def = true;
+            }
+            else
+            {
+                def = false;
+            }
+            config.device_config.status_led.def = def;
+            config.device_config.reset_btn.btn_pin = document.getElementById("rst_pin").value;
+            if(document.getElementById("btn_default_high").checked)
+            {
+                def = true;
+            }
+            else
+            {
+                def = false;
+            }
+            config.device_config.reset_btn.def = def;
+            config.device_config.relay.count = 0;
+            for(i=1; i<=5; i++)
+            {
+                if(document.getElementById("rly_"+i).value != "N/A")
+                {
+                    config.device_config.relay.count++;
+                    config.device_config.relay.GPIO.push(document.getElementById("rly_"+i).value);
+                }
+            }
+            if(document.getElementById("dht_sens_avail").checked)
+            {
+                config.device_config.dht.INSTALLED = true;
+                config.device_config.dht.GPIO = document.getElementById("sen_pin").value;
+            }
+            else{
+                config.device_config.dht.INSTALLED = false;
+            }
+            if(document.getElementById("ldr_sens_avail").checked)
+            {
+                config.device_config.light.INSTALLED = true;
+            }
+            else{
+                config.device_config.light.INSTALLED = false;
+                config.device_config.light.GPIO = "A0"
+            }
+        }
+        data = httpGet(0,0,"update_device_config", config);
+        result = JSON.parse(data);
+        if(result.done)
+        {
+            alert("Device config saved successfully. Rebooting....");
+            document.getElementById("freeze").style.display="block";
+            setTimeout(function(){
+                document.getElementById("freeze").style.opacity=1;
+            },1000) 
+            setTimeout(()=>{
+                location.reload();
+            },5000)
+        }
+        else{
+            alert(result.error)
+        }
+    }
+}
+
+function alert(msg, callback)
+{
+    document.getElementById("message").innerHTML = msg;
+    document.getElementById("customAlert").style.display = "block";
+    if(callback == undefined)
+    {
+        document.getElementById("okButton").setAttribute('onclick',"close_alert()");
+    }
+    else
+    {
+        document.getElementById("cancelButton").style.display = "block";
+        document.getElementById("cancelButton").setAttribute('onclick',"close_alert()");
+        document.getElementById("okButton").setAttribute('onclick',callback);
+    }
+}
+function close_alert()
+{
+    document.getElementById("message").innerHTML = "";
+    document.getElementById("customAlert").style.display = "none";
+    document.getElementById("cancelButton").style.display = "none";
+}

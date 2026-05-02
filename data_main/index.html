@@ -1,421 +1,300 @@
 <!DOCTYPE html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1">
-        <link rel="icon" href="favicon.ico" type="image/gif">
-        <title>
-            IoT Connect : Solutions for smart homes.
-        </title>
-        <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
-        <link href="style.css" rel="stylesheet">
-        <script type="application/javascript" src="script.js"></script>
-    </head>
-    <body onload="set_ui()">
-        <center>
-            <h1 style="font-family: 'Fjalla One'">IoT Connect : Solutions for smart homes.</h1>
-            <div class="tabset">
-                <input type="radio" name="tabset" id="tab1" aria-controls="status">
-                <label for="tab1">Status</label>                
-                
-                <input type="radio" name="tabset" id="tab2" aria-controls="relay_control" checked>
-                <label for="tab2">Relay</label>
-                                
-                <input type="radio" name="tabset" id="tab4" aria-controls="security_setup">
-                <label for="tab4">Security</label>
-                
-                <input type="radio" name="tabset" id="tab5" aria-controls="wifi_setup">
-                <label for="tab5">WiFi</label>
-                
-                <input type="radio" name="tabset" id="tab6" aria-controls="device_setup">
-                <label for="tab6">Device</label>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1">
+  <link rel="icon" href="favicon.ico" type="image/gif">
+  <title>IoT Connect</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+  <script src="script.js"></script>
+</head>
+<body onload="set_ui()">
 
-                <div class="tab-panels">
-                    <section id="status" class="tab-panel">
-                        <h2 style="font-family: 'Fjalla One'">Device Status</h2>
-                        <table style="width:100%">
-                            <tr>
-                                <td>
-                                    <div style="font-family: 'Fjalla One'">
-                                        Device URL: <a href="#" target="_blank" id="hostname"></a>
-                                    </div>
-                                    <div id='WiFi_Status' align="left" style="font-family: 'Fjalla One'">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div id='sensor_readings' align="left" style="font-family: 'Fjalla One'">
-                                        Firmware Version : <span id="firmware_version"></span><br />
-                                        Temperature : <span id="sensor_temp">N/A</span><br />
-                                        Humidity : <span id="sensor_humid">N/A</span><br />
-                                        Light : <span id="sensor_light">N/A</span><br />              
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                    </section>
-                    <section id="relay_control" class="tab-panel">
-                        <h2 style="font-family: 'Fjalla One'">Relay Control</h2>
-                        <table id="relay_table" cellspacing="15" style="border:#ccc solid thin">
-                        </table><br />
-                        <div style="font-family: 'Fjalla One'">
-                            Control 
-                            <select id="relay_select" class="list_relay" onchange="httpGet(0,0,'device','{\'action\':\'change_relay_btn_action\',\'status\':\''+this.value+'\'}')">
-                                <option value="N/A">Nothing</option>
-                            </select>
-                            using reset button.
-                        </div><br />
-                        <div style="font-family: 'Fjalla One'" align="center">
-                            <table>
-                                <tr>
-                                    <th style="padding: 5px;">
-                                        Use the corresponding MQTT topics<br />to toggle relay via MQTT.
-                                    </th>
-                                    <th style="padding: 5px;">
-                                        Provide following input:<br />
-                                        Turn ON : <span style="color: green;">{"action":true}</span><br />
-                                        Turn OFF : <span style="color: red;">{"action":false}</span><br />
-                                    </th>
-                                    <th style="padding: 5px;">
-                                        <button class='style_btn' id="console_btn" onclick="open_debug_console()">Open Debug Console</button>
-                                    </th>
-                                </tr>
-                            </table>
-                            <div class="console slow" id="console" align="left">
-                                <h2 style="font-family: 'Fjalla One'">Debug console</h4>
-                                <div id="consoleBoard">
-                                </div>
-                            </div>    
-                        </div>
-                    </section>
-                    <section id="security_setup" class="tab-panel">
-                        <h2 style="font-family: 'Fjalla One'">Security Settings</h2>
-                        <div>                            
-                            <input type="text" id="login_uname_input" placeholder="Login Username" style="margin:1px"/><br />
-                            <input type="password" id="login_pass_input" placeholder="Login Password" style="margin:1px"/><br />
-                            <input type="password" id="login_confirm_pass_input" placeholder="Confirm Password" style="margin:1px"/><br />
-                            <button class='style_btn' onclick="update_login(login_uname_input, login_pass_input, login_confirm_pass_input)">Update Login Details</button>
-                        </div>
-                    </section>
-                    <section id="wifi_setup" class="tab-panel">
-                        <h2 style="font-family: 'Fjalla One'">WiFi Settings</h2>
-                        <div>
-                            <table>
-                                <tr>
-                                    <td>
-                                        <input type="text" id="ssid_input" placeholder="WiFi SSID" style="margin:1px"/><br />
-                                        <input type="password" id="pass_input" placeholder="WiFi Password" style="margin:1px"/>
-                                    </td>
-                                    <td>
-                                        <button class='style_btn' id="update_wifi_btn" onclick="alert('Make sure that you have proivided the correct WiFi details,\nIncorrect details will host an Access Point to configure WiFi after 30 sec.','update_wifi()')">Update Wifi</button>
-                                        <button class='style_btn' onclick="scan_wifi()">Scan</button>                               
-                                    </td>
-                                </tr>
-                            </table>
-                            <table id="ssid_list" cellspacing="15" style="border:#ccc solid thin; width:100%">
-                                <tr>
-                                    <td style="font-family: 'Fjalla One'">
-                                        <b>No SSID</b>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    </section>
-                    <section id="device_setup" class="tab-panel">
-                        <h2 style="font-family: 'Fjalla One'">Device Setup</h2>
-                        <div>
-                            <input type="checkbox" id="on_board_led" onchange="httpGet(0,0,'device','{\'action\':\'toggle_onb\',\'status\':'+this.checked+'}')" /> <span style="font-family: 'Fjalla One'">Enable/Disable On Board LED</span>
-                            <input type="checkbox" id="save_status" onchange="httpGet(0,0,'device','{\'action\':\'save_status\',\'status\':'+this.checked+'}')" /> <span style="font-family: 'Fjalla One'">Save last status on EEPROM</span>
-                        </div>
-                        <button class='style_btn' id="reset_btn" onclick="    alert('Are you sure you want to reset this device?','reset_device()')">Reset</button>
-                        <button class='style_btn' onclick="httpGet(0,0,'device','{\'action\':\'reboot\'}');setTimeout(function(){location.reload()},1000);">Reboot</button>
-                        <button class='style_btn' onclick="location.href = ('/update')">Update</button>
-                        <button class='style_btn' onclick="start_init_setup()">Re-Configure Device</button>
-                    </section>
-                </div>
-        </center>
-        <div id="cover" class="slow" onclick="close_init_setup()"></div>
-        <div id="popup" class="slow">
-            <h1 style="font-family: 'Fjalla One';">
-                Device Setup
-            </h1><hr />
-            <center>
-                <table class="table_border" style="font-family: 'Fjalla One';">
-                    <tr>
-                        <th>
-                            MQTT Broker :
-                        </th>
-                        <td>
-                            <select onchange="check_broker(this.value)" id="mqtt_broker">
-                                <option value="IoT Connect">
-                                    IoT Connect
-                                </option>
-                                <option value="Custom">
-                                    Custom
-                                </option>
-                                <option value="N/A">
-                                    N/A
-                                </option>
-                            </select>
-                        </td>
-                    </tr>
-                </table>
-                <table class="table_border" id="mqtt_detail_table">
-                    <tr>
-                        <td>
-                            Host:
-                        </td>
-                        <td>
-                            <input type="text" id="mqtt_host" placeholder="MQTT Server URL" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Port:
-                        </td>
-                        <td>
-                            <input type="number" id="mqtt_port" value="1883" placeholder="MQTT Server PORT" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Username:
-                        </td>
-                        <td>
-                            <input type="text" id="mqtt_uname" placeholder="MQTT Username" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Password:
-                        </td>
-                        <td>
-                            <input type="password" id="mqtt_pass" placeholder="MQTT Password" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            QoS:
-                        </td>
-                        <td>
-                            <input type="number" value="1" id="mqtt_qos" placeholder="MQTT QoS" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Prefix:
-                        </td>
-                        <td>
-                            <input type="text" id="mqtt_prefix" placeholder="Prefix before mqtt topics" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Suffix:
-                        </td>
-                        <td>
-                            <input type="text" id="mqtt_suffix" placeholder="Suffix after mqtt topics" />
-                        </td>
-                    </tr>
-                </table>
-                <hr />
-                <table class="table_border" style="font-family: 'Fjalla One';">
-                    <tr>
-                        <th>
-                            Device Type :
-                        </th>
-                        <td>
-                            <select onchange="check_board(this.value)" id="device_type">
-                                <option value="IoT Connect Board Rev 1">
-                                    IoT Connect Board Rev 1
-                                </option>
-                                <option value="IoT Connect Board Rev 2">
-                                    IoT Connect Board Rev 2
-                                </option>
-                                <option value="Sonoff Basics">
-                                    Sonoff Basics
-                                </option>
-                                <option value="Custom Board">
-                                    Custom Board
-                                </option>
-                            </select>
-                        </td>
-                    </tr>
-                </table>
-                <div id="custom_board_configs">
-                    <table class="table_border" style="font-family: 'Fjalla One';">
-                        <tr>
-                            <th>
-                                Shift Register : 
-                            </th>
-                            <td>
-                                Available <input type="checkbox" id="sr_avail" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Data Pin:
-                            </td>
-                            <td>
-                                <select  id="sr_dpin"></select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Clock Pin:
-                            </td>
-                            <td>
-                                <select  id="sr_cpin"></select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                latch Pin:
-                            </td>
-                            <td>
-                                <select  id="sr_lpin"></select> 
-                            </td>
-                        </tr>
-                    </table>
-                    <table class="table_border" style="font-family: 'Fjalla One';">
-                        <tr>
-                            <th>
-                                Status LED:
-                            </th>
-                            <th> 
-                                <select  id="status_led"></select>
-                                <br />
-                                <form>
-                                    ON is 
-                                    <input type="radio" value="HIGH" id="led_default_high" name="led_default" checked> HIGH 
-                                    <input type="radio" value="LOW" id="led_default_low" name="led_default"> LOW
-                                </form>
-                            </th>
-                        </tr>
-                    </table>
-                    <table class="table_border" style="font-family: 'Fjalla One';">
-                        <tr>
-                            <th>
-                                Reset :
-                            </th>
-                            <th>
-                                <select  id="rst_pin"></select>
-                                <br />
-                                <form>
-                                    Button pressed is 
-                                    <input type="radio" value="HIGH" id="btn_default_high" name="btn_default" checked> HIGH 
-                                    <input type="radio" value="LOW" id="btn_default_low" name="btn_default"> LOW
-                                </form>
-                            </th>
-                        </tr>
-                    </table>
-                    <table class="table_border" style="font-family: 'Fjalla One';">
-                        <tr>
-                            <th>
-                                Relay
-                            </th>
-                        </tr>
-                        <tr>
-                            <td>
-                                Relay 1 : 
-                            </td>
-                            <td>
-                                <select  id="rly_1"></select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Relay 2 :
-                            </td>
-                            <td>
-                                <select  id="rly_2"></select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Relay 3 :
-                            </td>
-                            <td>
-                                <select  id="rly_3"></select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Relay 4 :
-                            </td>
-                            <td>
-                                <select  id="rly_4"></select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Relay 5 :
-                            </td>
-                            <td>
-                                <select  id="rly_5"></select>
-                            </td>
-                        </tr>
-                    </table>
-                    <table class="table_border" style="font-family: 'Fjalla One';">
-                        <tr>
-                            <th>
-                                Sensor
-                            </th>
-                            <td>
-                                Available <input type="checkbox" id="dht_sens_avail" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                DHT Sensor Type:
-                            </td>
-                            <td>    
-                                <select id="sensor_type">
-                                    <option value="DHT11">
-                                        DHT 11
-                                    </option>
-                                    <option value="DHT22">
-                                        DHT 22
-                                    </option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                PIN :
-                            </td>
-                            <td>
-                                <select  id="sen_pin"></select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                Light Sensor:
-                            </th>
-                            <td>
-                                Available <input type="checkbox" id="ldr_sens_avail" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                PIN : A0
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                <table>
-                    <tr><td><button class='style_btn fix_width' onclick="save_config()">Save</button></td></tr>
-                    <tr><td><button class='style_btn fix_width' id="pair_btn" onclick="pair_device()">Pair with IoT Connect</button></td></tr>
-                    <tr><td><button class='style_btn fix_width' id="close_btn" onclick="close_init_setup()">Close</button></td></tr>
-                </table>
-            </center>
-        </div>
-        <div id='customAlert'>
-            <p id='message'></p>
-            <center>
-                <button id='okButton' style="width: 100%;" class="style_btn">Ok</button>
-                <button id='cancelButton' style="width: 100%;" class="style_btn">Cancel</button>
-            </center>         
-        </div>
-        <div id="freeze" class="slow">
-        </div>
-    </body>
+  <!-- Sticky header -->
+  <div class="hdr">
+    <span class="hdr-title">IoT Connect</span>
+    <span class="hdr-status">
+      <span class="ws-dot" id="ws-dot"></span>Live
+    </span>
+  </div>
+
+  <!-- Main content -->
+  <div class="wrap">
+    <div class="tabset">
+
+      <!-- Tab radio inputs + labels -->
+      <input type="radio" name="tabset" id="tab1" aria-controls="status">
+      <label for="tab1">Status</label>
+      <input type="radio" name="tabset" id="tab2" aria-controls="relay_control" checked>
+      <label for="tab2">Relay</label>
+      <input type="radio" name="tabset" id="tab4" aria-controls="security_setup">
+      <label for="tab4">Security</label>
+      <input type="radio" name="tabset" id="tab5" aria-controls="wifi_setup">
+      <label for="tab5">WiFi</label>
+      <input type="radio" name="tabset" id="tab6" aria-controls="device_setup">
+      <label for="tab6">Device</label>
+
+      <div class="tab-panels">
+
+        <!-- ── Status Tab ── -->
+        <section id="status" class="tab-panel">
+          <div class="sec-title">Device Status</div>
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-lbl">Firmware</div>
+              <div class="stat-val"><span id="firmware_version">—</span></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-lbl">Device URL</div>
+              <div class="stat-val" style="font-size:.75rem">
+                <a href="#" target="_blank" id="hostname" style="color:#2563eb">—</a>
+              </div>
+            </div>
+          </div>
+          <!-- WiFi/MQTT/Signal/Heap cards injected here by show_status() -->
+          <div id="WiFi_Status"></div>
+          <!-- Sensor cards -->
+          <div style="margin-top:14px">
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-lbl">Temperature</div>
+                <div class="stat-val" id="sensor_temp">N/A</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-lbl">Humidity</div>
+                <div class="stat-val" id="sensor_humid">N/A</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-lbl">Light</div>
+                <div class="stat-val" id="sensor_light">N/A</div>
+              </div>
+            </div>
+          </div>
+          <!-- kept for legacy JS compatibility -->
+          <div id="sensor_readings" style="display:none"></div>
+        </section>
+
+        <!-- ── Relay Tab ── -->
+        <section id="relay_control" class="tab-panel">
+          <div class="sec-title">Relay Control</div>
+          <!-- Relay cards injected here by print_table() -->
+          <div id="relay_table" class="relay-grid"></div>
+          <!-- Reset-button binding -->
+          <div class="relay-info">
+            <div class="relay-info-row">
+              <span>Reset button controls:</span>
+              <select id="relay_select" onchange="httpGet(0,0,'device','{\'action\':\'change_relay_btn_action\',\'status\':\''+this.value+'\'}')">
+                <option value="N/A">Nothing</option>
+              </select>
+            </div>
+          </div>
+          <!-- MQTT hint -->
+          <div class="mqtt-hint">
+            MQTT payload &mdash; ON: <code style="color:#16a34a">{"action":true}</code>
+            &nbsp; OFF: <code style="color:#dc2626">{"action":false}</code>
+          </div>
+          <button class="style_btn" id="console_btn" onclick="open_debug_console()">Debug Console</button>
+          <div class="console slow" id="console">
+            <div id="consoleBoard"></div>
+          </div>
+        </section>
+
+        <!-- ── Security Tab ── -->
+        <section id="security_setup" class="tab-panel">
+          <div class="sec-title">Security Settings</div>
+          <div style="max-width:320px">
+            <div class="form-row">
+              <label>Username</label>
+              <input type="text" id="login_uname_input" placeholder="Login username">
+            </div>
+            <div class="form-row">
+              <label>Password</label>
+              <input type="password" id="login_pass_input" placeholder="New password">
+            </div>
+            <div class="form-row">
+              <label>Confirm Password</label>
+              <input type="password" id="login_confirm_pass_input" placeholder="Confirm password">
+            </div>
+            <button class="style_btn" onclick="update_login(login_uname_input,login_pass_input,login_confirm_pass_input)">
+              Update Login
+            </button>
+          </div>
+        </section>
+
+        <!-- ── WiFi Tab ── -->
+        <section id="wifi_setup" class="tab-panel">
+          <div class="sec-title">WiFi Settings</div>
+          <div style="max-width:360px">
+            <div class="form-row">
+              <label>SSID</label>
+              <input type="text" id="ssid_input" placeholder="Network name">
+            </div>
+            <div class="form-row">
+              <label>Password</label>
+              <input type="password" id="pass_input" placeholder="Network password">
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="style_btn" id="update_wifi_btn"
+                onclick="alert('Make sure WiFi details are correct.\nIncorrect details will start an AP after 60 sec.','update_wifi()')">
+                Update WiFi
+              </button>
+              <button class="style_btn" onclick="scan_wifi()">Scan</button>
+            </div>
+          </div>
+          <table id="ssid_list">
+            <tr><td style="color:#94a3b8;padding:12px 0">No networks scanned yet</td></tr>
+          </table>
+        </section>
+
+        <!-- ── Device Tab ── -->
+        <section id="device_setup" class="tab-panel">
+          <div class="sec-title">Device Settings</div>
+          <div class="toggle-row">
+            <input type="checkbox" id="on_board_led"
+              onchange="httpGet(0,0,'device','{\'action\':\'toggle_onb\',\'status\':'+this.checked+'}')">
+            <span>Enable On-Board LED</span>
+          </div>
+          <div class="toggle-row">
+            <input type="checkbox" id="save_status"
+              onchange="httpGet(0,0,'device','{\'action\':\'save_status\',\'status\':'+this.checked+'}')">
+            <span>Save relay state across reboots</span>
+          </div>
+          <div class="btn-row">
+            <button class="style_btn" onclick="alert('Are you sure you want to factory reset?','reset_device()')">
+              Factory Reset
+            </button>
+            <button class="style_btn"
+              onclick="httpGet(0,0,'device','{\'action\':\'reboot\'}');setTimeout(function(){location.reload()},1000)">
+              Reboot
+            </button>
+            <button class="style_btn" onclick="location.href='/update'">Firmware Update</button>
+            <button class="style_btn" onclick="start_init_setup()">Re-Configure</button>
+          </div>
+        </section>
+
+      </div><!-- /tab-panels -->
+    </div><!-- /tabset -->
+  </div><!-- /wrap -->
+
+  <!-- ── Device Setup Modal ── -->
+  <div id="cover" class="slow" onclick="close_init_setup()"></div>
+  <div id="popup" class="slow">
+    <div style="font-size:1.1rem;margin-bottom:14px">Device Setup</div>
+    <hr style="border:none;border-top:1px solid #f1f5f9;margin-bottom:14px">
+
+    <table class="table_border">
+      <tr>
+        <th>MQTT Broker</th>
+        <td>
+          <select onchange="check_broker(this.value)" id="mqtt_broker">
+            <option value="IoT Connect">IoT Connect</option>
+            <option value="Custom">Custom</option>
+            <option value="N/A">N/A</option>
+          </select>
+        </td>
+      </tr>
+    </table>
+
+    <table class="table_border" id="mqtt_detail_table">
+      <tr><td>Host</td><td><input type="text" id="mqtt_host" placeholder="MQTT Server URL"></td></tr>
+      <tr><td>Port</td><td><input type="number" id="mqtt_port" value="1883"></td></tr>
+      <tr><td>Username</td><td><input type="text" id="mqtt_uname" placeholder="MQTT Username"></td></tr>
+      <tr><td>Password</td><td><input type="password" id="mqtt_pass" placeholder="MQTT Password"></td></tr>
+      <tr><td>QoS</td><td><input type="number" value="1" id="mqtt_qos"></td></tr>
+      <tr><td>Prefix</td><td><input type="text" id="mqtt_prefix" placeholder="Topic prefix"></td></tr>
+      <tr><td>Suffix</td><td><input type="text" id="mqtt_suffix" placeholder="Topic suffix"></td></tr>
+    </table>
+
+    <hr style="border:none;border-top:1px solid #f1f5f9;margin:12px 0">
+
+    <table class="table_border">
+      <tr>
+        <th>Board Type</th>
+        <td>
+          <select onchange="check_board(this.value)" id="device_type">
+            <option value="IoT Connect Board Rev 1">IoT Connect Board Rev 1</option>
+            <option value="IoT Connect Board Rev 2">IoT Connect Board Rev 2</option>
+            <option value="Sonoff Basics">Sonoff Basics</option>
+            <option value="Custom Board">Custom Board</option>
+          </select>
+        </td>
+      </tr>
+    </table>
+
+    <div id="custom_board_configs">
+      <table class="table_border">
+        <tr><th colspan="2">Shift Register</th></tr>
+        <tr><td>Available</td><td><input type="checkbox" id="sr_avail"></td></tr>
+        <tr><td>Data Pin</td><td><select id="sr_dpin"></select></td></tr>
+        <tr><td>Clock Pin</td><td><select id="sr_cpin"></select></td></tr>
+        <tr><td>Latch Pin</td><td><select id="sr_lpin"></select></td></tr>
+      </table>
+      <table class="table_border">
+        <tr><th colspan="2">Status LED</th></tr>
+        <tr>
+          <td>Pin</td>
+          <td>
+            <select id="status_led"></select>
+            &nbsp; ON is
+            <input type="radio" value="HIGH" id="led_default_high" name="led_default" checked> HIGH
+            <input type="radio" value="LOW"  id="led_default_low"  name="led_default"> LOW
+          </td>
+        </tr>
+      </table>
+      <table class="table_border">
+        <tr><th colspan="2">Reset Button</th></tr>
+        <tr>
+          <td>Pin</td>
+          <td>
+            <select id="rst_pin"></select>
+            &nbsp; Pressed is
+            <input type="radio" value="HIGH" id="btn_default_high" name="btn_default" checked> HIGH
+            <input type="radio" value="LOW"  id="btn_default_low"  name="btn_default"> LOW
+          </td>
+        </tr>
+      </table>
+      <table class="table_border">
+        <tr><th colspan="2">GPIO Relays</th></tr>
+        <tr><td>Relay 1</td><td><select id="rly_1"></select></td></tr>
+        <tr><td>Relay 2</td><td><select id="rly_2"></select></td></tr>
+        <tr><td>Relay 3</td><td><select id="rly_3"></select></td></tr>
+        <tr><td>Relay 4</td><td><select id="rly_4"></select></td></tr>
+        <tr><td>Relay 5</td><td><select id="rly_5"></select></td></tr>
+      </table>
+      <table class="table_border">
+        <tr><th colspan="2">Sensors</th></tr>
+        <tr><td>DHT Available</td><td><input type="checkbox" id="dht_sens_avail"></td></tr>
+        <tr>
+          <td>DHT Type</td>
+          <td>
+            <select id="sensor_type">
+              <option value="DHT11">DHT 11</option>
+              <option value="DHT22">DHT 22</option>
+            </select>
+          </td>
+        </tr>
+        <tr><td>DHT Pin</td><td><select id="sen_pin"></select></td></tr>
+        <tr><td>Light Sensor</td><td><input type="checkbox" id="ldr_sens_avail"></td></tr>
+        <tr><td>Light Pin</td><td style="color:#64748b">A0 (fixed)</td></tr>
+      </table>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;max-width:220px">
+      <button class="style_btn" onclick="save_config()">Save Configuration</button>
+      <button class="style_btn" id="pair_btn" onclick="pair_device()">Pair with IoT Connect</button>
+      <button class="style_btn" id="close_btn" onclick="close_init_setup()">Close</button>
+    </div>
+  </div>
+
+  <!-- ── Custom Alert ── -->
+  <div id="customAlert">
+    <p id="message"></p>
+    <button id="okButton" style="width:100%" class="style_btn">OK</button>
+    <button id="cancelButton" style="width:100%;margin-top:6px" class="style_btn">Cancel</button>
+  </div>
+
+  <!-- ── Loading overlay ── -->
+  <div id="freeze" class="slow"></div>
+
+</body>
 </html>
