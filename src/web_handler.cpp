@@ -287,7 +287,7 @@ void firmware_web_updater()
         }\
     }\
     </script>\
-    <h4><a href=\"https://github.com/aviralverma-8877/IoTConnect-Firmware-Releases/releases/latest\" target=\"_blank\">Click Here</a> to download latest firmware.</h4>\
+    <h4><a href=\"https://github.com/aviralverma-8877/IoTConnectFirmware-PlatformIO-/releases/latest\" target=\"_blank\">Click Here</a> to download latest firmware.</h4>\
     <b>(Current Firmware Version : "+current_version+")</b><br /><hr />\
     <form method='POST' action='/update_flash' enctype='multipart/form-data'>\
       <input type='file' placeholder='firmware.bin' name='update'><input type='submit' value='Update'> firmware.bin\
