@@ -1,0 +1,16 @@
+{
+  "name": "IoTConnect Firmware",
+  "version": "3.0.1",
+  "new_install_prompt_erase": false,
+  "builds": [
+    {
+      "chipFamily": "ESP8266",
+      "parts": [
+        {
+          "path": "https://github.com/aviralverma-8877/IoTConnectFirmware-PlatformIO-/releases/download/v3.0.1/IoTConnect_Firmware_v3.0.1_ESP-01_1M.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
