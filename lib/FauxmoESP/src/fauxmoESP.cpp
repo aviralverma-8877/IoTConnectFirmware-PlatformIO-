@@ -130,8 +130,7 @@ String fauxmoESP::_deviceJson(unsigned char id, bool all = true) {
 			buffer, sizeof(buffer),
 			FAUXMO_DEVICE_JSON_TEMPLATE,
 			device.name, device.uniqueid,
-			device.state ? "true": "false",
-			device.value
+			device.state ? "true": "false"
 		);
 	}
 	else

@@ -17,7 +17,7 @@
 #include "device_handler.h"
 // Configuring Device
 #ifndef FIRMWARE_V
-#define FIRMWARE_V "3.0.0" // Current firmware version. (Displayed on Device Portal)
+#define FIRMWARE_V "3.0.1" // Current firmware version. (Displayed on Device Portal)
 #endif
 
 // Timing Constants (in milliseconds)
