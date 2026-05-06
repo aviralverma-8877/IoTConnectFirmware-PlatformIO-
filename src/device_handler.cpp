@@ -95,6 +95,7 @@ void relay_action(String relay, bool value, String by)
     write_mqtt_topics(mqtt_data);
   }
   perform_action(relay, value);
+  fauxmo_sync_state(relay, value);
   // sending nortification
   if (!comp(by.c_str(), ""))
   {

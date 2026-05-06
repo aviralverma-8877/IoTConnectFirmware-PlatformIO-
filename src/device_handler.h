@@ -33,4 +33,6 @@
     void toggle_relay(String relay);
     void perform_action();
     void perform_action(String relay, bool value);
+    void fauxmo_sync_state(String relay_name, bool state);
+    void fauxmo_sync_all_states();
 #endif

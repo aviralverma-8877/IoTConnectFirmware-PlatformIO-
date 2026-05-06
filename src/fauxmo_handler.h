@@ -12,4 +12,6 @@
     void fauxmo_remove_device(const char* device_name);
     void fauxmo_remove_all_device();
     void fauxmo_add_device();
+    void fauxmo_sync_state(String relay_name, bool state);
+    void fauxmo_sync_all_states();
 #endif

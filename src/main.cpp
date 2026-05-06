@@ -80,6 +80,7 @@ void setup()
   {
     fetchIP();             //Fetching Public and Local IP
     setup_fauxmo();        //Fauxmo Alexa handler
+    fauxmo_sync_all_states(); //Sync saved relay states into fauxmo cache
     setup_sensor();        //DHT and LDR Setup
     setup_tickers();       //Ticker Setup
   }

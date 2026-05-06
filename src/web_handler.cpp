@@ -484,6 +484,10 @@ void setup_web_server()
     //fauxmo request handling
       String body = (request->hasParam("body", true)) ? request->getParam("body", true)->value() : String();
       if (fauxmo.process(request->client(), request->method() == HTTP_GET, request->url(), body)) return;
+      // Fauxmo PUT/POST requests are handled by onRequestBody first; onNotFound is
+      // still called for the same request but the response was already sent, so we
+      // must not send a second response (redirect) for any fauxmo URL.
+      if (request->url().startsWith("/api") || request->url().equals("/description.xml")) return;
     //fauxmo request handling
     //Page not found request handling
       if(!ap_enabled)

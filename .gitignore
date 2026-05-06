@@ -1,6 +1,5 @@
 .pio/
 .vscode/*
-lib/*
 test/*
 
 # Sensitive credential files
