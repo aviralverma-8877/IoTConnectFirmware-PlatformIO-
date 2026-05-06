@@ -144,17 +144,6 @@ void handleDeviceConfig(AsyncWebServerRequest *request)
     return_doc["done"] = true;
     serializeJson(return_doc, return_msg);
     request->send(200, "application/json", return_msg);
-    String service = doc["mqtt"]["service"];
-    if(comp(service.c_str(),"IoT Connect"))
-    {
-      #include "iotconnect_mqtt_cred.h"
-      doc["mqtt"]["host"] = MQTT_HOST;
-      doc["mqtt"]["port"] = MQTT_PORT;
-      doc["mqtt"]["uname"] = MQTT_UNAME;
-      doc["mqtt"]["pass"] = MQTT_PASS;
-      doc["mqtt"]["qos"] = MQTT_QoS;
-      doc["mqtt"]["auth"] = true;
-    }
     TickerForTimeOut.once_ms(10,[doc]{
       write_device_config(doc);
       TickerForTimeOut.once_ms(10,[doc]{
