@@ -498,7 +498,18 @@ function check_board(board_type)
 
 function check_broker(board_type)
 {
-    if(board_type == "Custom")
+    if(board_type == "IoTConnect")
+    {
+        document.getElementById("mqtt_host").value = "iot-connect.in";
+        document.getElementById("mqtt_port").value = "1883";
+        document.getElementById("mqtt_uname").value = "iotconnect";
+        document.getElementById("mqtt_pass").value = "iot-12345";
+        document.getElementById("mqtt_qos").value = "1";
+        document.getElementById("mqtt_prefix").value = "";
+        document.getElementById("mqtt_suffix").value = "";
+        document.getElementById("mqtt_detail_table").style.display = "block";
+    }
+    else if(board_type == "Custom")
     {
         document.getElementById("mqtt_detail_table").style.display = "block";
     }
@@ -624,9 +635,10 @@ function save_config()
                 }
             }
         }
-        if(document.getElementById("mqtt_broker").value == "Custom")
+        var brokerVal = document.getElementById("mqtt_broker").value;
+        if(brokerVal == "Custom" || brokerVal == "IoTConnect")
         {
-            service = "Custom"
+            service = brokerVal
             host = document.getElementById("mqtt_host").value;
             port = document.getElementById("mqtt_port").value;
             uname = document.getElementById("mqtt_uname").value;
