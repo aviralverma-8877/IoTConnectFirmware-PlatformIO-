@@ -251,7 +251,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       serialDisplay("onMqttMessage", "Relay topic JSON parse failed: " + String(error_2.c_str()));
       return;
     }
-    if(!msg["action"].is<int>())
+    if(!msg["action"].is<bool>() && !msg["action"].is<int>())
       return;
     for( JsonObject kv : doc["relay"].as<JsonArray>() ) 
     {
