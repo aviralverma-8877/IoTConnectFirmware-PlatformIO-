@@ -234,7 +234,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   }
   else
   {
-    const char* relay = "";
+    String relay = "";
     bool action = false;
     String mqtt_data = read_mqtt_config();
     JsonDocument filter;
@@ -259,7 +259,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       serialDisplay("onMqttMessage","MQTT Topics: "+(prefix+config_topic+suffix));
       if(comp(topic, (prefix+config_topic+suffix).c_str()))
       {
-        relay = (const char*)kv["name"];
+        relay = kv["name"].as<String>();
         action = msg["action"];
         TickerForTimeOut.once_ms(100,[relay, action](){
           perform_action(relay, action);
